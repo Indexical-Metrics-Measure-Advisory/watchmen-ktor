@@ -33,3 +33,6 @@ gradle
 
 # build
 build
+
+# mac files
+.DS_Store
