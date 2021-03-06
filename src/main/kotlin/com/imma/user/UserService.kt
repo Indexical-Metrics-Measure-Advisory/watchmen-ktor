@@ -34,11 +34,11 @@ class UserService(application: Application) : Service(application) {
 
     fun findUserById(userId: String): User {
         return findFromMongo {
-            it.findOne(Query.query(Criteria.where("userId").`is`(userId)), User::class.java, "user")
+            it.findById(userId, User::class.java, "user")
         }
     }
 
-    fun findUserByName(name: String? = "", pageable: Pageable): DataPage<User> {
+    fun findUsersByName(name: String? = "", pageable: Pageable): DataPage<User> {
         val query: Query
         if (name!!.isEmpty()) {
             query = Query.query(Criteria.where("name").all())
@@ -46,6 +46,19 @@ class UserService(application: Application) : Service(application) {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
         return findPageFromMongo(User::class.java, "user", query, pageable)
+    }
+
+    fun findUsersByNameForHolder(name: String? = ""): List<User> {
+        val query: Query
+        if (name!!.isEmpty()) {
+            query = Query.query(Criteria.where("name").all())
+        } else {
+            query = Query.query(Criteria.where("name").regex(name, "i"))
+        }
+        query.fields().include("userId", "name")
+        return findFromMongo {
+            it.find(query, User::class.java, "user")
+        }
     }
 }
 

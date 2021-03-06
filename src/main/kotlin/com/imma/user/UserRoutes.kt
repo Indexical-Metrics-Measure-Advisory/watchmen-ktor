@@ -28,12 +28,20 @@ fun Route.findUserByIdRoute() {
     }
 }
 
-fun Route.listUserByNameRoute() {
+fun Route.listUsersByNameRoute() {
     post("/user/name") {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = UserService(application).findUserByName(name, pageable)
+        val page = UserService(application).findUsersByName(name, pageable)
         call.respond(page)
+    }
+}
+
+fun Route.listUsersByNameForHolderRoute() {
+    get("/query/user/group") {
+        val name: String? = call.request.queryParameters["query_name"]
+        val users = UserService(application).findUsersByNameForHolder(name)
+        call.respond(users)
     }
 }
 
@@ -41,6 +49,7 @@ fun Application.userRoutes() {
     routing {
         saveUserRoute()
         findUserByIdRoute()
-        listUserByNameRoute()
+        listUsersByNameRoute()
+        listUsersByNameForHolderRoute()
     }
 }
