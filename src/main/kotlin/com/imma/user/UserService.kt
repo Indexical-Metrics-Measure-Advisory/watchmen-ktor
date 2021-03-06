@@ -32,7 +32,7 @@ class UserService(application: Application) : Service(application) {
         }
     }
 
-    fun findUserById(userId: String): User {
+    fun findUserById(userId: String): User? {
         return findFromMongo {
             it.findById(userId, User::class.java, "user")
         }
@@ -56,9 +56,7 @@ class UserService(application: Application) : Service(application) {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userId", "name")
-        return findFromMongo {
-            it.find(query, User::class.java, "user")
-        }
+        return listPageFromMongo(User::class.java, "user", query)
     }
 }
 

@@ -32,12 +32,24 @@ fun Application.writeIntoMongo(action: (template: MongoTemplate) -> Unit) {
     mongoClient.close()
 }
 
-fun <T> Application.findFromMongo(action: (template: MongoTemplate) -> T): T {
+fun <T> Application.findFromMongo(action: (template: MongoTemplate) -> T): T? {
     val mongoClient = createMongoClient()
     val mongoTemplate = createMongoTemplate(mongoClient)
     val found = action(mongoTemplate)
     mongoClient.close()
     return found
+}
+
+fun <T> Application.listPageFromMongo(
+    entityClass: Class<T>,
+    collectionName: String,
+    query: Query,
+): List<T> {
+    return findFromMongo {
+        // page in PageRequest is zero-based
+        val count = it.count(query, collectionName)
+        findPageData(count) { it.find(query, entityClass, collectionName) }
+    }!!
 }
 
 fun <T> Application.findPageFromMongo(
@@ -53,5 +65,5 @@ fun <T> Application.findPageFromMongo(
         val count = it.count(query, collectionName)
         val items: List<T> = findPageData(count) { it.find(query, entityClass, collectionName) }
         toDataPage(items, count, pageable)
-    }
+    }!!
 }

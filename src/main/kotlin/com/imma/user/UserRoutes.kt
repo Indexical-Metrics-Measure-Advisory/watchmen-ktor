@@ -23,7 +23,12 @@ fun Route.findUserByIdRoute() {
             call.respond(mapOf<String, String>())
         } else {
             val user = UserService(application).findUserById(userId)
-            call.respond(user)
+            if (user == null) {
+                // TODO a empty object
+                call.respond(mapOf<String, String>())
+            } else {
+                call.respond(user)
+            }
         }
     }
 }
