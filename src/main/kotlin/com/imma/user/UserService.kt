@@ -1,9 +1,6 @@
 package com.imma.user
 
-import com.imma.model.User
-import com.imma.model.assignDateTimePair
-import com.imma.model.determineFakeId
-import com.imma.model.forceAssignDateTimePair
+import com.imma.model.*
 import com.imma.rest.DataPage
 import com.imma.rest.Pageable
 import com.imma.service.Service
@@ -48,7 +45,7 @@ class UserService(application: Application) : Service(application) {
         return findPageFromMongo(User::class.java, "user", query, pageable)
     }
 
-    fun findUsersByNameForHolder(name: String? = ""): List<User> {
+    fun findUsersByNameForHolder(name: String? = ""): List<UserForHolder> {
         val query: Query
         if (name!!.isEmpty()) {
             query = Query.query(Criteria.where("name").all())
@@ -56,7 +53,7 @@ class UserService(application: Application) : Service(application) {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userId", "name")
-        return listPageFromMongo(User::class.java, "user", query)
+        return listPageFromMongo(UserForHolder::class.java, "user", query)
     }
 }
 
