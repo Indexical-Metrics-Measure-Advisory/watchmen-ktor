@@ -10,14 +10,13 @@ import io.ktor.routing.*
 fun Route.saveUserRoute() {
     post("/user") {
         val user = call.receive<User>()
-        application.saveUser(user)
+        UserService(application).saveUser(user)
         call.respond(user)
     }
 }
 
 fun Route.findUserRoute() {
     get("/user") {
-
         val userId: String? = call.request.queryParameters["user_id"]
     }
 }
@@ -26,7 +25,7 @@ fun Route.listUserByNameRoute() {
     post("/user/name") {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = application.findUserByName(name, pageable)
+        val page = UserService(application).findUserByName(name, pageable)
         call.respond(page)
     }
 }
