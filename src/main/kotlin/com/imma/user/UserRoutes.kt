@@ -15,9 +15,16 @@ fun Route.saveUserRoute() {
     }
 }
 
-fun Route.findUserRoute() {
+fun Route.findUserByIdRoute() {
     get("/user") {
         val userId: String? = call.request.queryParameters["user_id"]
+        if (userId == null || userId.isBlank()) {
+            // TODO a empty object
+            call.respond(mapOf<String, String>())
+        } else {
+            val user = UserService(application).findUserById(userId)
+            call.respond(user)
+        }
     }
 }
 
@@ -33,7 +40,7 @@ fun Route.listUserByNameRoute() {
 fun Application.userRoutes() {
     routing {
         saveUserRoute()
-        findUserRoute()
+        findUserByIdRoute()
         listUserByNameRoute()
     }
 }

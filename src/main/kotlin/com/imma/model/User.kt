@@ -23,8 +23,8 @@ data class User(
     var active: Boolean = true,
     @Field("role")
     var role: String = "",
-    @Field("user_group_ids")
-    var userGroupIds: List<String>? = mutableListOf(),
+    @Field("group_ids")
+    var groupIds: List<String>? = mutableListOf(),
     @Field("create_time")
     override var createTime: String? = null,
     @Field("last_modify_time")

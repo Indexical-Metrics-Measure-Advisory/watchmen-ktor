@@ -32,6 +32,12 @@ class UserService(application: Application) : Service(application) {
         }
     }
 
+    fun findUserById(userId: String): User {
+        return findFromMongo {
+            it.findOne(Query.query(Criteria.where("userId").`is`(userId)), User::class.java, "user")
+        }
+    }
+
     fun findUserByName(name: String? = "", pageable: Pageable): DataPage<User> {
         val query: Query
         if (name!!.isEmpty()) {
