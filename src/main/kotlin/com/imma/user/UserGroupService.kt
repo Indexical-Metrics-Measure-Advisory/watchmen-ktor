@@ -54,12 +54,12 @@ class UserGroupService(application: Application) : Service(application) {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userGroupId", "name")
-        return listPageFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
+        return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
     }
 
     fun findUserGroupsByIdsForHolder(userGroupIds: List<String>): List<UserGroupForHolder> {
         val query: Query = Query.query(Criteria.where("userGroupId").`in`(userGroupIds))
         query.fields().include("userGroupId", "name")
-        return listPageFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
+        return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
     }
 }

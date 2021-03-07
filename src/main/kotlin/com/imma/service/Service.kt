@@ -2,7 +2,7 @@ package com.imma.service
 
 import com.imma.persist.mango.findFromMongo
 import com.imma.persist.mango.findPageFromMongo
-import com.imma.persist.mango.listPageFromMongo
+import com.imma.persist.mango.findListFromMongo
 import com.imma.persist.mango.writeIntoMongo
 import com.imma.persist.snowflake.nextSnowflakeId
 import com.imma.rest.DataPage
@@ -24,12 +24,12 @@ open class Service(val application: Application) {
         return application.findFromMongo(action)
     }
 
-    fun <T> listPageFromMongo(
+    fun <T> findListFromMongo(
         entityClass: Class<T>,
         collectionName: String,
         query: Query,
     ): List<T> {
-        return application.listPageFromMongo(entityClass, collectionName, query)
+        return application.findListFromMongo(entityClass, collectionName, query)
     }
 
     fun <T> findPageFromMongo(

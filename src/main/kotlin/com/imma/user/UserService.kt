@@ -53,13 +53,13 @@ class UserService(application: Application) : Service(application) {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userId", "name")
-        return listPageFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
+        return findListFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
     }
 
     fun findUsersByIdsForHolder(userIds: List<String>): List<UserForHolder> {
         val query: Query = Query.query(Criteria.where("userId").`in`(userIds))
         query.fields().include("userId", "name")
-        return listPageFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
+        return findListFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
     }
 }
 

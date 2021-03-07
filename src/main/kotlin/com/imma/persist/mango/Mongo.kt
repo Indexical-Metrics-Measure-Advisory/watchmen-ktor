@@ -40,7 +40,7 @@ fun <T> Application.findFromMongo(action: (template: MongoTemplate) -> T): T? {
     return found
 }
 
-fun <T> Application.listPageFromMongo(
+fun <T> Application.findListFromMongo(
     entityClass: Class<T>,
     collectionName: String,
     query: Query,
