@@ -31,7 +31,7 @@ class UserService(application: Application) : Service(application) {
 
     fun findUserById(userId: String): User? {
         return findFromMongo {
-            it.findById(userId, User::class.java, "user")
+            it.findById(userId, User::class.java, CollectionNames.USER)
         }
     }
 
@@ -42,7 +42,7 @@ class UserService(application: Application) : Service(application) {
         } else {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
-        return findPageFromMongo(User::class.java, "user", query, pageable)
+        return findPageFromMongo(User::class.java, CollectionNames.USER, query, pageable)
     }
 
     fun findUsersByNameForHolder(name: String? = ""): List<UserForHolder> {
@@ -53,7 +53,7 @@ class UserService(application: Application) : Service(application) {
             query = Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userId", "name")
-        return listPageFromMongo(UserForHolder::class.java, "user", query)
+        return listPageFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
     }
 }
 

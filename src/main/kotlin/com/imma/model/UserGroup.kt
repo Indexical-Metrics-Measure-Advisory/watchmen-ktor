@@ -8,23 +8,15 @@ import org.springframework.data.mongodb.core.mapping.Field
 import java.time.ZoneOffset.UTC
 import java.util.*
 
-@Document(collection = CollectionNames.USER)
-data class User(
+@Document(collection = CollectionNames.USER_GROUP)
+data class UserGroup(
     @Id
-    var userId: String? = null,
+    var userGroupId: String? = null,
     @Indexed(unique = true)
     @Field("name")
     var name: String? = null,
-    @Field("nick_name")
-    var nickName: String? = null,
-    @Field("password")
-    var password: String? = null,
-    @Field("is_active")
-    var active: Boolean = true,
-    @Field("role")
-    var role: String = "",
-    @Field("group_ids")
-    var groupIds: List<String>? = mutableListOf(),
+    @Field("description")
+    var description: String? = null,
     @Field("create_time")
     override var createTime: String? = null,
     @Field("last_modify_time")
