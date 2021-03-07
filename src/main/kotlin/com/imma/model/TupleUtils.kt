@@ -3,12 +3,12 @@ package com.imma.model
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.isFakeId
 
-fun determineFakeId(user: User, replace: Boolean = true, generateId: () -> String): Boolean {
-    val isFakeId = user.userId?.isFakeId()
+fun determineFakeId(getId: () -> String?, replace: Boolean = true, setId: () -> Unit): Boolean {
+    val isFakeId = getId()?.isFakeId()
     val fake = isFakeId == true || isFakeId == null
     if (fake && replace) {
         // no id declared or it is a fake id
-        user.userId = generateId()
+        setId()
     }
     return fake
 }

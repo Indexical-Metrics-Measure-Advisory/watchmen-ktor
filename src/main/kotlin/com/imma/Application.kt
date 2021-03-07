@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
 import io.ktor.application.*
 import io.ktor.features.*
@@ -62,6 +63,7 @@ fun Application.module(testing: Boolean = false) {
     }
     routing {
         userRoutes()
+        userGroupRoutes()
     }
 }
 

@@ -20,7 +20,7 @@ class UserService(application: Application) : Service(application) {
     }
 
     fun saveUser(user: User) {
-        val fake = determineFakeId(user, true) { nextSnowflakeId().toString() }
+        val fake = determineFakeId({ user.userId }, true, { user.userId = nextSnowflakeId().toString() })
 
         if (fake) {
             createUser(user)
