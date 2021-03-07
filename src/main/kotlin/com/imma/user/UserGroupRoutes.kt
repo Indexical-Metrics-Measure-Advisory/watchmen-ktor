@@ -1,6 +1,7 @@
 package com.imma.user
 
 import com.imma.model.UserGroup
+import com.imma.model.UserGroupForHolder
 import com.imma.rest.Pageable
 import io.ktor.application.*
 import io.ktor.request.*
@@ -51,11 +52,24 @@ fun Route.listUserGroupsByNameForHolderRoute() {
     }
 }
 
+fun Route.listUserGroupsByIdsForHolderRoute() {
+    post("/user_groups/ids") {
+        val userGroupIds: List<String> = call.receive<List<String>>()
+        if (userGroupIds.isEmpty()) {
+            call.respond(listOf<UserGroupForHolder>())
+        } else {
+            val userGroups = UserGroupService(application).findUserGroupsByIdsForHolder(userGroupIds)
+            call.respond(userGroups)
+        }
+    }
+}
+
 fun Application.userGroupRoutes() {
     routing {
         saveUserGroupRoute()
         findUserGroupByIdRoute()
         listUserGroupsByNameRoute()
         listUserGroupsByNameForHolderRoute()
+        listUserGroupsByIdsForHolderRoute()
     }
 }

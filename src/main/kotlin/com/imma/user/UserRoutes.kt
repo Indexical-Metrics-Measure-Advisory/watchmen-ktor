@@ -1,6 +1,7 @@
 package com.imma.user
 
 import com.imma.model.User
+import com.imma.model.UserForHolder
 import com.imma.rest.Pageable
 import io.ktor.application.*
 import io.ktor.request.*
@@ -51,11 +52,24 @@ fun Route.listUsersByNameForHolderRoute() {
     }
 }
 
+fun Route.listUsersByIdsForHolderRoute() {
+    post("/user/ids") {
+        val userIds: List<String> = call.receive<List<String>>()
+        if (userIds.isEmpty()) {
+            call.respond(listOf<UserForHolder>())
+        } else {
+            val users = UserService(application).findUsersByIdsForHolder(userIds)
+            call.respond(users)
+        }
+    }
+}
+
 fun Application.userRoutes() {
     routing {
         saveUserRoute()
         findUserByIdRoute()
         listUsersByNameRoute()
         listUsersByNameForHolderRoute()
+        listUsersByIdsForHolderRoute()
     }
 }
