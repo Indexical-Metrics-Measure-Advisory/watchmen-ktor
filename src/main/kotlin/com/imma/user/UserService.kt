@@ -65,17 +65,23 @@ class UserService(application: Application) : Service(application) {
 
     fun unassignUserGroup(userGroupId: String) {
         writeIntoMongo {
-            val query: Query = Query.query(Criteria.where("groupIds").`is`(userGroupId))
-            it.update(User::class.java).matching(query).apply(Update().pull("groupIds", userGroupId))
-                .findAndModifyValue()
+            it.updateMulti(
+                Query.query(Criteria.where("groupIds").`is`(userGroupId)),
+                Update().pull("groupIds", userGroupId),
+                User::class.java,
+                CollectionNames.USER
+            )
         }
     }
 
     fun assignUserGroup(userIds: List<String>, userGroupId: String) {
         writeIntoMongo {
-            val query: Query = Query.query(Criteria.where("userId").`in`(userIds))
-            it.update(User::class.java).matching(query).apply(Update().push("groupIds", userGroupId))
-                .findAndModifyValue()
+            it.updateMulti(
+                Query.query(Criteria.where("userId").`in`(userIds)),
+                Update().push("groupIds", userGroupId),
+                User::class.java,
+                CollectionNames.USER
+            )
         }
     }
 }
