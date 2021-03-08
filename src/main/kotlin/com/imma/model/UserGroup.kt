@@ -2,6 +2,7 @@ package com.imma.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -17,6 +18,10 @@ data class UserGroup(
     var name: String? = null,
     @Field("description")
     var description: String? = null,
+    @Transient
+    var userIds: List<String>? = mutableListOf(),
+    @Transient
+    var spaceIds: List<String>? = mutableListOf(),
     @Field("create_time")
     override var createTime: String? = null,
     @Field("last_modify_time")

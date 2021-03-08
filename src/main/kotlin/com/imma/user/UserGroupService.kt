@@ -28,6 +28,13 @@ class UserGroupService(application: Application) : Service(application) {
         } else {
             updateUserGroup(userGroup)
         }
+
+        val userIds = userGroup.userIds
+        val userService = UserService(application)
+        userService.unassignUserGroup(userGroup.userGroupId!!)
+        if (userIds != null && userIds.isNotEmpty()) {
+            userService.assignUserGroup(userIds, userGroup.userGroupId!!)
+        }
     }
 
     fun findUserGroupById(userGroupId: String): UserGroup? {

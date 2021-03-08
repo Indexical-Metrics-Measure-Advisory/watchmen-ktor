@@ -7,6 +7,7 @@ import com.imma.service.Service
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 
 class UserService(application: Application) : Service(application) {
     private fun createUser(user: User) {
@@ -60,6 +61,22 @@ class UserService(application: Application) : Service(application) {
         val query: Query = Query.query(Criteria.where("userId").`in`(userIds))
         query.fields().include("userId", "name")
         return findListFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
+    }
+
+    fun unassignUserGroup(userGroupId: String) {
+        writeIntoMongo {
+            val query: Query = Query.query(Criteria.where("groupIds").`is`(userGroupId))
+            it.update(User::class.java).matching(query).apply(Update().pull("groupIds", userGroupId))
+                .findAndModifyValue()
+        }
+    }
+
+    fun assignUserGroup(userIds: List<String>, userGroupId: String) {
+        writeIntoMongo {
+            val query: Query = Query.query(Criteria.where("userId").`in`(userIds))
+            it.update(User::class.java).matching(query).apply(Update().push("groupIds", userGroupId))
+                .findAndModifyValue()
+        }
     }
 }
 
