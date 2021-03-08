@@ -3,13 +3,14 @@ package com.imma.user
 import com.imma.model.UserGroup
 import com.imma.model.UserGroupForHolder
 import com.imma.rest.Pageable
+import com.imma.service.RouteConstants
 import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.saveUserGroupRoute() {
-    post("/user_group") {
+    post(RouteConstants.USER_GROUP_SAVE) {
         val userGroup = call.receive<UserGroup>()
         UserGroupService(application).saveUserGroup(userGroup)
         call.respond(userGroup)
@@ -17,7 +18,7 @@ fun Route.saveUserGroupRoute() {
 }
 
 fun Route.findUserGroupByIdRoute() {
-    get("/user_group") {
+    get(RouteConstants.USER_GROUP_FIND_BY_ID) {
         val userGroupId: String? = call.request.queryParameters["user_group_id"]
         if (userGroupId == null || userGroupId.isBlank()) {
             // TODO a empty object
@@ -35,7 +36,7 @@ fun Route.findUserGroupByIdRoute() {
 }
 
 fun Route.listUserGroupsByNameRoute() {
-    post("/user_group/name") {
+    post(RouteConstants.USER_GROUP_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
         val page = UserGroupService(application).findUserGroupsByName(name, pageable)
@@ -45,7 +46,7 @@ fun Route.listUserGroupsByNameRoute() {
 
 fun Route.listUserGroupsByNameForHolderRoute() {
     // TODO fix this url
-    get("/query/user_group/space") {
+    get(RouteConstants.USER_GROUP_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
         val userGroups = UserGroupService(application).findUserGroupsByNameForHolder(name)
         call.respond(userGroups)
@@ -53,7 +54,7 @@ fun Route.listUserGroupsByNameForHolderRoute() {
 }
 
 fun Route.listUserGroupsByIdsForHolderRoute() {
-    post("/user_groups/ids") {
+    post(RouteConstants.USER_GROUP_LIST_BY_IDS_FOR_HOLDER) {
         val userGroupIds: List<String> = call.receive<List<String>>()
         if (userGroupIds.isEmpty()) {
             call.respond(listOf<UserGroupForHolder>())

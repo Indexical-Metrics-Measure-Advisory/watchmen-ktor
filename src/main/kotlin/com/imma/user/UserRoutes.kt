@@ -3,13 +3,14 @@ package com.imma.user
 import com.imma.model.User
 import com.imma.model.UserForHolder
 import com.imma.rest.Pageable
+import com.imma.service.RouteConstants
 import io.ktor.application.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.saveUserRoute() {
-    post("/user") {
+    post(RouteConstants.USER_SAVE) {
         val user = call.receive<User>()
         UserService(application).saveUser(user)
         call.respond(user)
@@ -17,7 +18,7 @@ fun Route.saveUserRoute() {
 }
 
 fun Route.findUserByIdRoute() {
-    get("/user") {
+    get(RouteConstants.USER_FIND_BY_ID) {
         val userId: String? = call.request.queryParameters["user_id"]
         if (userId == null || userId.isBlank()) {
             // TODO a empty object
@@ -35,7 +36,7 @@ fun Route.findUserByIdRoute() {
 }
 
 fun Route.listUsersByNameRoute() {
-    post("/user/name") {
+    post(RouteConstants.USER_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
         val page = UserService(application).findUsersByName(name, pageable)
@@ -45,7 +46,7 @@ fun Route.listUsersByNameRoute() {
 
 fun Route.listUsersByNameForHolderRoute() {
     // TODO fix this url
-    get("/query/user/group") {
+    get(RouteConstants.USER_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
         val users = UserService(application).findUsersByNameForHolder(name)
         call.respond(users)
@@ -53,7 +54,7 @@ fun Route.listUsersByNameForHolderRoute() {
 }
 
 fun Route.listUsersByIdsForHolderRoute() {
-    post("/user/ids") {
+    post(RouteConstants.USER_LIST_BY_IDS_FOR_HOLDER) {
         val userIds: List<String> = call.receive<List<String>>()
         if (userIds.isEmpty()) {
             call.respond(listOf<UserForHolder>())
