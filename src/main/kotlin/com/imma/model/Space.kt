@@ -5,25 +5,21 @@ import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset.UTC
+import java.time.ZoneOffset
 import java.util.*
 
-@Document(collection = CollectionNames.USER)
-data class User(
+@Document(collection = CollectionNames.SPACE)
+data class Space(
     @Id
-    var userId: String? = null,
+    var spaceId: String? = null,
     @Indexed(unique = true)
     @Field("name")
     var name: String? = null,
-    @Field("nick_name")
-    var nickName: String? = null,
-    @Field("password")
-    var password: String? = null,
-    @Field("is_active")
-    var active: Boolean = true,
-    @Field("role")
-    var role: String = "",
-    @Field("group_ids")
+    @Field("description")
+    var description: String? = null,
+    @Field("topic_ids")
+    var topicIds: List<String>? = mutableListOf(),
+    @Transient
     var groupIds: List<String>? = mutableListOf(),
     @Field("create_time")
     override var createTime: String? = null,
@@ -31,5 +27,5 @@ data class User(
     override var lastModifyTime: String? = null,
     @LastModifiedDate
     @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(UTC)).time
+    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
 ) : Tuple()
