@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.imma.auth.role
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.features.*
 import io.ktor.jackson.*
 import io.ktor.request.*
@@ -56,14 +58,34 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    install(Authentication) {
+        role("admin") {
+            validate { credentials ->
+                if (credentials.token == "123456") {
+                    UserIdPrincipal("hello")
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
     routing {
         get("/") {
             call.respondText("Hello World!")
         }
     }
+
     routing {
-        userRoutes()
-        userGroupRoutes()
+        post("/login/access-token") {
+            // TODO
+        }
+    }
+    routing {
+        authenticate("admin") {
+            userRoutes()
+            userGroupRoutes()
+        }
     }
 }
 
