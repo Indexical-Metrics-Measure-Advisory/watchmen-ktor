@@ -32,6 +32,7 @@ data class User(
     @Field("last_modified")
     override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(UTC)).time
 ) : Tuple() {
+    // transient fields here for avoid construct exception by spring data using kotlin data class
     @Transient
     var password: String? = null
 }
