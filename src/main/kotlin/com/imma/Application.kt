@@ -4,15 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.imma.auth.jwtRealm
 import com.imma.auth.makeJwtVerifier
 import com.imma.auth.role
 import com.imma.login.loginRoutes
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
+import com.imma.utils.isDev
 import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.jackson.*
 import io.ktor.request.*
@@ -56,27 +55,22 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(Authentication) {
-        jwt {
-            realm = jwtRealm
-            verifier(makeJwtVerifier())
-            validate { credential ->
-                null
-            }
-        }
         role(name = "admin") {
             verifier = makeJwtVerifier()
             validate { credentials ->
-//                if (isDev) {
-//                    // in development mode, use token as principal
-//                    UserIdPrincipal(credentials.token)
-//                } else {
-                val userId = verify(credentials.token)
-                if (userId != null && userId.isNotBlank()) {
-                    UserIdPrincipal(userId)
+                val mock = request.queryParameters["mock"]
+                if (isDev && mock.equals("true", ignoreCase = true)) {
+                    // in development mode, use token as principal
+                    // must with query parameter "mock=true", value is case insensitive
+                    UserIdPrincipal(credentials.token)
                 } else {
-                    null
+                    val userId = verify(credentials.token)
+                    if (userId != null && userId.isNotBlank()) {
+                        UserIdPrincipal(userId)
+                    } else {
+                        null
+                    }
                 }
-//                }
             }
         }
     }
