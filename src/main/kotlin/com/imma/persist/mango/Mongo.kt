@@ -2,6 +2,7 @@ package com.imma.persist.mango
 
 import com.imma.rest.DataPage
 import com.imma.rest.Pageable
+import com.imma.utils.EnvConstants
 import com.imma.utils.findPageData
 import com.imma.utils.toDataPage
 import com.mongodb.client.MongoClient
@@ -13,14 +14,14 @@ import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory
 import org.springframework.data.mongodb.core.query.Query
 
 private fun Application.createMongoClient(): MongoClient {
-    val host = environment.config.property("ktor.mongo.host").getString()
-    val port = environment.config.property("ktor.mongo.port").getString()
+    val host = environment.config.property(EnvConstants.MONGO_HOST).getString()
+    val port = environment.config.property(EnvConstants.MONGO_PORT).getString()
 
     return MongoClients.create("mongodb://$host:$port")
 }
 
 private fun Application.createMongoTemplate(client: MongoClient): MongoTemplate {
-    val name = environment.config.property("ktor.mongo.name").getString()
+    val name = environment.config.property(EnvConstants.MONGO_NAME).getString()
 
     return MongoTemplate(SimpleMongoClientDatabaseFactory(client, name))
 }

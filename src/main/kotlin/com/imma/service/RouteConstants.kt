@@ -1,6 +1,8 @@
 package com.imma.service
 
 object RouteConstants {
+    const val LOGIN: String = "/login/access-token"
+
     const val USER_SAVE: String = "/user"
     const val USER_FIND_BY_ID: String = "/user"
     const val USER_LIST_BY_NAME: String = "/user/name"

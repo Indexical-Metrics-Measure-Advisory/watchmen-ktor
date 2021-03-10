@@ -17,8 +17,6 @@ data class User(
     var name: String? = null,
     @Field("nick_name")
     var nickName: String? = null,
-    @Field("password")
-    var password: String? = null,
     @Field("is_active")
     var active: Boolean = true,
     @Field("role")

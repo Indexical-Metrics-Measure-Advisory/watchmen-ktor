@@ -1,5 +1,6 @@
 package com.imma.auth
 
+import com.auth0.jwt.interfaces.JWTVerifier
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.auth.*
@@ -31,6 +32,11 @@ class RoleBaseAuthenticationProvider internal constructor(
          * Specifies realm to be passed in `WWW-Authenticate` header
          */
         var realm: String = "Ktor Server"
+        internal var verifier: ((HttpAuthHeader) -> JWTVerifier?) = { null }
+
+        fun verifier(verifier: JWTVerifier) {
+            this.verifier = { verifier }
+        }
 
         /**
          * Sets a validation function that will check given [UserPasswordCredential] instance and return [Principal],
