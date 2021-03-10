@@ -5,8 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.imma.auth.makeJwtVerifier
-import com.imma.auth.role
+import com.imma.auth.*
 import com.imma.login.loginRoutes
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
@@ -61,10 +60,6 @@ fun Application.module(testing: Boolean = false) {
             dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         }
     }
-
-    val jwtIssuer = environment.config.property("ktor.jwt.domain").getString()
-    val jwtAudience = environment.config.property("ktor.jwt.audience").getString()
-    val jwtRealm = environment.config.property("ktor.jwt.realm").getString()
 
     install(Authentication) {
         role("admin") {

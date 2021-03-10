@@ -3,7 +3,13 @@ package com.imma.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
+import com.imma.utils.EnvConstants
+import io.ktor.application.*
 
-private val algorithm = Algorithm.HMAC256("secret")
-fun makeJwtVerifier(issuer: String, audience: String): JWTVerifier =
-    JWT.require(algorithm).withAudience(audience).withIssuer(issuer).build()
+val Application.jwtIssuer get() = environment.config.property(EnvConstants.JWT_DOMAIN).getString()
+val Application.jwtAudience get() = environment.config.property(EnvConstants.JWT_AUDIENCE).getString()
+val Application.jwtRealm get() = environment.config.property(EnvConstants.JWT_REALM).getString()
+val Application.jwtAlgorithm get() = Algorithm.HMAC256(environment.config.property(EnvConstants.JWT_HMAC256_SECRET).getString())
+
+fun Application.makeJwtVerifier(issuer: String, audience: String): JWTVerifier =
+    JWT.require(jwtAlgorithm).withAudience(audience).withIssuer(issuer).build()
