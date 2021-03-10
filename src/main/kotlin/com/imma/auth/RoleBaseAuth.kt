@@ -1,11 +1,15 @@
 package com.imma.auth
 
-import com.auth0.jwt.interfaces.JWTVerifier
+import com.auth0.jwt.JWTVerifier
+import com.auth0.jwt.impl.JWTParser
+import com.auth0.jwt.interfaces.DecodedJWT
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.auth.*
 import io.ktor.request.*
 import io.ktor.response.*
+import java.util.*
+import kotlin.collections.LinkedHashMap
 
 /**
  * Represents a role based authentication provider
@@ -14,8 +18,6 @@ import io.ktor.response.*
 class RoleBaseAuthenticationProvider internal constructor(
     configuration: Configuration
 ) : AuthenticationProvider(configuration) {
-    internal val realm: String = configuration.realm
-
     internal val authenticationFunction = configuration.authenticationFunction
 
     /**
@@ -28,14 +30,16 @@ class RoleBaseAuthenticationProvider internal constructor(
             )
         }
 
-        /**
-         * Specifies realm to be passed in `WWW-Authenticate` header
-         */
-        var realm: String = "Ktor Server"
-        internal var verifier: ((HttpAuthHeader) -> JWTVerifier?) = { null }
+        internal var verifier: JWTVerifier? = null
 
-        fun verifier(verifier: JWTVerifier) {
-            this.verifier = { verifier }
+        fun verify(token: String): String? {
+            val jwt: DecodedJWT? = verifier?.verify(token)
+            if (jwt != null) {
+                val payloadString = String(Base64.getUrlDecoder().decode(jwt.payload))
+                return JWTParser().parsePayload(payloadString).subject
+            } else {
+                return null
+            }
         }
 
         /**
@@ -56,7 +60,6 @@ fun Authentication.Configuration.role(
     configure: RoleBaseAuthenticationProvider.Configuration.() -> Unit
 ) {
     val provider = RoleBaseAuthenticationProvider(RoleBaseAuthenticationProvider.Configuration(name).apply(configure))
-    val realm = provider.realm
     val authenticate = provider.authenticationFunction
 
     provider.pipeline.intercept(AuthenticationPipeline.RequestAuthentication) { context ->
@@ -74,7 +77,7 @@ fun Authentication.Configuration.role(
                 call.respond(UnauthorizedResponse(HttpAuthHeader.Parameterized(
                     "Bearer",
                     LinkedHashMap<String, String>().apply {
-                        put(HttpAuthHeader.Parameters.Realm, realm)
+                        put(HttpAuthHeader.Parameters.Realm, application.jwtRealm)
                     }
                 )))
                 it.complete()

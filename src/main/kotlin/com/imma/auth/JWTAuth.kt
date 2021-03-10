@@ -9,7 +9,10 @@ import io.ktor.application.*
 val Application.jwtIssuer get() = environment.config.property(EnvConstants.JWT_DOMAIN).getString()
 val Application.jwtAudience get() = environment.config.property(EnvConstants.JWT_AUDIENCE).getString()
 val Application.jwtRealm get() = environment.config.property(EnvConstants.JWT_REALM).getString()
-val Application.jwtAlgorithm get() = Algorithm.HMAC256(environment.config.property(EnvConstants.JWT_HMAC256_SECRET).getString())
+val Application.jwtAlgorithm
+    get() = Algorithm.HMAC256(
+        environment.config.property(EnvConstants.JWT_HMAC256_SECRET).getString()
+    )
 
-fun Application.makeJwtVerifier(issuer: String, audience: String): JWTVerifier =
-    JWT.require(jwtAlgorithm).withAudience(audience).withIssuer(issuer).build()
+fun Application.makeJwtVerifier(): JWTVerifier =
+    JWT.require(jwtAlgorithm).withAudience(jwtAudience).withIssuer(jwtIssuer).build()

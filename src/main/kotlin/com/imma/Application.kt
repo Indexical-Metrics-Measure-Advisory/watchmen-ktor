@@ -1,11 +1,11 @@
 package com.imma
 
-import com.auth0.jwt.impl.JWTParser
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.imma.auth.*
+import com.imma.auth.makeJwtVerifier
+import com.imma.auth.role
 import com.imma.login.loginRoutes
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
@@ -19,7 +19,6 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import org.slf4j.event.Level
 import java.text.SimpleDateFormat
-import java.util.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -36,12 +35,6 @@ fun Application.module(testing: Boolean = false) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
     }
-//    install(ShutDownUrl.ApplicationCallFeature) {
-//        // The URL that will be intercepted (you can also use the application.conf's ktor.deployment.shutdown.url key)
-//        shutDownUrl = "/ktor/application/shutdown"
-//        // A function that will be executed to get the exit code of the process
-//        exitCodeSupplier = { 0 } // ApplicationCall.() -> Int
-//    }
 
     install(ContentNegotiation) {
         jackson {
@@ -63,21 +56,19 @@ fun Application.module(testing: Boolean = false) {
 
     install(Authentication) {
         role("admin") {
-            realm = jwtRealm
-            verifier(makeJwtVerifier(jwtIssuer, jwtAudience))
+            verifier = makeJwtVerifier()
             validate { credentials ->
-                if (isDev) {
-                    // in development mode, use token as principal
-                    UserIdPrincipal(credentials.token)
-                } else {
-                    val payloadString = String(Base64.getUrlDecoder().decode(credentials.token))
-                    val payload = JWTParser().parsePayload(payloadString)
-                    if (payload.audience.contains(jwtAudience)) {
-                        UserIdPrincipal("hello")
+//                if (isDev) {
+//                    // in development mode, use token as principal
+//                    UserIdPrincipal(credentials.token)
+//                } else {
+                    val userId = verify(credentials.token)
+                    if (userId != null && userId.isNotBlank()) {
+                        UserIdPrincipal(userId)
                     } else {
                         null
                     }
-                }
+//                }
             }
         }
     }
