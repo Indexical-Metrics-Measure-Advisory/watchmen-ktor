@@ -8,7 +8,6 @@ object EnvConstants {
     const val JWT_DOMAIN = "ktor.jwt.domain"
     const val JWT_AUDIENCE = "ktor.jwt.audience"
     const val JWT_REALM = "ktor.jwt.realm"
-    const val JWT_HMAC256_SECRET = "ktor.jwt.hmac256.secret"
     const val ADMIN_USERNAME = "ktor.admin.username"
     const val ADMIN_PASSWORD = "ktor.admin.password"
     const val ADMIN_ENABLED = "ktor.admin.enabled"
