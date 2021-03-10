@@ -1,10 +1,12 @@
 package com.imma.user
 
+import com.imma.auth.Roles
 import com.imma.model.User
 import com.imma.model.UserForHolder
 import com.imma.rest.Pageable
 import com.imma.service.RouteConstants
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -67,10 +69,12 @@ fun Route.listUsersByIdsForHolderRoute() {
 
 fun Application.userRoutes() {
     routing {
-        saveUserRoute()
-        findUserByIdRoute()
-        listUsersByNameRoute()
-        listUsersByNameForHolderRoute()
-        listUsersByIdsForHolderRoute()
+        authenticate(Roles.ADMIN.ROLE) {
+            saveUserRoute()
+            findUserByIdRoute()
+            listUsersByNameRoute()
+            listUsersByNameForHolderRoute()
+            listUsersByIdsForHolderRoute()
+        }
     }
 }
