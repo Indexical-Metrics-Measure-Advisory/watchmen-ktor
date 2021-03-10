@@ -10,6 +10,7 @@ import com.imma.auth.makeJwtVerifier
 import com.imma.auth.role
 import com.imma.login.loginRoutes
 import com.imma.space.spaceRoutes
+import com.imma.user.UserService
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
 import com.imma.utils.EnvConstants
@@ -72,9 +73,10 @@ fun Application.module(testing: Boolean = false) {
                     if (!userId.isNullOrBlank()) {
                         if (userId == adminUsername && adminEnabled) {
                             UserIdPrincipal(userId)
-                        } else {
-                            // TODO
+                        } else if (UserService(application).isActive(userId)) {
                             UserIdPrincipal(userId)
+                        } else {
+                            null
                         }
                     } else {
                         null

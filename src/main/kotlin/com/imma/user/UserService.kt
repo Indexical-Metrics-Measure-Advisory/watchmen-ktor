@@ -107,5 +107,15 @@ class UserService(application: Application) : Service(application) {
             )
         }
     }
+
+    fun isActive(userId: String): Boolean {
+        return findFromMongo {
+            it.exists(
+                Query.query(Criteria.where("userId").`is`(userId).and("active").`is`(true)),
+                User::class.java,
+                CollectionNames.USER
+            )
+        }!!
+    }
 }
 
