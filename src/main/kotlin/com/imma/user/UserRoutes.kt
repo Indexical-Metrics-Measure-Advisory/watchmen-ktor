@@ -47,7 +47,6 @@ fun Route.listUsersByNameRoute() {
 }
 
 fun Route.listUsersByNameForHolderRoute() {
-    // TODO fix this url
     get(RouteConstants.USER_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
         val users = UserService(application).findUsersByNameForHolder(name)

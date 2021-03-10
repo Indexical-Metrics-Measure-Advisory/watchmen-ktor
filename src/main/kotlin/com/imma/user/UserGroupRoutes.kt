@@ -47,7 +47,6 @@ fun Route.listUserGroupsByNameRoute() {
 }
 
 fun Route.listUserGroupsByNameForHolderRoute() {
-    // TODO fix this url
     get(RouteConstants.USER_GROUP_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
         val userGroups = UserGroupService(application).findUserGroupsByNameForHolder(name)
