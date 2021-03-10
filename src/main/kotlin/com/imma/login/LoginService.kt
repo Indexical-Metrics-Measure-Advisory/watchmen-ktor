@@ -19,6 +19,7 @@ class LoginService(application: Application) : Service(application) {
             && username == application.adminUsername
             && plainPassword == application.adminPassword
         ) {
+            // successfully login when admin enabled and username/password matched
             return User().apply {
                 val now = getCurrentDateTime()
                 userId = username

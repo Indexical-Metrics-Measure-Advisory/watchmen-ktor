@@ -72,6 +72,7 @@ fun Application.module(testing: Boolean = false) {
                     val userId = verify(credentials.token)
                     if (!userId.isNullOrBlank()) {
                         if (userId == adminUsername && adminEnabled) {
+                            // pass validation when admin enabled and username matched
                             UserIdPrincipal(userId)
                         } else if (UserService(application).isActive(userId)) {
                             UserIdPrincipal(userId)
@@ -81,6 +82,15 @@ fun Application.module(testing: Boolean = false) {
                     } else {
                         null
                     }
+                }
+            }
+            authorise { principal ->
+                val userId = principal.name
+                if (userId == adminUsername && adminEnabled) {
+                    // authorise anything when admin enabled and username matched
+                    true
+                } else {
+                    UserService(application).isAdmin(userId)
                 }
             }
         }
@@ -102,4 +112,3 @@ fun Application.module(testing: Boolean = false) {
         spaceRoutes()
     }
 }
-

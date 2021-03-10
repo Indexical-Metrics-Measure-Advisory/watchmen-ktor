@@ -11,6 +11,8 @@ import io.ktor.response.*
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
+typealias AuthorizationFunction<P> = suspend ApplicationCall.(principal: P) -> Boolean
+
 /**
  * Represents a role based authentication provider
  * @property name is the name of the provider, or `null` for a default provider
@@ -19,6 +21,7 @@ class RoleBaseAuthenticationProvider internal constructor(
     configuration: Configuration
 ) : AuthenticationProvider(configuration) {
     internal val authenticationFunction = configuration.authenticationFunction
+    internal val authorizationFunction = configuration.authorizationFunction
 
     /**
      * Role base auth configuration
@@ -27,6 +30,11 @@ class RoleBaseAuthenticationProvider internal constructor(
         internal var authenticationFunction: AuthenticationFunction<RoleBaseCredential> = {
             throw NotImplementedError(
                 "Role base auth validate function is not specified. Use role { validate { ... } } to fix."
+            )
+        }
+        internal var authorizationFunction: AuthorizationFunction<UserIdPrincipal> = {
+            throw NotImplementedError(
+                "Role base auth authorise function is not specified. Use role { authorise { ... } } to fix."
             )
         }
 
@@ -49,6 +57,10 @@ class RoleBaseAuthenticationProvider internal constructor(
         fun validate(body: suspend ApplicationCall.(RoleBaseCredential) -> Principal?) {
             authenticationFunction = body
         }
+
+        fun authorise(body: suspend ApplicationCall.(UserIdPrincipal) -> Boolean) {
+            authorizationFunction = body
+        }
     }
 }
 
@@ -61,6 +73,7 @@ fun Authentication.Configuration.role(
 ) {
     val provider = RoleBaseAuthenticationProvider(RoleBaseAuthenticationProvider.Configuration(name).apply(configure))
     val authenticate = provider.authenticationFunction
+    val authorise = provider.authorizationFunction
 
     provider.pipeline.intercept(AuthenticationPipeline.RequestAuthentication) { context ->
         val credentials = call.request.roleBaseAuthenticationCredentials()
@@ -84,7 +97,20 @@ fun Authentication.Configuration.role(
             }
         }
         if (principal != null) {
-            context.principal(principal)
+            val pass = principal.let { authorise(call, it as UserIdPrincipal) }
+            if (pass) {
+                context.principal(principal)
+            } else {
+                context.challenge(roleBaseAuthenticationChallengeKey, AuthenticationFailedCause.Error("Access denied.")) {
+                    call.respond(ForbiddenResponse(HttpAuthHeader.Parameterized(
+                        "Bearer",
+                        LinkedHashMap<String, String>().apply {
+                            put(HttpAuthHeader.Parameters.Realm, application.jwtRealm)
+                        }
+                    )))
+                    it.complete()
+                }
+            }
         }
     }
 
