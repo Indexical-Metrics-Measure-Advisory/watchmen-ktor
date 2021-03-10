@@ -2,6 +2,7 @@ package com.imma.model
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
@@ -30,4 +31,7 @@ data class User(
     @LastModifiedDate
     @Field("last_modified")
     override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(UTC)).time
-) : Tuple()
+) : Tuple() {
+    @Transient
+    var password: String? = null
+}

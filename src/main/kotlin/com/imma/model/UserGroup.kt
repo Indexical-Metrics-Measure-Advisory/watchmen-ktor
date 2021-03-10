@@ -18,8 +18,6 @@ data class UserGroup(
     var name: String? = null,
     @Field("description")
     var description: String? = null,
-    @Transient
-    var userIds: List<String>? = mutableListOf(),
     @Field("space_ids")
     var spaceIds: List<String>? = mutableListOf(),
     @Field("create_time")
@@ -29,4 +27,7 @@ data class UserGroup(
     @LastModifiedDate
     @Field("last_modified")
     override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(UTC)).time
-) : Tuple()
+) : Tuple() {
+    @Transient
+    var userIds: List<String>? = mutableListOf()
+}

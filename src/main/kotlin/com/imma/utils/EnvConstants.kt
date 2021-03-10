@@ -9,6 +9,9 @@ object EnvConstants {
     const val JWT_AUDIENCE = "ktor.jwt.audience"
     const val JWT_REALM = "ktor.jwt.realm"
     const val JWT_HMAC256_SECRET = "ktor.jwt.hmac256.secret"
+    const val ADMIN_USERNAME = "ktor.admin.username"
+    const val ADMIN_PASSWORD = "ktor.admin.password"
+    const val ADMIN_ENABLED = "ktor.admin.enabled"
 
     const val MONGO_HOST: String = "ktor.mongo.host"
     const val MONGO_PORT: String = "ktor.mongo.port"
@@ -16,4 +19,6 @@ object EnvConstants {
 
     const val SNOWFLAKE_WORKER: String = "ktor.snowflake.worker"
     const val SNOWFLAKE_DATA_CENTER: String = "ktor.snowflake.dataCenter"
+
+    const val CONTENT_DATE_FORMAT: String = "ktor.content.date.format"
 }

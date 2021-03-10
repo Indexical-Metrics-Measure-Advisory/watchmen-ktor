@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.imma.auth.adminEnabled
+import com.imma.auth.adminUsername
 import com.imma.auth.makeJwtVerifier
 import com.imma.auth.role
 import com.imma.login.loginRoutes
 import com.imma.space.spaceRoutes
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
+import com.imma.utils.EnvConstants
 import com.imma.utils.isDev
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -51,7 +54,7 @@ fun Application.module(testing: Boolean = false) {
 
             setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-            dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            dateFormat = SimpleDateFormat(environment.config.property(EnvConstants.CONTENT_DATE_FORMAT).getString())
         }
     }
 
@@ -66,8 +69,13 @@ fun Application.module(testing: Boolean = false) {
                     UserIdPrincipal(credentials.token)
                 } else {
                     val userId = verify(credentials.token)
-                    if (userId != null && userId.isNotBlank()) {
-                        UserIdPrincipal(userId)
+                    if (!userId.isNullOrBlank()) {
+                        if (userId == adminUsername && adminEnabled) {
+                            UserIdPrincipal(userId)
+                        } else {
+                            // TODO
+                            UserIdPrincipal(userId)
+                        }
                     } else {
                         null
                     }

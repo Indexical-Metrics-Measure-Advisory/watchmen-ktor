@@ -10,6 +10,18 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 
 class UserService(application: Application) : Service(application) {
+    private fun updateCredential(user: User) {
+        // update credential only when password is given
+        if (!user.password.isNullOrEmpty()) {
+            val credential = UserCredential().apply {
+                userId = user.userId
+                name = user.name
+                credential = user.password
+            }
+            UserCredentialService(application).saveCredential(credential)
+        }
+    }
+
     private fun createUser(user: User) {
         forceAssignDateTimePair(user)
         this.writeIntoMongo { it.insert(user) }
@@ -28,6 +40,8 @@ class UserService(application: Application) : Service(application) {
         } else {
             updateUser(user)
         }
+
+        updateCredential(user)
     }
 
     fun findUserById(userId: String): User? {
