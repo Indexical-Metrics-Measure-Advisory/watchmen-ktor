@@ -36,6 +36,9 @@ class UserService(application: Application) : Service(application) {
         }
     }
 
+    /**
+     * exactly match given username
+     */
     fun findUserByName(username: String): User? {
         return findFromMongo {
             it.findOne(Query.query(Criteria.where("name").`is`(username)), User::class.java, CollectionNames.USER)

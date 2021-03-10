@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.makeJwtVerifier
 import com.imma.auth.role
 import com.imma.login.loginRoutes
+import com.imma.space.spaceRoutes
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
 import com.imma.utils.isDev
@@ -88,6 +89,7 @@ fun Application.module(testing: Boolean = false) {
     routing {
         userRoutes()
         userGroupRoutes()
+        spaceRoutes()
     }
 }
 

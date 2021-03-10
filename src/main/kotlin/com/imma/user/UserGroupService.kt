@@ -7,6 +7,7 @@ import com.imma.service.Service
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 
 class UserGroupService(application: Application) : Service(application) {
     private fun createUserGroup(userGroup: UserGroup) {
@@ -32,7 +33,7 @@ class UserGroupService(application: Application) : Service(application) {
         val userIds = userGroup.userIds
         val userService = UserService(application)
         userService.unassignUserGroup(userGroup.userGroupId!!)
-        if (userIds != null && userIds.isNotEmpty()) {
+        if (!userIds.isNullOrEmpty()) {
             userService.assignUserGroup(userIds, userGroup.userGroupId!!)
         }
     }
@@ -68,5 +69,27 @@ class UserGroupService(application: Application) : Service(application) {
         val query: Query = Query.query(Criteria.where("userGroupId").`in`(userGroupIds))
         query.fields().include("userGroupId", "name")
         return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
+    }
+
+    fun unassignSpace(spaceId: String) {
+        writeIntoMongo {
+            it.updateMulti(
+                Query.query(Criteria.where("spaceIds").`is`(spaceId)),
+                Update().pull("spaceIds", spaceId),
+                UserGroup::class.java,
+                CollectionNames.USER_GROUP
+            )
+        }
+    }
+
+    fun assignSpace(userGroupIds: List<String>, spaceId: String) {
+        writeIntoMongo {
+            it.updateMulti(
+                Query.query(Criteria.where("userGroupId").`in`(userGroupIds)),
+                Update().push("spaceIds", spaceId),
+                UserGroup::class.java,
+                CollectionNames.USER_GROUP
+            )
+        }
     }
 }
