@@ -54,11 +54,7 @@ fun <T> Application.findListFromMongo(
     collectionName: String,
     query: Query,
 ): List<T> {
-    return getFromMongo {
-        val count = it.count(query, entityClass, collectionName)
-        println(count)
-        it.find(query, entityClass, collectionName)
-    }
+    return getFromMongo { it.find(query, entityClass, collectionName) }
 }
 
 fun <T> Application.findPageFromMongo(
