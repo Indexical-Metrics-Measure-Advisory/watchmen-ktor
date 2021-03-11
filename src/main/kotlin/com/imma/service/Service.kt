@@ -1,9 +1,7 @@
 package com.imma.service
 
+import com.imma.persist.mango.*
 import com.imma.persist.mango.findFromMongo
-import com.imma.persist.mango.findPageFromMongo
-import com.imma.persist.mango.findListFromMongo
-import com.imma.persist.mango.writeIntoMongo
 import com.imma.persist.snowflake.nextSnowflakeId
 import com.imma.rest.DataPage
 import com.imma.rest.Pageable
@@ -22,6 +20,10 @@ open class Service(val application: Application) {
 
     fun <T> findFromMongo(action: (template: MongoTemplate) -> T): T? {
         return application.findFromMongo(action)
+    }
+
+    fun <T> getFromMongo(action: (template: MongoTemplate) -> T): T {
+        return application.getFromMongo(action)
     }
 
     fun <T> findListFromMongo(

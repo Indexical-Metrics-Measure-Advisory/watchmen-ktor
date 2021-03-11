@@ -6,6 +6,7 @@ import com.imma.service.RouteConstants
 import com.imma.utils.isFakeOrNull
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -32,9 +33,20 @@ fun Route.connectSpaceRoute() {
         val userId = connectedSpace.userId
         if (!userId.isNullOrBlank() && userId != principal.name) {
             // cannot save connected space which belongs to other user (at least by request data)
+            call.respond(HttpStatusCode.Forbidden, "Cannot use connected space belongs to others.")
+            return@post
         }
 
-        connectedSpace.connectId.isFakeOrNull()
+        val connectId = connectedSpace.connectId
+        if (!connectId.isFakeOrNull()) {
+            val belongsMe =
+                ConnectedSpaceService(application).isConnectedSpaceBelongsTo(connectId, principal.name)
+            if (!belongsMe) {
+                // cannot save connected space which belongs to other user (check with exists data)
+                call.respond(HttpStatusCode.Forbidden, "Cannot use connected space belongs to others.")
+                return@post
+            }
+        }
 
         // assign to current authenticated user
         connectedSpace.userId = principal.name

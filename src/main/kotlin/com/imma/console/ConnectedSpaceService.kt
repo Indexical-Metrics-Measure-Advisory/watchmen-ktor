@@ -1,11 +1,10 @@
 package com.imma.console
 
-import com.imma.model.ConnectedSpace
-import com.imma.model.assignDateTimePair
-import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
+import com.imma.model.*
 import com.imma.service.Service
 import io.ktor.application.*
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import kotlin.contracts.ExperimentalContracts
 
 class ConnectedSpaceService(application: Application) : Service(application) {
@@ -34,6 +33,16 @@ class ConnectedSpaceService(application: Application) : Service(application) {
         SubjectService(application).saveSubjects(connectedSpace.subjects.onEach {
             it.connectId = connectedSpace.connectId
         })
+    }
+
+    fun isConnectedSpaceBelongsTo(connectId: String, userId: String): Boolean {
+        return getFromMongo {
+            it.exists(
+                Query.query(Criteria.where("connectId").`is`(connectId).and("userId").`is`(userId)),
+                ConnectedSpace::class.java,
+                CollectionNames.CONNECTED_SPACE
+            )
+        }
     }
 }
 

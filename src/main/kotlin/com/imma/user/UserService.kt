@@ -112,23 +112,23 @@ class UserService(application: Application) : Service(application) {
     }
 
     fun isActive(userId: String): Boolean {
-        return findFromMongo {
+        return getFromMongo {
             it.exists(
                 Query.query(Criteria.where("userId").`is`(userId).and("active").`is`(true)),
                 User::class.java,
                 CollectionNames.USER
             )
-        }!!
+        }
     }
 
     fun isAdmin(userId: String): Boolean {
-        return findFromMongo {
+        return getFromMongo {
             it.exists(
                 Query.query(Criteria.where("userId").`is`(userId).and("role").`is`(Roles.ADMIN.ROLE)),
                 User::class.java,
                 CollectionNames.USER
             )
-        }!!
+        }
     }
 }
 
