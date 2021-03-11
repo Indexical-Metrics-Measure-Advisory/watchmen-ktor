@@ -59,9 +59,10 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    val jwtVerifier = makeJwtVerifier()
     fun roleBasedAuthorise(authorise: AuthorizationFunction<UserIdPrincipal>): (RoleBaseAuthenticationProvider.Configuration.() -> Unit) {
         return {
-            verifier = makeJwtVerifier()
+            verifier = jwtVerifier
             validate { credentials ->
                 val mock = request.queryParameters["mock"]
                 if (isDev && mock.equals("true", ignoreCase = true)) {

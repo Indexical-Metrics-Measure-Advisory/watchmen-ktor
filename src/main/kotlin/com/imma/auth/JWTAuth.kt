@@ -17,8 +17,8 @@ private fun generateRandomSecret(): String {
     SecureRandom().nextBytes(bytes)
     return Base64.getUrlEncoder().encodeToString(bytes)
 }
-
-val Application.jwtAlgorithm: Algorithm get() = Algorithm.HMAC256(generateRandomSecret())
+private val algorithm: Algorithm = Algorithm.HMAC256(generateRandomSecret())
+val Application.jwtAlgorithm: Algorithm get() = algorithm
 
 fun Application.makeJwtVerifier(): JWTVerifier =
     JWT.require(jwtAlgorithm).withAudience(jwtAudience).withIssuer(jwtIssuer).build()
