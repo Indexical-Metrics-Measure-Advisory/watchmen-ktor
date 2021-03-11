@@ -10,7 +10,9 @@ import io.ktor.auth.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlin.contracts.ExperimentalContracts
 
+@ExperimentalContracts
 fun Route.saveUserGroupRoute() {
     post(RouteConstants.USER_GROUP_SAVE) {
         val userGroup = call.receive<UserGroup>()
@@ -66,6 +68,7 @@ fun Route.listUserGroupsByIdsForHolderRoute() {
     }
 }
 
+@ExperimentalContracts
 fun Application.userGroupRoutes() {
     routing {
         authenticate(Roles.ADMIN.ROLE) {

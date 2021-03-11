@@ -8,6 +8,7 @@ import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import kotlin.contracts.ExperimentalContracts
 
 class UserGroupService(application: Application) : Service(application) {
     private fun createUserGroup(userGroup: UserGroup) {
@@ -20,9 +21,10 @@ class UserGroupService(application: Application) : Service(application) {
         writeIntoMongo { it.save(userGroup) }
     }
 
+    @ExperimentalContracts
     fun saveUserGroup(userGroup: UserGroup) {
         val fake =
-            determineFakeId({ userGroup.userGroupId }, true, { userGroup.userGroupId = nextSnowflakeId().toString() })
+            determineFakeOrNullId({ userGroup.userGroupId }, true, { userGroup.userGroupId = nextSnowflakeId().toString() })
 
         if (fake) {
             createUserGroup(userGroup)

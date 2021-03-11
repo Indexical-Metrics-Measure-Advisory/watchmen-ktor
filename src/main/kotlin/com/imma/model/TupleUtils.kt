@@ -1,16 +1,20 @@
 package com.imma.model
 
 import com.imma.utils.getCurrentDateTime
-import com.imma.utils.isFakeId
+import com.imma.utils.isFakeOrNull
+import kotlin.contracts.ExperimentalContracts
 
-fun determineFakeId(getId: () -> String?, replace: Boolean = true, setId: () -> Unit): Boolean {
-    val isFakeId = getId()?.isFakeId()
-    val fake = isFakeId == true || isFakeId == null
-    if (fake && replace) {
+/**
+ * @return true when id is null or fake one
+ */
+@ExperimentalContracts
+fun determineFakeOrNullId(getId: () -> String?, replace: Boolean = true, setId: () -> Unit): Boolean {
+    val isFakeOrNull = getId().isFakeOrNull()
+    if (isFakeOrNull && replace) {
         // no id declared or it is a fake id
         setId()
     }
-    return fake
+    return isFakeOrNull
 }
 
 fun assignCreateTime(tuple: Tuple, force: Boolean, datetime: String = getCurrentDateTime()) {

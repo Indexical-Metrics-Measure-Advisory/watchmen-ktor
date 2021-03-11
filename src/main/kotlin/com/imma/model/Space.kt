@@ -13,7 +13,6 @@ import java.util.*
 data class Space(
     @Id
     var spaceId: String? = null,
-    @Indexed(unique = true)
     @Field("name")
     var name: String? = null,
     @Field("description")

@@ -10,7 +10,9 @@ import io.ktor.auth.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlin.contracts.ExperimentalContracts
 
+@ExperimentalContracts
 fun Route.saveSpaceRoute() {
     post(RouteConstants.SPACE_SAVE) {
         val space = call.receive<Space>()
@@ -66,6 +68,7 @@ fun Route.listSpacesByIdsForHolderRoute() {
     }
 }
 
+@ExperimentalContracts
 fun Application.spaceRoutes() {
     routing {
         authenticate(Roles.ADMIN.ROLE) {

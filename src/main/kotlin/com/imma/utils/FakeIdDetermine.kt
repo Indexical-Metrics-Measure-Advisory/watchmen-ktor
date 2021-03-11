@@ -1,5 +1,12 @@
 package com.imma.utils
 
-fun String.isFakeId(): Boolean {
-    return this.startsWith("f-")
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
+@ExperimentalContracts
+fun String?.isFakeOrNull(): Boolean {
+    contract {
+        returns(false) implies (this@isFakeOrNull != null)
+    }
+    return this == null || this.startsWith("f-")
 }

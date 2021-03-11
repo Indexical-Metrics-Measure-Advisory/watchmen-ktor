@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.imma.auth.adminEnabled
-import com.imma.auth.adminUsername
-import com.imma.auth.makeJwtVerifier
-import com.imma.auth.role
+import com.imma.auth.*
+import com.imma.console.connectedSpaceRoutes
 import com.imma.login.loginRoutes
 import com.imma.space.spaceRoutes
 import com.imma.user.UserService
@@ -24,9 +22,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import org.slf4j.event.Level
 import java.text.SimpleDateFormat
-import javax.script.ScriptContext
-import javax.script.ScriptEngineManager
-import javax.script.SimpleBindings
+import kotlin.contracts.ExperimentalContracts
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -34,6 +30,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
  * Please note that you can use any other name instead of *module*.
  * Also note that you can have more then one modules in your application.
  * */
+@ExperimentalContracts
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
@@ -62,8 +59,8 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
-    install(Authentication) {
-        role(name = "admin") {
+    fun roleBasedAuthorise(authorise: AuthorizationFunction<UserIdPrincipal>): (RoleBaseAuthenticationProvider.Configuration.() -> Unit) {
+        return {
             verifier = makeJwtVerifier()
             validate { credentials ->
                 val mock = request.queryParameters["mock"]
@@ -88,15 +85,21 @@ fun Application.module(testing: Boolean = false) {
                 }
             }
             authorise { principal ->
-                val userId = principal.name
-                if (userId == adminUsername && adminEnabled) {
-                    // authorise anything when admin enabled and username matched
-                    true
-                } else {
-                    UserService(application).isAdmin(userId)
-                }
+                authorise(principal)
             }
         }
+    }
+    install(Authentication) {
+        role(name = "authenticated", roleBasedAuthorise { true })
+        role(name = "admin", roleBasedAuthorise { principal ->
+            val userId = principal.name
+            if (userId == adminUsername && adminEnabled) {
+                // authorise anything when admin enabled and username matched
+                true
+            } else {
+                UserService(application).isAdmin(userId)
+            }
+        })
     }
 
     routing {
@@ -113,7 +116,7 @@ fun Application.module(testing: Boolean = false) {
         userRoutes()
         userGroupRoutes()
         spaceRoutes()
-    }
 
-    SampleScript.eval()
+        connectedSpaceRoutes()
+    }
 }

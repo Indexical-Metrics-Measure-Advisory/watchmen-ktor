@@ -10,7 +10,9 @@ import io.ktor.auth.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlin.contracts.ExperimentalContracts
 
+@ExperimentalContracts
 fun Route.saveUserRoute() {
     post(RouteConstants.USER_SAVE) {
         val user = call.receive<User>()
@@ -66,6 +68,7 @@ fun Route.listUsersByIdsForHolderRoute() {
     }
 }
 
+@ExperimentalContracts
 fun Application.userRoutes() {
     routing {
         authenticate(Roles.ADMIN.ROLE) {

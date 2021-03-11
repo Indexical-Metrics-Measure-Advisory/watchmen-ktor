@@ -9,6 +9,7 @@ import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import kotlin.contracts.ExperimentalContracts
 
 class UserService(application: Application) : Service(application) {
     private fun updateCredential(user: User) {
@@ -33,8 +34,9 @@ class UserService(application: Application) : Service(application) {
         writeIntoMongo { it.save(user) }
     }
 
+    @ExperimentalContracts
     fun saveUser(user: User) {
-        val fake = determineFakeId({ user.userId }, true, { user.userId = nextSnowflakeId().toString() })
+        val fake = determineFakeOrNullId({ user.userId }, true, { user.userId = nextSnowflakeId().toString() })
 
         if (fake) {
             createUser(user)

@@ -6,4 +6,9 @@ object CollectionNames {
     const val USER_GROUP: String = "user_groups"
 
     const val SPACE: String = "spaces"
+
+    const val CONNECTED_SPACE: String = "connected_spaces"
+    const val CONNECTED_SPACE_GRAPHICS: String = "connected_space_graphics"
+    const val SUBJECT: String = "subjects"
+    const val REPORT: String = "reports"
 }

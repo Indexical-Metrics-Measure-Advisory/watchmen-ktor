@@ -9,6 +9,7 @@ import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import kotlin.contracts.ExperimentalContracts
 
 class SpaceService(application: Application) : Service(application) {
     private fun createSpace(space: Space) {
@@ -21,8 +22,9 @@ class SpaceService(application: Application) : Service(application) {
         writeIntoMongo { it.save(space) }
     }
 
+    @ExperimentalContracts
     fun saveSpace(space: Space) {
-        val fake = determineFakeId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
+        val fake = determineFakeOrNullId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
 
         if (fake) {
             createSpace(space)
