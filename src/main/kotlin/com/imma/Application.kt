@@ -117,6 +117,7 @@ fun Application.module(testing: Boolean = false) {
     routing {
         userRoutes()
         userGroupRoutes()
+
         spaceRoutes()
 
         connectedSpaceRoutes()
