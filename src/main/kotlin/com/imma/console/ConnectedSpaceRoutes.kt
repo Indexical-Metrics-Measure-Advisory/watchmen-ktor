@@ -114,8 +114,8 @@ fun Route.connectedSpaceDeleteByMeRoute() {
     }
 }
 
-fun Route.listMyConnectedSpaceRoute() {
-    get(RouteConstants.CONNECTED_SPACE_LIST_BY_MINE) {
+fun Route.listMyConnectedSpacesRoute() {
+    get(RouteConstants.CONNECTED_SPACE_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val connectedSpaces = ConnectedSpaceService(application).listConnectedSpaceByUser(principal.name)
         connectedSpaces.forEach { clearUnnecessaryFields(it) }
@@ -158,7 +158,7 @@ fun Route.saveConnectedSpaceGraphicsByMeRoute() {
 }
 
 fun Route.listMyConnectedSpaceGraphicsRoute() {
-    get(RouteConstants.CONNECTED_SPACE_GRAPHICS_LIST_BY_MINE) {
+    get(RouteConstants.CONNECTED_SPACE_GRAPHICS_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val graphics = ConnectedSpaceGraphicsService(application).listConnectedSpaceGraphicsByUser(principal.name)
         // remove user id when respond to client
@@ -174,7 +174,7 @@ fun Application.connectedSpaceRoutes() {
             connectSpaceByMeRoute()
             connectedSpaceRenameByMeRoute()
             connectedSpaceDeleteByMeRoute()
-            listMyConnectedSpaceRoute()
+            listMyConnectedSpacesRoute()
             saveConnectedSpaceGraphicsByMeRoute()
             listMyConnectedSpaceGraphicsRoute()
         }

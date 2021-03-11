@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.*
 import com.imma.console.connectedSpaceRoutes
+import com.imma.console.dashboardRoutes
 import com.imma.login.loginRoutes
 import com.imma.space.spaceRoutes
 import com.imma.user.UserService
@@ -119,5 +120,6 @@ fun Application.module(testing: Boolean = false) {
         spaceRoutes()
 
         connectedSpaceRoutes()
+        dashboardRoutes()
     }
 }

@@ -11,4 +11,5 @@ object CollectionNames {
     const val CONNECTED_SPACE_GRAPHICS: String = "connected_space_graphics"
     const val SUBJECT: String = "subjects"
     const val REPORT: String = "reports"
+    const val DASHBOARD: String = "dashboards"
 }
