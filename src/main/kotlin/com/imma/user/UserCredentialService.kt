@@ -18,12 +18,14 @@ class UserCredentialService(application: Application) : Service(application) {
         writeIntoMongo {
             it.upsert(
                 Query.query(Criteria.where("userId").`is`(credential.userId)),
-                Update().set("userId", credential.userId)
-                    .set("name", credential.name)
-                    .set("credential", credential.credential)
-                    .set("createTime", credential.createTime)
-                    .set("lastModifyTime", credential.lastModifyTime)
-                    .set("lastModified", credential.lastModified),
+                Update().apply {
+                    set("userId", credential.userId)
+                    set("name", credential.name)
+                    set("credential", credential.credential)
+                    set("createTime", credential.createTime)
+                    set("lastModifyTime", credential.lastModifyTime)
+                    set("lastModified", credential.lastModified)
+                },
                 UserCredential::class.java,
                 CollectionNames.USER_CREDENTIAL
             )

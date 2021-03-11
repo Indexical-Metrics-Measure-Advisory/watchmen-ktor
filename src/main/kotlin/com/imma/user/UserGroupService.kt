@@ -79,9 +79,11 @@ class UserGroupService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateMulti(
                 Query.query(Criteria.where("spaceIds").`is`(spaceId)),
-                Update().pull("spaceIds", spaceId)
-                    .set("lastModifyTime", getCurrentDateTimeAsString())
-                    .set("lastModified", getCurrentDateTime()),
+                Update().apply {
+                    pull("spaceIds", spaceId)
+                    set("lastModifyTime", getCurrentDateTimeAsString())
+                    set("lastModified", getCurrentDateTime())
+                },
                 UserGroup::class.java,
                 CollectionNames.USER_GROUP
             )
@@ -92,9 +94,11 @@ class UserGroupService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateMulti(
                 Query.query(Criteria.where("userGroupId").`in`(userGroupIds)),
-                Update().push("spaceIds", spaceId)
-                    .set("lastModifyTime", getCurrentDateTimeAsString())
-                    .set("lastModified", getCurrentDateTime()),
+                Update().apply {
+                    push("spaceIds", spaceId)
+                    set("lastModifyTime", getCurrentDateTimeAsString())
+                    set("lastModified", getCurrentDateTime())
+                },
                 UserGroup::class.java,
                 CollectionNames.USER_GROUP
             )

@@ -52,9 +52,11 @@ class ConnectedSpaceService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateFirst(
                 Query.query(Criteria.where("connectId").`is`(connectId)),
-                Update().set("name", name)
-                    .set("lastModifyTime", getCurrentDateTimeAsString())
-                    .set("lastModified", getCurrentDateTime()),
+                Update().apply {
+                    set("name", name)
+                    set("lastModifyTime", getCurrentDateTimeAsString())
+                    set("lastModified", getCurrentDateTime())
+                },
                 ConnectedSpace::class.java,
                 CollectionNames.CONNECTED_SPACE
             )
