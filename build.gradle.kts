@@ -52,5 +52,10 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("org.springframework.data:spring-data-mongodb:$spring_data_mango_version")
     implementation("org.mongodb:mongodb-driver-sync:$mongo_driver_version")
+    implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.4.30")
+    implementation("org.jetbrains.kotlin:kotlin-script-util:1.4.30")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.4.30")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.4.30")
+    implementation("net.java.dev.jna:jna:5.7.0")
 //    testImplementation("org.springframework.dataio.ktor:ktor-server-tests:$ktor_version")
 }

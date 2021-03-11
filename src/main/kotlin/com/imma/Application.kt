@@ -24,6 +24,9 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import org.slf4j.event.Level
 import java.text.SimpleDateFormat
+import javax.script.ScriptContext
+import javax.script.ScriptEngineManager
+import javax.script.SimpleBindings
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -111,4 +114,6 @@ fun Application.module(testing: Boolean = false) {
         userGroupRoutes()
         spaceRoutes()
     }
+
+    SampleScript.eval()
 }
