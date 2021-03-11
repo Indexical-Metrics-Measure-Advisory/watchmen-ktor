@@ -33,7 +33,10 @@ private fun PipelineContext<Unit, ApplicationCall>.belongsToCurrentUser(
     principal: UserIdPrincipal
 ): Boolean {
     return when {
+        // connect id is null or a fake id, not exists in persist
+        // belongs to current user anyway
         connectId.isFakeOrNull() -> true
+        // check persist
         else -> ConnectedSpaceService(application).isConnectedSpaceBelongsTo(connectId, principal.name)
     }
 }
