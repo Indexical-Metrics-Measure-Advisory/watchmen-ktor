@@ -55,9 +55,9 @@ fun <T> Application.findListFromMongo(
     query: Query,
 ): List<T> {
     return getFromMongo {
-        // page in PageRequest is zero-based
-        val count = it.count(query, collectionName)
-        findPageData(count) { it.find(query, entityClass, collectionName) }
+        val count = it.count(query, entityClass, collectionName)
+        println(count)
+        it.find(query, entityClass, collectionName)
     }
 }
 
@@ -71,7 +71,7 @@ fun <T> Application.findPageFromMongo(
         // page in PageRequest is zero-based
         val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
         query.with(pageRequest)
-        val count = it.count(query, collectionName)
+        val count = it.count(query, entityClass, collectionName)
         val items: List<T> = findPageData(count) { it.find(query, entityClass, collectionName) }
         toDataPage(items, count, pageable)
     }
