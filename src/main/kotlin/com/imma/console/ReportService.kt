@@ -1,11 +1,10 @@
 package com.imma.console
 
-import com.imma.model.Report
-import com.imma.model.assignDateTimePair
-import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
+import com.imma.model.*
 import com.imma.service.Service
 import io.ktor.application.*
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import kotlin.contracts.ExperimentalContracts
 
 class ReportService(application: Application) : Service(application) {
@@ -32,5 +31,10 @@ class ReportService(application: Application) : Service(application) {
                 updateReport(report)
             }
         }
+    }
+
+    fun listReportBySubjects(subjectIds: List<String>): List<Report> {
+        val query: Query = Query.query(Criteria.where("subjectId").`in`(subjectIds))
+        return findListFromMongo(Report::class.java, CollectionNames.REPORT, query)
     }
 }

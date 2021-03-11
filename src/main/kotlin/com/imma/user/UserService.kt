@@ -5,6 +5,8 @@ import com.imma.model.*
 import com.imma.rest.DataPage
 import com.imma.rest.Pageable
 import com.imma.service.Service
+import com.imma.utils.getCurrentDateTime
+import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -63,21 +65,19 @@ class UserService(application: Application) : Service(application) {
     }
 
     fun findUsersByName(name: String? = "", pageable: Pageable): DataPage<User> {
-        val query: Query
-        if (name!!.isEmpty()) {
-            query = Query.query(Criteria.where("name").all())
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
         } else {
-            query = Query.query(Criteria.where("name").regex(name, "i"))
+            Query.query(Criteria.where("name").regex(name, "i"))
         }
         return findPageFromMongo(User::class.java, CollectionNames.USER, query, pageable)
     }
 
     fun findUsersByNameForHolder(name: String? = ""): List<UserForHolder> {
-        val query: Query
-        if (name!!.isEmpty()) {
-            query = Query.query(Criteria.where("name").all())
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
         } else {
-            query = Query.query(Criteria.where("name").regex(name, "i"))
+            Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userId", "name")
         return findListFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
@@ -93,7 +93,9 @@ class UserService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateMulti(
                 Query.query(Criteria.where("groupIds").`is`(userGroupId)),
-                Update().pull("groupIds", userGroupId),
+                Update().pull("groupIds", userGroupId)
+                    .set("lastModifyTime", getCurrentDateTimeAsString())
+                    .set("lastModified", getCurrentDateTime()),
                 User::class.java,
                 CollectionNames.USER
             )
@@ -104,7 +106,9 @@ class UserService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateMulti(
                 Query.query(Criteria.where("userId").`in`(userIds)),
-                Update().push("groupIds", userGroupId),
+                Update().push("groupIds", userGroupId)
+                    .set("lastModifyTime", getCurrentDateTimeAsString())
+                    .set("lastModified", getCurrentDateTime()),
                 User::class.java,
                 CollectionNames.USER
             )

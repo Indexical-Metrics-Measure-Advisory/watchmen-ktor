@@ -1,7 +1,9 @@
 package com.imma.model
 
 import com.imma.utils.getCurrentDateTime
+import com.imma.utils.getCurrentDateTimeAsString
 import com.imma.utils.isFakeOrNull
+import java.util.*
 import kotlin.contracts.ExperimentalContracts
 
 /**
@@ -17,7 +19,7 @@ fun determineFakeOrNullId(getId: () -> String?, replace: Boolean = true, setId: 
     return isFakeOrNull
 }
 
-fun assignCreateTime(tuple: Tuple, force: Boolean, datetime: String = getCurrentDateTime()) {
+private fun assignCreateTime(tuple: Tuple, force: Boolean, datetime: String = getCurrentDateTimeAsString()) {
     if (force) {
         tuple.createTime = datetime
     } else if (tuple.createTime == null || tuple.createTime?.trim()?.length == 0) {
@@ -25,34 +27,35 @@ fun assignCreateTime(tuple: Tuple, force: Boolean, datetime: String = getCurrent
     }
 }
 
-fun forceAssignCreateTime(tuple: Tuple, datetime: String = getCurrentDateTime()) {
+private fun forceAssignCreateTime(tuple: Tuple, datetime: String = getCurrentDateTimeAsString()) {
     assignCreateTime(tuple, true, datetime)
 }
 
-fun assignLastModifyTime(tuple: Tuple, force: Boolean, datetime: String = getCurrentDateTime()) {
-    if (force) {
-        tuple.lastModifyTime = datetime
-    } else if (tuple.lastModifyTime == null || tuple.lastModifyTime?.trim()?.length == 0) {
-        tuple.lastModifyTime = datetime
-    }
+private fun assignLastModifyTime(tuple: Tuple, datetimeStr: String, datetime: Date) {
+    tuple.lastModifyTime = datetimeStr
+    tuple.lastModified = datetime
 }
 
-fun forceAssignModifyTime(tuple: Tuple, datetime: String = getCurrentDateTime()) {
-    assignLastModifyTime(tuple, true, datetime)
+private fun forceAssignModifyTime(
+    tuple: Tuple,
+    datetimeStr: String = getCurrentDateTimeAsString(),
+    datetime: Date = getCurrentDateTime()
+) {
+    assignLastModifyTime(tuple, datetimeStr, datetime)
 }
 
 /**
  * force assign create time and last modify time
  */
-fun forceAssignDateTimePair(tuple: Tuple, datetime: String = getCurrentDateTime()) {
-    forceAssignCreateTime(tuple, datetime)
-    forceAssignModifyTime(tuple, datetime)
+fun forceAssignDateTimePair(tuple: Tuple) {
+    forceAssignCreateTime(tuple)
+    forceAssignModifyTime(tuple)
 }
 
 /**
  * assign create time, and force assign last modify time
  */
-fun assignDateTimePair(tuple: Tuple, datetime: String = getCurrentDateTime()) {
-    assignCreateTime(tuple, false, datetime)
-    forceAssignModifyTime(tuple, datetime)
+fun assignDateTimePair(tuple: Tuple) {
+    assignCreateTime(tuple, false)
+    forceAssignModifyTime(tuple)
 }

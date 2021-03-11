@@ -29,5 +29,5 @@ data class ConnectedSpace(
     override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
 ) : Tuple() {
     @Transient
-    var subjects: List<Subject> = mutableListOf()
+    var subjects: MutableList<Subject> = mutableListOf()
 }

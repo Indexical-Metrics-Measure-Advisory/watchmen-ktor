@@ -8,7 +8,6 @@ import com.imma.user.UserGroupService
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
 class SpaceService(application: Application) : Service(application) {
@@ -47,21 +46,19 @@ class SpaceService(application: Application) : Service(application) {
     }
 
     fun findSpacesByName(name: String? = "", pageable: Pageable): DataPage<Space> {
-        val query: Query
-        if (name!!.isEmpty()) {
-            query = Query.query(Criteria.where("name").all())
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
         } else {
-            query = Query.query(Criteria.where("name").regex(name, "i"))
+            Query.query(Criteria.where("name").regex(name, "i"))
         }
         return findPageFromMongo(Space::class.java, CollectionNames.SPACE, query, pageable)
     }
 
     fun findSpacesByNameForHolder(name: String? = ""): List<SpaceForHolder> {
-        val query: Query
-        if (name!!.isEmpty()) {
-            query = Query.query(Criteria.where("name").all())
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
         } else {
-            query = Query.query(Criteria.where("name").regex(name, "i"))
+            Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("spaceId", "name")
         return findListFromMongo(SpaceForHolder::class.java, CollectionNames.SPACE, query)
@@ -71,28 +68,6 @@ class SpaceService(application: Application) : Service(application) {
         val query: Query = Query.query(Criteria.where("spaceId").`in`(spaceIds))
         query.fields().include("spaceId", "name")
         return findListFromMongo(SpaceForHolder::class.java, CollectionNames.SPACE, query)
-    }
-
-    fun unassignSpaceGroup(spaceGroupId: String) {
-        writeIntoMongo {
-            it.updateMulti(
-                Query.query(Criteria.where("groupIds").`is`(spaceGroupId)),
-                Update().pull("groupIds", spaceGroupId),
-                Space::class.java,
-                CollectionNames.SPACE
-            )
-        }
-    }
-
-    fun assignSpaceGroup(spaceIds: List<String>, spaceGroupId: String) {
-        writeIntoMongo {
-            it.updateMulti(
-                Query.query(Criteria.where("spaceId").`in`(spaceIds)),
-                Update().push("groupIds", spaceGroupId),
-                Space::class.java,
-                CollectionNames.SPACE
-            )
-        }
     }
 }
 

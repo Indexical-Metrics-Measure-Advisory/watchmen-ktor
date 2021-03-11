@@ -20,7 +20,10 @@ class UserCredentialService(application: Application) : Service(application) {
                 Query.query(Criteria.where("userId").`is`(credential.userId)),
                 Update().set("userId", credential.userId)
                     .set("name", credential.name)
-                    .set("credential", credential.credential),
+                    .set("credential", credential.credential)
+                    .set("createTime", credential.createTime)
+                    .set("lastModifyTime", credential.lastModifyTime)
+                    .set("lastModified", credential.lastModified),
                 UserCredential::class.java,
                 CollectionNames.USER_CREDENTIAL
             )

@@ -10,6 +10,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.util.pipeline.*
 import kotlin.contracts.ExperimentalContracts
 
 fun clearUnnecessaryFields(connectedSpace: ConnectedSpace) {
@@ -25,48 +26,106 @@ fun clearUnnecessaryFields(connectedSpace: ConnectedSpace) {
 }
 
 @ExperimentalContracts
+private fun PipelineContext<Unit, ApplicationCall>.belongsToCurrentUser(
+    connectId: String?,
+    principal: UserIdPrincipal
+): Boolean {
+    return when {
+        connectId.isFakeOrNull() -> true
+        else -> ConnectedSpaceService(application).isConnectedSpaceBelongsTo(connectId, principal.name)
+    }
+}
+
+@ExperimentalContracts
 fun Route.connectSpaceRoute() {
     post(RouteConstants.CONNECT_SPACE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val connectedSpace = call.receive<ConnectedSpace>()
 
         val userId = connectedSpace.userId
-        if (!userId.isNullOrBlank() && userId != principal.name) {
+        when {
             // cannot save connected space which belongs to other user (at least by request data)
-            call.respond(HttpStatusCode.Forbidden, "Cannot use connected space belongs to others.")
-            return@post
-        }
+            !userId.isNullOrBlank() && userId != principal.name -> call.respond(
+                HttpStatusCode.Forbidden,
+                "Cannot use connected space belongs to others."
+            )
+            // cannot save connected space which belongs to other user (check with exists data)
+            !belongsToCurrentUser(connectedSpace.connectId, principal) -> call.respond(
+                HttpStatusCode.Forbidden,
+                "Cannot use connected space belongs to others."
+            )
+            else -> {
+                // assign to current authenticated user
+                connectedSpace.userId = principal.name
+                ConnectedSpaceService(application).saveConnectedSpace(connectedSpace)
 
-        val connectId = connectedSpace.connectId
-        if (!connectId.isFakeOrNull()) {
-            val belongsMe =
-                ConnectedSpaceService(application).isConnectedSpaceBelongsTo(connectId, principal.name)
-            if (!belongsMe) {
-                // cannot save connected space which belongs to other user (check with exists data)
-                call.respond(HttpStatusCode.Forbidden, "Cannot use connected space belongs to others.")
-                return@post
+                clearUnnecessaryFields(connectedSpace)
+                call.respond(connectedSpace)
             }
         }
-
-        // assign to current authenticated user
-        connectedSpace.userId = principal.name
-        ConnectedSpaceService(application).saveConnectedSpace(connectedSpace)
-
-        clearUnnecessaryFields(connectedSpace)
-        call.respond(connectedSpace)
     }
 }
 
-//fun Route.connectedSpaceRenameRoute() {
-//
-//}
+@ExperimentalContracts
+fun Route.connectedSpaceRenameRoute() {
+    get(RouteConstants.CONNECTED_SPACE_RENAME) {
+        val principal = call.authentication.principal<UserIdPrincipal>()!!
+        val connectId = call.request.queryParameters["connect_id"]
+        val name = call.request.queryParameters["name"]
+
+        when {
+            connectId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Connected space id is required.")
+            // cannot save connected space which belongs to other user (check with exists data)
+            !belongsToCurrentUser(connectId, principal) -> call.respond(
+                HttpStatusCode.Forbidden,
+                "Cannot use connected space belongs to others."
+            )
+            else -> {
+                ConnectedSpaceService(application).renameConnectedSpace(connectId, name)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+}
+
+@ExperimentalContracts
+fun Route.connectedSpaceDeleteRoute() {
+    get(RouteConstants.CONNECTED_SPACE_DELETE) {
+        val principal = call.authentication.principal<UserIdPrincipal>()!!
+        val connectId = call.request.queryParameters["connect_id"]
+
+        when {
+            connectId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Connected space id is required.")
+            // cannot save connected space which belongs to other user (check with exists data)
+            !belongsToCurrentUser(connectId, principal) -> call.respond(
+                HttpStatusCode.Forbidden,
+                "Cannot use connected space belongs to others."
+            )
+            else -> {
+                ConnectedSpaceService(application).deleteConnectedSpace(connectId)
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+}
+
+fun Route.listMyConnectedSpaceRoute() {
+    get(RouteConstants.CONNECTED_SPACE_LIST_BY_MINE) {
+        val principal = call.authentication.principal<UserIdPrincipal>()!!
+        val connectedSpaces = ConnectedSpaceService(application).listConnectedSpaceByUser(principal.name)
+        connectedSpaces.forEach { clearUnnecessaryFields(it) }
+        call.respond(connectedSpaces)
+    }
+}
 
 @ExperimentalContracts
 fun Application.connectedSpaceRoutes() {
     routing {
         authenticate(Roles.AUTHENTICATED.ROLE) {
             connectSpaceRoute()
-//            connectedSpaceRenameRoute()
+            connectedSpaceRenameRoute()
+            connectedSpaceDeleteRoute()
+            listMyConnectedSpaceRoute()
         }
     }
 }

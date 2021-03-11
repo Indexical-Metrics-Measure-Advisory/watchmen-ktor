@@ -5,7 +5,7 @@ import com.imma.model.User
 import com.imma.service.Service
 import com.imma.user.UserCredentialService
 import com.imma.user.UserService
-import com.imma.utils.getCurrentDateTime
+import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
 import org.mindrot.jbcrypt.BCrypt
 
@@ -21,7 +21,7 @@ class LoginService(application: Application) : Service(application) {
         ) {
             // successfully login when admin enabled and username/password matched
             return User().apply {
-                val now = getCurrentDateTime()
+                val now = getCurrentDateTimeAsString()
                 userId = username
                 name = username
                 nickName = username

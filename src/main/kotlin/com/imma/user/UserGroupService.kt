@@ -4,6 +4,8 @@ import com.imma.model.*
 import com.imma.rest.DataPage
 import com.imma.rest.Pageable
 import com.imma.service.Service
+import com.imma.utils.getCurrentDateTime
+import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -23,8 +25,10 @@ class UserGroupService(application: Application) : Service(application) {
 
     @ExperimentalContracts
     fun saveUserGroup(userGroup: UserGroup) {
-        val fake =
-            determineFakeOrNullId({ userGroup.userGroupId }, true, { userGroup.userGroupId = nextSnowflakeId().toString() })
+        val fake = determineFakeOrNullId(
+            { userGroup.userGroupId },
+            true,
+            { userGroup.userGroupId = nextSnowflakeId().toString() })
 
         if (fake) {
             createUserGroup(userGroup)
@@ -47,21 +51,19 @@ class UserGroupService(application: Application) : Service(application) {
     }
 
     fun findUserGroupsByName(name: String? = "", pageable: Pageable): DataPage<UserGroup> {
-        val query: Query
-        if (name!!.isEmpty()) {
-            query = Query.query(Criteria.where("name").all())
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
         } else {
-            query = Query.query(Criteria.where("name").regex(name, "i"))
+            Query.query(Criteria.where("name").regex(name, "i"))
         }
         return findPageFromMongo(UserGroup::class.java, CollectionNames.USER_GROUP, query, pageable)
     }
 
     fun findUserGroupsByNameForHolder(name: String? = ""): List<UserGroupForHolder> {
-        val query: Query
-        if (name!!.isEmpty()) {
-            query = Query.query(Criteria.where("name").all())
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
         } else {
-            query = Query.query(Criteria.where("name").regex(name, "i"))
+            Query.query(Criteria.where("name").regex(name, "i"))
         }
         query.fields().include("userGroupId", "name")
         return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
@@ -77,7 +79,9 @@ class UserGroupService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateMulti(
                 Query.query(Criteria.where("spaceIds").`is`(spaceId)),
-                Update().pull("spaceIds", spaceId),
+                Update().pull("spaceIds", spaceId)
+                    .set("lastModifyTime", getCurrentDateTimeAsString())
+                    .set("lastModified", getCurrentDateTime()),
                 UserGroup::class.java,
                 CollectionNames.USER_GROUP
             )
@@ -88,7 +92,9 @@ class UserGroupService(application: Application) : Service(application) {
         writeIntoMongo {
             it.updateMulti(
                 Query.query(Criteria.where("userGroupId").`in`(userGroupIds)),
-                Update().push("spaceIds", spaceId),
+                Update().push("spaceIds", spaceId)
+                    .set("lastModifyTime", getCurrentDateTimeAsString())
+                    .set("lastModified", getCurrentDateTime()),
                 UserGroup::class.java,
                 CollectionNames.USER_GROUP
             )

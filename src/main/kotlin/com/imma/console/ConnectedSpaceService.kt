@@ -2,9 +2,12 @@ package com.imma.console
 
 import com.imma.model.*
 import com.imma.service.Service
+import com.imma.utils.getCurrentDateTime
+import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
 class ConnectedSpaceService(application: Application) : Service(application) {
@@ -43,6 +46,46 @@ class ConnectedSpaceService(application: Application) : Service(application) {
                 CollectionNames.CONNECTED_SPACE
             )
         }
+    }
+
+    fun renameConnectedSpace(connectId: String, name: String? = "") {
+        writeIntoMongo {
+            it.updateFirst(
+                Query.query(Criteria.where("connectId").`is`(connectId)),
+                Update().set("name", name)
+                    .set("lastModifyTime", getCurrentDateTimeAsString())
+                    .set("lastModified", getCurrentDateTime()),
+                ConnectedSpace::class.java,
+                CollectionNames.CONNECTED_SPACE
+            )
+        }
+    }
+
+    fun deleteConnectedSpace(connectId: String) {
+        writeIntoMongo {
+            it.remove(
+                Query.query(Criteria.where("connectId").`is`(connectId)),
+                ConnectedSpace::class.java,
+                CollectionNames.CONNECTED_SPACE
+            )
+        }
+    }
+
+    fun listConnectedSpaceByUser(userId: String): List<ConnectedSpace> {
+        val query: Query = Query.query(Criteria.where("userId").`is`(userId))
+        val connectedSpaces = findListFromMongo(ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE, query)
+
+        val connectedSpaceIds = connectedSpaces.map { it.connectId!! }
+        val subjects = SubjectService(application).listSubjectByConnectedSpaces(connectedSpaceIds)
+
+        val connectedSpaceMap = connectedSpaces.map { it.connectId to it }.toMap()
+        subjects.forEach { subject ->
+            val subjectId = subject.connectId
+            val connectedSpace = connectedSpaceMap[subjectId]!!
+            connectedSpace.subjects.add(subject)
+        }
+
+        return connectedSpaces
     }
 }
 

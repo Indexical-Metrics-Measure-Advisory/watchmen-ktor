@@ -57,5 +57,5 @@ data class Subject(
     override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
 ) : Tuple() {
     @Transient
-    var reports: List<Report> = mutableListOf()
+    var reports: MutableList<Report> = mutableListOf()
 }
