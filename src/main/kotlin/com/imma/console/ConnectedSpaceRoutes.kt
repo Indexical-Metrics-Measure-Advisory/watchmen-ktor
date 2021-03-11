@@ -20,6 +20,7 @@ fun clearUnnecessaryFields(connectedSpace: ConnectedSpace) {
     connectedSpace.subjects.forEach { subject ->
         subject.connectId = null
         subject.reports.forEach { report ->
+            report.connectId = null
             report.subjectId = null
         }
     }

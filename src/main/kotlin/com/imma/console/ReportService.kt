@@ -33,8 +33,18 @@ class ReportService(application: Application) : Service(application) {
         }
     }
 
-    fun listReportBySubjects(subjectIds: List<String>): List<Report> {
-        val query: Query = Query.query(Criteria.where("subjectId").`in`(subjectIds))
+    fun listReportsByConnectedSpaces(connectedSpaceIds: List<String>): List<Report> {
+        val query: Query = Query.query(Criteria.where("connectId").`in`(connectedSpaceIds))
         return findListFromMongo(Report::class.java, CollectionNames.REPORT, query)
+    }
+
+    fun deleteReportsByConnectedSpace(connectId: String) {
+        writeIntoMongo {
+            it.remove(
+                Query.query(Criteria.where("connectId").`is`(connectId)),
+                Report::class.java,
+                CollectionNames.REPORT
+            )
+        }
     }
 }

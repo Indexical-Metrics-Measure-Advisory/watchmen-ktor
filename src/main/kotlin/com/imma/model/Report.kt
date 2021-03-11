@@ -34,6 +34,8 @@ data class Report(
     var reportId: String? = null,
     @Field("name")
     var name: String? = null,
+    @Field("connect_id")
+    var connectId: String? = null,
     @Field("subject_id")
     var subjectId: String? = null,
     @Field("indicators")

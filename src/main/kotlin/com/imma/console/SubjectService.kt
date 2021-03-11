@@ -31,18 +31,21 @@ class SubjectService(application: Application) : Service(application) {
                 updateSubject(subject)
             }
 
-            subject.reports.onEach { it.subjectId = subject.subjectId }
+            subject.reports.onEach {
+                it.connectId = subject.connectId
+                it.subjectId = subject.subjectId
+            }
         }
         ReportService(application).saveReports(reports)
     }
 
-    fun listSubjectByConnectedSpaces(connectedSpaceIds: List<String>): List<Subject> {
+    fun listSubjectsByConnectedSpaces(connectedSpaceIds: List<String>): List<Subject> {
         val query: Query = Query.query(Criteria.where("connectId").`in`(connectedSpaceIds))
         val subjects = findListFromMongo(Subject::class.java, CollectionNames.SUBJECT, query)
 
-        val subjectIds = subjects.map { it.subjectId!! }
-        val reports = ReportService(application).listReportBySubjects(subjectIds)
+        val reports = ReportService(application).listReportsByConnectedSpaces(connectedSpaceIds)
 
+        // assemble reports to subjects
         val subjectMap = subjects.map { it.subjectId to it }.toMap()
         reports.forEach { report ->
             val subjectId = report.subjectId
@@ -51,5 +54,15 @@ class SubjectService(application: Application) : Service(application) {
         }
 
         return subjects
+    }
+
+    fun deleteSubjectsByConnectedSpace(connectId: String) {
+        writeIntoMongo {
+            it.remove(
+                Query.query(Criteria.where("connectId").`is`(connectId)),
+                Subject::class.java,
+                CollectionNames.SUBJECT
+            )
+        }
     }
 }

@@ -63,6 +63,11 @@ class ConnectedSpaceService(application: Application) : Service(application) {
 
     fun deleteConnectedSpace(connectId: String) {
         writeIntoMongo {
+            // delete reports
+            ReportService(application).deleteReportsByConnectedSpace(connectId)
+            // delete subjects
+            SubjectService(application).deleteSubjectsByConnectedSpace(connectId)
+            // delete connected space
             it.remove(
                 Query.query(Criteria.where("connectId").`is`(connectId)),
                 ConnectedSpace::class.java,
@@ -76,8 +81,9 @@ class ConnectedSpaceService(application: Application) : Service(application) {
         val connectedSpaces = findListFromMongo(ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE, query)
 
         val connectedSpaceIds = connectedSpaces.map { it.connectId!! }
-        val subjects = SubjectService(application).listSubjectByConnectedSpaces(connectedSpaceIds)
+        val subjects = SubjectService(application).listSubjectsByConnectedSpaces(connectedSpaceIds)
 
+        // assemble subjects to connected spaces
         val connectedSpaceMap = connectedSpaces.map { it.connectId to it }.toMap()
         subjects.forEach { subject ->
             val subjectId = subject.connectId
