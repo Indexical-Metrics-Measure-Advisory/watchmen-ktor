@@ -2,6 +2,7 @@ package com.imma.rest
 
 import com.imma.service.console.ConnectedSpaceService
 import com.imma.service.console.DashboardService
+import com.imma.service.console.ReportService
 import com.imma.service.console.SubjectService
 import com.imma.utils.isFakeOrNull
 import io.ktor.application.*
@@ -29,11 +30,25 @@ fun PipelineContext<Unit, ApplicationCall>.subjectBelongsToCurrentUser(
     principal: UserIdPrincipal
 ): Boolean {
     return when {
-        // dashboard id is null or a fake id, not exists in persist
+        // subject id is null or a fake id, not exists in persist
         // belongs to current user anyway
         subjectId.isFakeOrNull() -> true
         // check persist
         else -> SubjectService(application).isSubjectBelongsTo(subjectId, principal.name)
+    }
+}
+
+@ExperimentalContracts
+fun PipelineContext<Unit, ApplicationCall>.reportBelongsToCurrentUser(
+    reportId: String?,
+    principal: UserIdPrincipal
+): Boolean {
+    return when {
+        // report id is null or a fake id, not exists in persist
+        // belongs to current user anyway
+        reportId.isFakeOrNull() -> true
+        // check persist
+        else -> ReportService(application).isReportBelongsTo(reportId, principal.name)
     }
 }
 

@@ -13,15 +13,17 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import kotlin.contracts.ExperimentalContracts
 
-
+/**
+ * @see Subject.connectId it is ignored when connectId is given in query parameters
+ */
 @ExperimentalContracts
 fun Route.subjectSaveByMeRoute() {
     post(RouteConstants.SUBJECT_SAVE_BY_ME) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val subject = call.receive<Subject>()
         // get from query parameter first, or from body
-        val connectId =
-            call.request.queryParameters["connect_id"].takeIf { it.isNullOrBlank() }?.apply { subject.connectId }
+        val connectId = call.request.queryParameters["connect_id"]
+            .takeIf { it.isNullOrBlank() }?.apply { subject.connectId }
 
         val userId = subject.userId
         when {
@@ -63,11 +65,10 @@ fun Route.subjectSaveByMeRoute() {
                         subject.connectId = existsSubject.connectId
                     }
                     // if connect id in query parameter exists, assign to subject
-                    // even connect id on subject also has value in request, they must be same, it is checked in above logic already
                     else -> subject.connectId = connectId
                 }
                 SubjectService(application).saveSubject(subject)
-                // remove user id when respond to client
+                // remove ids when respond to client
                 subject.connectId = null
                 subject.userId = null
                 call.respond(subject)

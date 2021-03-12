@@ -6,9 +6,12 @@ import com.imma.model.console.Report
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.forceAssignDateTimePair
 import com.imma.service.Service
+import com.imma.utils.getCurrentDateTime
+import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
 class ReportService(application: Application) : Service(application) {
@@ -32,6 +35,27 @@ class ReportService(application: Application) : Service(application) {
             createReport(report)
         } else {
             updateReport(report)
+        }
+    }
+
+    fun findById(reportId: String): Report? {
+        return findFromMongo {
+            it.findById(reportId, Report::class.java, CollectionNames.REPORT)
+        }
+    }
+
+    fun renameReport(reportId: String, name: String? = "") {
+        writeIntoMongo {
+            it.updateFirst(
+                Query.query(Criteria.where("reportId").`is`(reportId)),
+                Update().apply {
+                    set("name", name)
+                    set("lastModifyTime", getCurrentDateTimeAsString())
+                    set("lastModified", getCurrentDateTime())
+                },
+                Report::class.java,
+                CollectionNames.REPORT
+            )
         }
     }
 
@@ -79,6 +103,16 @@ class ReportService(application: Application) : Service(application) {
         writeIntoMongo {
             it.remove(
                 Query.query(Criteria.where("subjectId").`is`(subjectId)),
+                Report::class.java,
+                CollectionNames.REPORT
+            )
+        }
+    }
+
+    fun isReportBelongsTo(reportId: String, userId: String): Boolean {
+        return getFromMongo {
+            it.exists(
+                Query.query(Criteria.where("reportId").`is`(reportId).and("userId").`is`(userId)),
                 Report::class.java,
                 CollectionNames.REPORT
             )
