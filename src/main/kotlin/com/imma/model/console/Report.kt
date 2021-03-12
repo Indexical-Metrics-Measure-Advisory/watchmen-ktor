@@ -47,6 +47,8 @@ data class Report(
     var connectId: String? = null,
     @Field("subject_id")
     var subjectId: String? = null,
+    @Field("user_id")
+    var userId: String? = null,
     @Field("indicators")
     var indicators: List<ReportIndicator> = mutableListOf(),
     @Field("dimensions")

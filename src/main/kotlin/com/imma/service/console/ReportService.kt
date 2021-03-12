@@ -1,7 +1,10 @@
 package com.imma.service.console
 
-import com.imma.model.*
+import com.imma.model.CollectionNames
+import com.imma.model.assignDateTimePair
 import com.imma.model.console.Report
+import com.imma.model.determineFakeOrNullId
+import com.imma.model.forceAssignDateTimePair
 import com.imma.service.Service
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
@@ -17,6 +20,29 @@ class ReportService(application: Application) : Service(application) {
     private fun updateReport(report: Report) {
         assignDateTimePair(report)
         writeIntoMongo { it.save(report) }
+    }
+
+    @ExperimentalContracts
+    fun saveReport(report: Report) {
+        val fake = determineFakeOrNullId({ report.reportId },
+            true,
+            { report.reportId = nextSnowflakeId().toString() })
+
+        if (fake) {
+            createReport(report)
+        } else {
+            updateReport(report)
+        }
+    }
+
+    fun deleteReport(reportId: String) {
+        writeIntoMongo {
+            it.remove(
+                Query.query(Criteria.where("reportId").`is`(reportId)),
+                Report::class.java,
+                CollectionNames.REPORT
+            )
+        }
     }
 
     @ExperimentalContracts
@@ -43,6 +69,16 @@ class ReportService(application: Application) : Service(application) {
         writeIntoMongo {
             it.remove(
                 Query.query(Criteria.where("connectId").`is`(connectId)),
+                Report::class.java,
+                CollectionNames.REPORT
+            )
+        }
+    }
+
+    fun deleteReportsBySubject(subjectId: String) {
+        writeIntoMongo {
+            it.remove(
+                Query.query(Criteria.where("subjectId").`is`(subjectId)),
                 Report::class.java,
                 CollectionNames.REPORT
             )

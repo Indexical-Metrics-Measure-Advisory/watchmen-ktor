@@ -35,16 +35,6 @@ class DashboardService(application: Application) : Service(application) {
         }
     }
 
-    fun isDashboardBelongsTo(dashboardId: String, userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("dashboardId").`is`(dashboardId).and("userId").`is`(userId)),
-                Dashboard::class.java,
-                CollectionNames.DASHBOARD
-            )
-        }
-    }
-
     fun renameDashboard(dashboardId: String, name: String? = "") {
         writeIntoMongo {
             it.updateFirst(
@@ -74,6 +64,16 @@ class DashboardService(application: Application) : Service(application) {
     fun listDashboardByUser(userId: String): List<Dashboard> {
         val query: Query = Query.query(Criteria.where("userId").`is`(userId))
         return findListFromMongo(Dashboard::class.java, CollectionNames.DASHBOARD, query)
+    }
+
+    fun isDashboardBelongsTo(dashboardId: String, userId: String): Boolean {
+        return getFromMongo {
+            it.exists(
+                Query.query(Criteria.where("dashboardId").`is`(dashboardId).and("userId").`is`(userId)),
+                Dashboard::class.java,
+                CollectionNames.DASHBOARD
+            )
+        }
     }
 }
 

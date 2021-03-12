@@ -46,6 +46,8 @@ data class Subject(
     var name: String? = null,
     @Field("connect_id")
     var connectId: String? = null,
+    @Field("user_id")
+    var userId: String? = null,
     @Field("dataset")
     var dataset: SubjectDataSet = SubjectDataSet(),
     @Field("last_visit_time")

@@ -1,31 +1,15 @@
 package com.imma.rest
 
 import com.imma.auth.Roles
-import com.imma.service.console.DashboardService
 import com.imma.model.console.Dashboard
-import com.imma.utils.isFakeOrNull
+import com.imma.service.console.DashboardService
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.pipeline.*
 import kotlin.contracts.ExperimentalContracts
-
-@ExperimentalContracts
-private fun PipelineContext<Unit, ApplicationCall>.belongsToCurrentUser(
-    dashboardId: String?,
-    principal: UserIdPrincipal
-): Boolean {
-    return when {
-        // dashboard id is null or a fake id, not exists in persist
-        // belongs to current user anyway
-        dashboardId.isFakeOrNull() -> true
-        // check persist
-        else -> DashboardService(application).isDashboardBelongsTo(dashboardId, principal.name)
-    }
-}
 
 @ExperimentalContracts
 fun Route.dashboardSaveByMeRoute() {
@@ -41,7 +25,7 @@ fun Route.dashboardSaveByMeRoute() {
                 "Cannot use dashboard belongs to others."
             )
             // cannot save dashboard which belongs to other user (check with exists data)
-            !belongsToCurrentUser(dashboard.dashboardId, principal) -> call.respond(
+            !dashboardBelongsToCurrentUser(dashboard.dashboardId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use dashboard belongs to others."
             )
@@ -67,7 +51,7 @@ fun Route.dashboardRenameByMeRoute() {
         when {
             dashboardId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Dashboard id is required.")
             // cannot save dashboard which belongs to other user (check with exists data)
-            !belongsToCurrentUser(dashboardId, principal) -> call.respond(
+            !dashboardBelongsToCurrentUser(dashboardId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use dashboard belongs to others."
             )
@@ -88,7 +72,7 @@ fun Route.dashboardDeleteByMeRoute() {
         when {
             dashboardId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Dashboard id is required.")
             // cannot save dashboard which belongs to other user (check with exists data)
-            !belongsToCurrentUser(dashboardId, principal) -> call.respond(
+            !dashboardBelongsToCurrentUser(dashboardId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use dashboard belongs to others."
             )

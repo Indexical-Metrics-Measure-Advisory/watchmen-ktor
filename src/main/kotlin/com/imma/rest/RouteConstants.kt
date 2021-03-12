@@ -33,4 +33,8 @@ object RouteConstants {
     const val DASHBOARD_RENAME_BY_ME: String = "/dashboard/rename/me"
     const val DASHBOARD_DELETE_BY_ME: String = "/dashboard/delete/me"
     const val DASHBOARD_LIST_MINE: String = "/dashboard/list/mine"
+
+    const val SUBJECT_SAVE_BY_ME: String = "/subject/me"
+    const val SUBJECT_RENAME_BY_ME: String = "/subject/rename/me"
+    const val SUBJECT_DELETE_BY_ME: String = "/subject/delete/me"
 }

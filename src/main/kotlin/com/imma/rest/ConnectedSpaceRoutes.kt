@@ -12,7 +12,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.pipeline.*
 import kotlin.contracts.ExperimentalContracts
 
 fun clearUnnecessaryFields(connectedSpace: ConnectedSpace) {
@@ -25,20 +24,6 @@ fun clearUnnecessaryFields(connectedSpace: ConnectedSpace) {
             report.connectId = null
             report.subjectId = null
         }
-    }
-}
-
-@ExperimentalContracts
-private fun PipelineContext<Unit, ApplicationCall>.belongsToCurrentUser(
-    connectId: String?,
-    principal: UserIdPrincipal
-): Boolean {
-    return when {
-        // connect id is null or a fake id, not exists in persist
-        // belongs to current user anyway
-        connectId.isFakeOrNull() -> true
-        // check persist
-        else -> ConnectedSpaceService(application).isConnectedSpaceBelongsTo(connectId, principal.name)
     }
 }
 
@@ -56,7 +41,7 @@ fun Route.connectSpaceByMeRoute() {
                 "Cannot use connected space belongs to others."
             )
             // cannot save connected space which belongs to other user (check with exists data)
-            !belongsToCurrentUser(connectedSpace.connectId, principal) -> call.respond(
+            !connectedSpaceBelongsToCurrentUser(connectedSpace.connectId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use connected space belongs to others."
             )
@@ -82,7 +67,7 @@ fun Route.connectedSpaceRenameByMeRoute() {
         when {
             connectId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Connected space id is required.")
             // cannot save connected space which belongs to other user (check with exists data)
-            !belongsToCurrentUser(connectId, principal) -> call.respond(
+            !connectedSpaceBelongsToCurrentUser(connectId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use connected space belongs to others."
             )
@@ -103,7 +88,7 @@ fun Route.connectedSpaceDeleteByMeRoute() {
         when {
             connectId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Connected space id is required.")
             // cannot save connected space which belongs to other user (check with exists data)
-            !belongsToCurrentUser(connectId, principal) -> call.respond(
+            !connectedSpaceBelongsToCurrentUser(connectId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use connected space belongs to others."
             )
@@ -145,7 +130,7 @@ fun Route.saveConnectedSpaceGraphicsByMeRoute() {
                 "Cannot use connected space belongs to others."
             )
             // cannot save connected space which belongs to other user (check with exists data)
-            !belongsToCurrentUser(connectId, principal) -> call.respond(
+            !connectedSpaceBelongsToCurrentUser(connectId, principal) -> call.respond(
                 HttpStatusCode.Forbidden,
                 "Cannot use connected space belongs to others."
             )

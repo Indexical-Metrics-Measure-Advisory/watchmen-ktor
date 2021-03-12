@@ -1,7 +1,10 @@
 package com.imma.service.console
 
-import com.imma.model.*
+import com.imma.model.CollectionNames
+import com.imma.model.assignDateTimePair
 import com.imma.model.console.ConnectedSpace
+import com.imma.model.determineFakeOrNullId
+import com.imma.model.forceAssignDateTimePair
 import com.imma.service.Service
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
@@ -36,17 +39,8 @@ class ConnectedSpaceService(application: Application) : Service(application) {
 
         SubjectService(application).saveSubjects(connectedSpace.subjects.onEach {
             it.connectId = connectedSpace.connectId
+            it.userId = connectedSpace.userId
         })
-    }
-
-    fun isConnectedSpaceBelongsTo(connectId: String, userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("connectId").`is`(connectId).and("userId").`is`(userId)),
-                ConnectedSpace::class.java,
-                CollectionNames.CONNECTED_SPACE
-            )
-        }
     }
 
     fun renameConnectedSpace(connectId: String, name: String? = "") {
@@ -97,6 +91,16 @@ class ConnectedSpaceService(application: Application) : Service(application) {
         }
 
         return connectedSpaces
+    }
+
+    fun isConnectedSpaceBelongsTo(connectId: String, userId: String): Boolean {
+        return getFromMongo {
+            it.exists(
+                Query.query(Criteria.where("connectId").`is`(connectId).and("userId").`is`(userId)),
+                ConnectedSpace::class.java,
+                CollectionNames.CONNECTED_SPACE
+            )
+        }
     }
 }
 

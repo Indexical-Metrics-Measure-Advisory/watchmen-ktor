@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.*
-import com.imma.rest.connectedSpaceRoutes
-import com.imma.rest.dashboardRoutes
-import com.imma.rest.loginRoutes
-import com.imma.rest.spaceRoutes
+import com.imma.rest.*
 import com.imma.service.admin.UserService
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
@@ -122,5 +119,6 @@ fun Application.module(testing: Boolean = false) {
 
         connectedSpaceRoutes()
         dashboardRoutes()
+        subjectRoutes()
     }
 }
