@@ -52,4 +52,7 @@ object RouteConstants {
 
     const val FAVORITE_SAVE: String = "/favorite/save"
     const val FAVORITE: String = "/favorite"
+
+    const val LAST_SNAPSHOT_SAVE: String = "/last-snapshot/save"
+    const val LAST_SNAPSHOT: String = "/last-snapshot"
 }

@@ -120,5 +120,6 @@ fun Application.module(testing: Boolean = false) {
         dashboardRoutes()
         subjectRoutes()
         favoriteRoutes()
+        lastSnapshotRoutes()
     }
 }
