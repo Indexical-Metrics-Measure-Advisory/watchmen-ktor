@@ -25,7 +25,7 @@ enum class PipelineStageUnitActionType(val type: String) {
 data class PipelineStageUnitAction(
     var actionId: String? = null,
     var type: PipelineStageUnitActionType = PipelineStageUnitActionType.ALARM,
-)
+) : HashMap<String, Any>()
 
 data class PipelineStageUnit(
     var unitId: String? = null,
