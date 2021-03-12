@@ -89,6 +89,8 @@ data class Factor(
     var name: String? = null,
     @Field("type")
     var type: FactorType = FactorType.TEXT,
+    @Field("topic_id")
+    var topicId: String? = null,
     @Field("label")
     var label: String? = null,
     @Field("default_value")

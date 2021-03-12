@@ -116,6 +116,7 @@ fun Application.module(testing: Boolean = false) {
         userGroupRoutes()
 
         spaceRoutes()
+        topicRoutes()
 
         connectedSpaceRoutes()
         dashboardRoutes()

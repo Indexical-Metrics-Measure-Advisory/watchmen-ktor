@@ -21,6 +21,12 @@ object RouteConstants {
     const val SPACE_LIST_BY_NAME_FOR_HOLDER: String = "/space/list/by-name/for-holder"
     const val SPACE_LIST_BY_IDS_FOR_HOLDER: String = "/space/list/by-ids/for-holder"
 
+    const val TOPIC_SAVE: String = "/topic/save"
+    const val TOPIC_FIND_BY_ID: String = "/topic/find/by-id"
+    const val TOPIC_LIST_BY_NAME: String = "/topic/list/by-name"
+    const val TOPIC_LIST_BY_NAME_FOR_HOLDER: String = "/topic/list/by-name/for-holder"
+    const val TOPIC_LIST_BY_IDS_FOR_HOLDER: String = "/topic/list/by-ids/for-holder"
+
     const val CONNECT_SPACE_BY_ME: String = "/space/connect/me"
     const val CONNECTED_SPACE_RENAME_BY_ME: String = "/connected-space/rename/me"
     const val CONNECTED_SPACE_DELETE_BY_ME: String = "/connected-space/delete/me"
