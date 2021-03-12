@@ -27,6 +27,7 @@ object RouteConstants {
     const val TOPIC_LIST_BY_NAME: String = "/topic/list/by-name"
     const val TOPIC_LIST_BY_NAME_FOR_HOLDER: String = "/topic/list/by-name/for-holder"
     const val TOPIC_LIST_BY_IDS_FOR_HOLDER: String = "/topic/list/by-ids/for-holder"
+    const val TOPIC_LIST_ALL = "/topic/list/all"
 
     const val CONNECT_SPACE_BY_ME: String = "/space/connect/me"
     const val CONNECTED_SPACE_RENAME_BY_ME: String = "/connected-space/rename/me"
@@ -56,6 +57,10 @@ object RouteConstants {
     const val LAST_SNAPSHOT_SAVE: String = "/last-snapshot/save"
     const val LAST_SNAPSHOT: String = "/last-snapshot"
 
+    const val PIPELINE_SAVE: String = "/pipeline/save"
+    const val PIPELINE_RENAME: String = "/pipeline/rename"
+    const val PIPELINE_ENABLEMENT_TOGGLE: String = "/pipeline/enablement/toggle"
+    const val PIPELINE_LIST_ALL: String = "pipeline/list/all"
     const val PIPELINE_GRAPHICS_SAVE_BY_ME: String = "pipeline/graphics/me"
     const val PIPELINE_GRAPHICS_MINE: String = "pipeline/graphics/mine"
 }

@@ -1,11 +1,9 @@
 package com.imma.service.console
 
 import com.imma.model.CollectionNames
-import com.imma.model.assignDateTimePair
 import com.imma.model.console.ConnectedSpace
 import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
-import com.imma.service.Service
+import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
@@ -14,17 +12,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class ConnectedSpaceService(application: Application) : Service(application) {
-    private fun createConnectedSpace(connectedSpace: ConnectedSpace) {
-        forceAssignDateTimePair(connectedSpace)
-        this.writeIntoMongo { it.insert(connectedSpace) }
-    }
-
-    private fun updateConnectedSpace(connectedSpace: ConnectedSpace) {
-        assignDateTimePair(connectedSpace)
-        writeIntoMongo { it.save(connectedSpace) }
-    }
-
+class ConnectedSpaceService(application: Application) : TupleService(application) {
     @ExperimentalContracts
     fun saveConnectedSpace(connectedSpace: ConnectedSpace) {
         val fake = determineFakeOrNullId({ connectedSpace.connectId },
@@ -32,9 +20,9 @@ class ConnectedSpaceService(application: Application) : Service(application) {
             { connectedSpace.connectId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createConnectedSpace(connectedSpace)
+            createTuple(connectedSpace)
         } else {
-            updateConnectedSpace(connectedSpace)
+            updateTuple(connectedSpace)
         }
 
         SubjectService(application).saveSubjects(connectedSpace.subjects.onEach {

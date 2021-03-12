@@ -1,13 +1,14 @@
 package com.imma.service.admin
 
 import com.imma.auth.Roles
-import com.imma.model.*
+import com.imma.model.CollectionNames
 import com.imma.model.admin.User
 import com.imma.model.admin.UserCredential
 import com.imma.model.admin.UserForHolder
+import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
-import com.imma.service.Service
+import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
@@ -16,7 +17,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class UserService(application: Application) : Service(application) {
+class UserService(application: Application) : TupleService(application) {
     private fun updateCredential(user: User) {
         // update credential only when password is given
         if (!user.password.isNullOrEmpty()) {
@@ -29,24 +30,14 @@ class UserService(application: Application) : Service(application) {
         }
     }
 
-    private fun createUser(user: User) {
-        forceAssignDateTimePair(user)
-        this.writeIntoMongo { it.insert(user) }
-    }
-
-    private fun updateUser(user: User) {
-        assignDateTimePair(user)
-        writeIntoMongo { it.save(user) }
-    }
-
     @ExperimentalContracts
     fun saveUser(user: User) {
         val fake = determineFakeOrNullId({ user.userId }, true, { user.userId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createUser(user)
+            createTuple(user)
         } else {
-            updateUser(user)
+            updateTuple(user)
         }
 
         updateCredential(user)

@@ -3,37 +3,25 @@ package com.imma.service.admin
 import com.imma.model.CollectionNames
 import com.imma.model.admin.Space
 import com.imma.model.admin.SpaceForHolder
-import com.imma.model.assignDateTimePair
 import com.imma.model.console.AvailableSpace
 import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
-import com.imma.service.Service
+import com.imma.service.TupleService
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import kotlin.contracts.ExperimentalContracts
 
-class SpaceService(application: Application) : Service(application) {
-    private fun createSpace(space: Space) {
-        forceAssignDateTimePair(space)
-        this.writeIntoMongo { it.insert(space) }
-    }
-
-    private fun updateSpace(space: Space) {
-        assignDateTimePair(space)
-        writeIntoMongo { it.save(space) }
-    }
-
+class SpaceService(application: Application) : TupleService(application) {
     @ExperimentalContracts
     fun saveSpace(space: Space) {
         val fake = determineFakeOrNullId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createSpace(space)
+            createTuple(space)
         } else {
-            updateSpace(space)
+            updateTuple(space)
         }
 
         val userGroupIds = space.groupIds

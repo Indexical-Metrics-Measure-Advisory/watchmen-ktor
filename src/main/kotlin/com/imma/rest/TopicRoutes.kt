@@ -17,8 +17,6 @@ fun Route.saveTopicRoute() {
     post(RouteConstants.TOPIC_SAVE) {
         val topic = call.receive<Topic>()
         TopicService(application).saveTopic(topic)
-        // remove topicId from factors
-        topic.factors.onEach { it.topicId = null }
         call.respond(topic)
     }
 }
@@ -35,8 +33,6 @@ fun Route.findTopicByIdRoute() {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
             } else {
-                // remove topicId from factors
-                topic.factors.onEach { it.topicId = null }
                 call.respond(topic)
             }
         }
@@ -75,6 +71,13 @@ fun Route.listTopicsByIdsForHolderRoute() {
     }
 }
 
+fun Route.findAllTopicsRoute() {
+    get(RouteConstants.TOPIC_LIST_ALL) {
+        val topics = TopicService(application).findAllTopics()
+        call.respond(topics)
+    }
+}
+
 @ExperimentalContracts
 fun Application.topicRoutes() {
     routing {
@@ -86,6 +89,7 @@ fun Application.topicRoutes() {
             findTopicByIdRoute()
             listTopicsByNameRoute()
             listTopicsByNameForHolderRoute()
+            findAllTopicsRoute()
         }
     }
 }

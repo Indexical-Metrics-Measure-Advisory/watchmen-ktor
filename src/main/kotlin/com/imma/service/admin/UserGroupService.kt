@@ -3,12 +3,10 @@ package com.imma.service.admin
 import com.imma.model.CollectionNames
 import com.imma.model.admin.UserGroup
 import com.imma.model.admin.UserGroupForHolder
-import com.imma.model.assignDateTimePair
 import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
-import com.imma.service.Service
+import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
@@ -17,17 +15,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class UserGroupService(application: Application) : Service(application) {
-    private fun createUserGroup(userGroup: UserGroup) {
-        forceAssignDateTimePair(userGroup)
-        this.writeIntoMongo { it.insert(userGroup) }
-    }
-
-    private fun updateUserGroup(userGroup: UserGroup) {
-        assignDateTimePair(userGroup)
-        writeIntoMongo { it.save(userGroup) }
-    }
-
+class UserGroupService(application: Application) : TupleService(application) {
     @ExperimentalContracts
     fun saveUserGroup(userGroup: UserGroup) {
         val fake = determineFakeOrNullId(
@@ -36,9 +24,9 @@ class UserGroupService(application: Application) : Service(application) {
             { userGroup.userGroupId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createUserGroup(userGroup)
+            createTuple(userGroup)
         } else {
-            updateUserGroup(userGroup)
+            updateTuple(userGroup)
         }
 
         val userIds = userGroup.userIds

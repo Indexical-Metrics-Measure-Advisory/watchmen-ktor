@@ -1,11 +1,9 @@
 package com.imma.service.console
 
 import com.imma.model.CollectionNames
-import com.imma.model.assignDateTimePair
 import com.imma.model.console.Subject
 import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
-import com.imma.service.Service
+import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
@@ -14,17 +12,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class SubjectService(application: Application) : Service(application) {
-    private fun createSubject(subject: Subject) {
-        forceAssignDateTimePair(subject)
-        this.writeIntoMongo { it.insert(subject) }
-    }
-
-    private fun updateSubject(subject: Subject) {
-        assignDateTimePair(subject)
-        writeIntoMongo { it.save(subject) }
-    }
-
+class SubjectService(application: Application) : TupleService(application) {
     @ExperimentalContracts
     fun saveSubject(subject: Subject) {
         val fake = determineFakeOrNullId({ subject.subjectId },
@@ -32,9 +20,9 @@ class SubjectService(application: Application) : Service(application) {
             { subject.subjectId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createSubject(subject)
+            createTuple(subject)
         } else {
-            updateSubject(subject)
+            updateTuple(subject)
         }
 
         ReportService(application).saveReports(subject.reports.onEach {
@@ -80,24 +68,7 @@ class SubjectService(application: Application) : Service(application) {
 
     @ExperimentalContracts
     fun saveSubjects(subjects: List<Subject>) {
-        val reports = subjects.flatMap { subject ->
-            val fake = determineFakeOrNullId({ subject.subjectId },
-                true,
-                { subject.subjectId = nextSnowflakeId().toString() })
-
-            if (fake) {
-                createSubject(subject)
-            } else {
-                updateSubject(subject)
-            }
-
-            subject.reports.onEach {
-                it.connectId = subject.connectId
-                it.subjectId = subject.subjectId
-                it.userId = subject.userId
-            }
-        }
-        ReportService(application).saveReports(reports)
+        subjects.forEach { saveSubject(it) }
     }
 
     fun listSubjectsByConnectedSpaces(connectedSpaceIds: List<String>): List<Subject> {

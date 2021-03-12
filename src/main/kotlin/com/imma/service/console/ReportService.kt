@@ -1,13 +1,11 @@
 package com.imma.service.console
 
 import com.imma.model.CollectionNames
-import com.imma.model.assignDateTimePair
 import com.imma.model.console.Report
 import com.imma.model.determineFakeOrNullId
-import com.imma.model.forceAssignDateTimePair
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
-import com.imma.service.Service
+import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
@@ -16,17 +14,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class ReportService(application: Application) : Service(application) {
-    private fun createReport(report: Report) {
-        forceAssignDateTimePair(report)
-        this.writeIntoMongo { it.insert(report) }
-    }
-
-    private fun updateReport(report: Report) {
-        assignDateTimePair(report)
-        writeIntoMongo { it.save(report) }
-    }
-
+class ReportService(application: Application) : TupleService(application) {
     @ExperimentalContracts
     fun saveReport(report: Report) {
         val fake = determineFakeOrNullId({ report.reportId },
@@ -34,9 +22,9 @@ class ReportService(application: Application) : Service(application) {
             { report.reportId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createReport(report)
+            createTuple(report)
         } else {
-            updateReport(report)
+            updateTuple(report)
         }
     }
 
@@ -73,17 +61,7 @@ class ReportService(application: Application) : Service(application) {
 
     @ExperimentalContracts
     fun saveReports(reports: List<Report>) {
-        reports.forEach { report ->
-            val fake = determineFakeOrNullId({ report.reportId },
-                true,
-                { report.reportId = nextSnowflakeId().toString() })
-
-            if (fake) {
-                createReport(report)
-            } else {
-                updateReport(report)
-            }
-        }
+        reports.forEach { saveReport(it) }
     }
 
     fun listReportsByConnectedSpaces(connectedSpaceIds: List<String>): List<Report> {

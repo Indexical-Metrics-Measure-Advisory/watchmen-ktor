@@ -5,11 +5,42 @@ import com.imma.model.Tuple
 import com.imma.model.compute.ParameterJoint
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.ZoneOffset
 import java.util.*
+
+enum class PipelineStageUnitActionType(val type: String) {
+    ALARM("alarm"),
+    COPY_TO_MEMORY("copy-to-memory"),
+    READ_ROW("read-row"),
+    READ_FACTOR("read-factor"),
+    EXISTS("exists"),
+    MERGE_ROW("merge-row"),
+    INSERT_ROW("insert-row"),
+    INSERT_OR_MERGE_ROW("insert-or-merge-row"),
+    WRITE_FACTOR("write-factor"),
+}
+
+data class PipelineStageUnitAction(
+    var actionId: String? = null,
+    var type: PipelineStageUnitActionType = PipelineStageUnitActionType.ALARM,
+)
+
+data class PipelineStageUnit(
+    var unitId: String? = null,
+    override var conditional: Boolean = false,
+    override var on: ParameterJoint = ParameterJoint(),
+    var `do`: List<PipelineStageUnitAction> = mutableListOf(),
+) : Conditional
+
+data class PipelineStage(
+    var stageId: String? = null,
+    var name: String? = null,
+    override var conditional: Boolean = false,
+    override var on: ParameterJoint = ParameterJoint(),
+    var units: List<PipelineStageUnit> = mutableListOf(),
+) : Conditional
 
 enum class PipelineTriggerType(val type: String) {
     INSERT("insert"),
@@ -34,8 +65,8 @@ data class Pipeline(
     override var conditional: Boolean = false,
     @Field("condition_on")
     override var on: ParameterJoint = ParameterJoint(),
-    @Transient
-    var stages: List<PipelineStage> = mutableListOf(),
+    @Field("stages")
+    var stages: MutableList<PipelineStage> = mutableListOf(),
     @Field("enabled")
     var enabled: Boolean = false,
     @Field("validated")

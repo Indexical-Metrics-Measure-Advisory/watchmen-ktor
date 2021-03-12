@@ -1,8 +1,9 @@
 package com.imma.service.console
 
-import com.imma.model.*
+import com.imma.model.CollectionNames
 import com.imma.model.console.Dashboard
-import com.imma.service.Service
+import com.imma.model.determineFakeOrNullId
+import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import io.ktor.application.*
@@ -11,17 +12,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class DashboardService(application: Application) : Service(application) {
-    private fun createDashboard(dashboard: Dashboard) {
-        forceAssignDateTimePair(dashboard)
-        this.writeIntoMongo { it.insert(dashboard) }
-    }
-
-    private fun updateDashboard(dashboard: Dashboard) {
-        assignDateTimePair(dashboard)
-        writeIntoMongo { it.save(dashboard) }
-    }
-
+class DashboardService(application: Application) : TupleService(application) {
     @ExperimentalContracts
     fun saveDashboard(dashboard: Dashboard) {
         val fake = determineFakeOrNullId({ dashboard.dashboardId },
@@ -29,9 +20,9 @@ class DashboardService(application: Application) : Service(application) {
             { dashboard.dashboardId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createDashboard(dashboard)
+            createTuple(dashboard)
         } else {
-            updateDashboard(dashboard)
+            updateTuple(dashboard)
         }
     }
 
