@@ -1,6 +1,7 @@
 package com.imma.console
 
 import com.imma.model.CollectionNames
+import com.imma.model.ConnectedSpace
 import com.imma.model.ConnectedSpaceGraphics
 import com.imma.service.Service
 import io.ktor.application.*
@@ -29,5 +30,15 @@ class ConnectedSpaceGraphicsService(application: Application) : Service(applicat
     fun listConnectedSpaceGraphicsByUser(userId: String): List<ConnectedSpaceGraphics> {
         val query: Query = Query.query(Criteria.where("userId").`is`(userId))
         return findListFromMongo(ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS, query)
+    }
+
+    fun deleteConnectedSpaceGraphics(connectId: String) {
+        writeIntoMongo {
+            it.remove(
+                Query.query(Criteria.where("connectId").`is`(connectId)),
+                ConnectedSpaceGraphics::class.java,
+                CollectionNames.CONNECTED_SPACE_GRAPHICS
+            )
+        }
     }
 }

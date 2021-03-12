@@ -65,6 +65,8 @@ class ConnectedSpaceService(application: Application) : Service(application) {
 
     fun deleteConnectedSpace(connectId: String) {
         writeIntoMongo {
+            // delete graphics
+            ConnectedSpaceGraphicsService(application).deleteConnectedSpaceGraphics(connectId)
             // delete reports
             ReportService(application).deleteReportsByConnectedSpace(connectId)
             // delete subjects
