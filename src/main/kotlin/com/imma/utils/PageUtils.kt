@@ -1,7 +1,7 @@
 package com.imma.utils
 
-import com.imma.rest.DataPage
-import com.imma.rest.Pageable
+import com.imma.model.page.DataPage
+import com.imma.model.page.Pageable
 
 fun <T> findPageData(count: Long, find: () -> List<T>): List<T> {
     val items: List<T>

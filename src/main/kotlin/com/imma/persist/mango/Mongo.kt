@@ -1,7 +1,7 @@
 package com.imma.persist.mango
 
-import com.imma.rest.DataPage
-import com.imma.rest.Pageable
+import com.imma.model.page.DataPage
+import com.imma.model.page.Pageable
 import com.imma.utils.EnvConstants
 import com.imma.utils.findPageData
 import com.imma.utils.toDataPage

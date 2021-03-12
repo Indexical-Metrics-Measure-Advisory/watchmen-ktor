@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.*
-import com.imma.console.connectedSpaceRoutes
-import com.imma.console.dashboardRoutes
-import com.imma.login.loginRoutes
-import com.imma.space.spaceRoutes
-import com.imma.user.UserService
+import com.imma.rest.connectedSpaceRoutes
+import com.imma.rest.dashboardRoutes
+import com.imma.rest.loginRoutes
+import com.imma.rest.spaceRoutes
+import com.imma.service.admin.UserService
 import com.imma.user.userGroupRoutes
 import com.imma.user.userRoutes
 import com.imma.utils.EnvConstants

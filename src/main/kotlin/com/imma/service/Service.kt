@@ -3,8 +3,8 @@ package com.imma.service
 import com.imma.persist.mango.*
 import com.imma.persist.mango.findFromMongo
 import com.imma.persist.snowflake.nextSnowflakeId
-import com.imma.rest.DataPage
-import com.imma.rest.Pageable
+import com.imma.model.page.DataPage
+import com.imma.model.page.Pageable
 import io.ktor.application.*
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
