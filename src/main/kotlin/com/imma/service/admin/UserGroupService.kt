@@ -1,8 +1,11 @@
 package com.imma.service.admin
 
-import com.imma.model.*
+import com.imma.model.CollectionNames
 import com.imma.model.admin.UserGroup
 import com.imma.model.admin.UserGroupForHolder
+import com.imma.model.assignDateTimePair
+import com.imma.model.determineFakeOrNullId
+import com.imma.model.forceAssignDateTimePair
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.service.Service
@@ -69,6 +72,11 @@ class UserGroupService(application: Application) : Service(application) {
         }
         query.fields().include("userGroupId", "name")
         return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
+    }
+
+    fun findUserGroupsByIds(userGroupIds: List<String>): List<UserGroup> {
+        val query: Query = Query.query(Criteria.where("userGroupId").`in`(userGroupIds))
+        return findListFromMongo(UserGroup::class.java, CollectionNames.USER_GROUP, query)
     }
 
     fun findUserGroupsByIdsForHolder(userGroupIds: List<String>): List<UserGroupForHolder> {

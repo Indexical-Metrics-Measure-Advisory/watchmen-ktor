@@ -61,13 +61,21 @@ fun Route.listSpacesByNameForHolderRoute() {
 
 fun Route.listSpacesByIdsForHolderRoute() {
     post(RouteConstants.SPACE_LIST_BY_IDS_FOR_HOLDER) {
-        val spaceIds: List<String> = call.receive<List<String>>()
+        val spaceIds = call.receive<List<String>>()
         if (spaceIds.isEmpty()) {
             call.respond(listOf<SpaceForHolder>())
         } else {
             val spaces = SpaceService(application).findSpacesByIdsForHolder(spaceIds)
             call.respond(spaces)
         }
+    }
+}
+
+fun Route.listAvailableSpacesRoute() {
+    get(RouteConstants.AVAILABLE_SPACE_LIST_MINE) {
+        val principal = call.authentication.principal<UserIdPrincipal>()!!
+        val spaces = SpaceService(application).findAvailableSpaces(principal.name)
+        call.respond(spaces)
     }
 }
 
@@ -80,6 +88,9 @@ fun Application.spaceRoutes() {
             listSpacesByNameRoute()
             listSpacesByNameForHolderRoute()
             listSpacesByIdsForHolderRoute()
+        }
+        authenticate(Roles.AUTHENTICATED.ROLE) {
+            listAvailableSpacesRoute()
         }
     }
 }

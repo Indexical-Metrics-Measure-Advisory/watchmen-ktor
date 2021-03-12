@@ -20,6 +20,7 @@ object RouteConstants {
     const val SPACE_LIST_BY_NAME: String = "/space/list/by-name"
     const val SPACE_LIST_BY_NAME_FOR_HOLDER: String = "/space/list/by-name/for-holder"
     const val SPACE_LIST_BY_IDS_FOR_HOLDER: String = "/space/list/by-ids/for-holder"
+    const val AVAILABLE_SPACE_LIST_MINE: String = "/space/list/available/mine"
 
     const val TOPIC_SAVE: String = "/topic/save"
     const val TOPIC_FIND_BY_ID: String = "/topic/find/by-id"

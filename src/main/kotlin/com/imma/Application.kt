@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.*
 import com.imma.rest.*
 import com.imma.service.admin.UserService
-import com.imma.user.userGroupRoutes
-import com.imma.user.userRoutes
 import com.imma.utils.EnvConstants
 import com.imma.utils.isDev
 import io.ktor.application.*

@@ -1,8 +1,12 @@
 package com.imma.service.admin
 
-import com.imma.model.*
+import com.imma.model.CollectionNames
 import com.imma.model.admin.Space
 import com.imma.model.admin.SpaceForHolder
+import com.imma.model.assignDateTimePair
+import com.imma.model.console.AvailableSpace
+import com.imma.model.determineFakeOrNullId
+import com.imma.model.forceAssignDateTimePair
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.service.Service
@@ -69,6 +73,25 @@ class SpaceService(application: Application) : Service(application) {
         val query: Query = Query.query(Criteria.where("spaceId").`in`(spaceIds))
         query.fields().include("spaceId", "name")
         return findListFromMongo(SpaceForHolder::class.java, CollectionNames.SPACE, query)
+    }
+
+    fun findAvailableSpaces(userId: String): List<AvailableSpace> {
+        val user = UserService(application).findUserById(userId)!!
+        val userGroupIds = user.groupIds.orEmpty()
+        if (userGroupIds.isEmpty()) {
+            return mutableListOf()
+        }
+
+        val spaceIds = UserGroupService(application).findUserGroupsByIds(userGroupIds).map {
+            it.spaceIds.orEmpty()
+        }.flatten()
+        if (spaceIds.isEmpty()) {
+            return mutableListOf()
+        }
+
+        val query: Query = Query.query(Criteria.where("spaceId").`in`(spaceIds))
+        query.fields().include("spaceId", "name", "topicIds", "description")
+        return findListFromMongo(AvailableSpace::class.java, CollectionNames.SPACE, query)
     }
 }
 

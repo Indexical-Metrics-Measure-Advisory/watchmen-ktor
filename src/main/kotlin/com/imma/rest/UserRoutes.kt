@@ -1,10 +1,9 @@
-package com.imma.user
+package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.admin.User
 import com.imma.model.admin.UserForHolder
 import com.imma.model.page.Pageable
-import com.imma.rest.RouteConstants
 import com.imma.service.admin.UserService
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -62,7 +61,7 @@ fun Route.listUsersByNameForHolderRoute() {
 
 fun Route.listUsersByIdsForHolderRoute() {
     post(RouteConstants.USER_LIST_BY_IDS_FOR_HOLDER) {
-        val userIds: List<String> = call.receive<List<String>>()
+        val userIds = call.receive<List<String>>()
         if (userIds.isEmpty()) {
             call.respond(listOf<UserForHolder>())
         } else {

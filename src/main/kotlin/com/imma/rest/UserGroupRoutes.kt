@@ -1,4 +1,4 @@
-package com.imma.user
+package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.admin.UserGroup
@@ -62,7 +62,7 @@ fun Route.listUserGroupsByNameForHolderRoute() {
 
 fun Route.listUserGroupsByIdsForHolderRoute() {
     post(RouteConstants.USER_GROUP_LIST_BY_IDS_FOR_HOLDER) {
-        val userGroupIds: List<String> = call.receive<List<String>>()
+        val userGroupIds = call.receive<List<String>>()
         if (userGroupIds.isEmpty()) {
             call.respond(listOf<UserGroupForHolder>())
         } else {
