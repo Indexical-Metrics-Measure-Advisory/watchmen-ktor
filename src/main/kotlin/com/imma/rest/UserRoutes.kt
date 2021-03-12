@@ -40,6 +40,9 @@ fun Route.findUserByIdRoute() {
     }
 }
 
+/**
+ * TODO it is not compatible with frontend response format, to be continued...
+ */
 fun Route.listUsersByNameRoute() {
     post(RouteConstants.USER_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()

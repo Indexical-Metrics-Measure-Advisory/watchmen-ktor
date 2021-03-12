@@ -12,4 +12,8 @@ object CollectionNames {
     const val SUBJECT: String = "subjects"
     const val REPORT: String = "reports"
     const val DASHBOARD: String = "dashboards"
+
+    const val TOPIC: String = "topics"
+    const val FACTOR: String = "factors"
+    const val PIPELINE: String = "pipelines"
 }

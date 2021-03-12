@@ -39,6 +39,9 @@ fun Route.findSpaceByIdRoute() {
     }
 }
 
+/**
+ * TODO it is not compatible with frontend response format, to be continued...
+ */
 fun Route.listSpacesByNameRoute() {
     post(RouteConstants.SPACE_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()

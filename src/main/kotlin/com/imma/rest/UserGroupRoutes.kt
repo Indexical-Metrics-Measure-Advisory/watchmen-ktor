@@ -40,6 +40,9 @@ fun Route.findUserGroupByIdRoute() {
     }
 }
 
+/**
+ * TODO it is not compatible with frontend response format, to be continued...
+ */
 fun Route.listUserGroupsByNameRoute() {
     post(RouteConstants.USER_GROUP_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
