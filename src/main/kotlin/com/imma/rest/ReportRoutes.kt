@@ -2,6 +2,7 @@ package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.console.Report
+import com.imma.model.page.Pageable
 import com.imma.service.console.ReportService
 import com.imma.service.console.SubjectService
 import com.imma.utils.isFake
@@ -128,6 +129,18 @@ fun Route.reportDeleteByMeRoute() {
     }
 }
 
+/**
+ * TODO it is not compatible with frontend response format, to be continued...
+ */
+fun Route.listReportsByNameRoute() {
+    post(RouteConstants.REPORT_LIST_BY_NAME) {
+        val pageable = call.receive<Pageable>()
+        val name: String? = call.request.queryParameters["query_name"]
+        val page = ReportService(application).findReportsByName(name, pageable)
+        call.respond(page)
+    }
+}
+
 @ExperimentalContracts
 fun Application.reportRoutes() {
     routing {
@@ -135,6 +148,9 @@ fun Application.reportRoutes() {
             reportSaveByMeRoute()
             reportRenameByMeRoute()
             reportDeleteByMeRoute()
+        }
+        authenticate(Roles.ADMIN.ROLE) {
+            listReportsByNameRoute()
         }
     }
 }

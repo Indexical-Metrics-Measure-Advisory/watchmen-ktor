@@ -41,4 +41,5 @@ object RouteConstants {
     const val REPORT_SAVE_BY_ME: String = "/report/me"
     const val REPORT_RENAME_BY_ME: String = "/report/rename/me"
     const val REPORT_DELETE_BY_ME: String = "/report/delete/me"
+    const val REPORT_LIST_BY_NAME: String = "/report/list/by-name"
 }

@@ -5,6 +5,8 @@ import com.imma.model.assignDateTimePair
 import com.imma.model.console.Report
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.forceAssignDateTimePair
+import com.imma.model.page.DataPage
+import com.imma.model.page.Pageable
 import com.imma.service.Service
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
@@ -117,5 +119,14 @@ class ReportService(application: Application) : Service(application) {
                 CollectionNames.REPORT
             )
         }
+    }
+
+    fun findReportsByName(name: String?, pageable: Pageable): DataPage<Report> {
+        val query: Query = if (name!!.isEmpty()) {
+            Query.query(Criteria.where("name").all())
+        } else {
+            Query.query(Criteria.where("name").regex(name, "i"))
+        }
+        return findPageFromMongo(Report::class.java, CollectionNames.REPORT, query, pageable)
     }
 }
