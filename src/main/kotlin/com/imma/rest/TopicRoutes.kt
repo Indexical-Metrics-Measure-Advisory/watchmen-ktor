@@ -17,6 +17,8 @@ fun Route.saveTopicRoute() {
     post(RouteConstants.TOPIC_SAVE) {
         val topic = call.receive<Topic>()
         TopicService(application).saveTopic(topic)
+        // remove topicId from factors
+        topic.factors.onEach { it.topicId = null }
         call.respond(topic)
     }
 }
