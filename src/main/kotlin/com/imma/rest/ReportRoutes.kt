@@ -64,13 +64,13 @@ fun Route.reportSaveByMeRoute() {
                     // in this case, report must be valid, it is checked in above logic already
                     subjectId.isNullOrBlank() -> {
                         // must exists, it is checked in above logic already
-                        val existsReport = ReportService(application).findById(report.reportId!!)!!
+                        val existsReport = ReportService(application).findReportById(report.reportId!!)!!
                         report.connectId = existsReport.connectId
                         report.subjectId = existsReport.subjectId
                     }
                     // if subject id in query parameter exists, assign to report
                     else -> {
-                        val existsSubject = SubjectService(application).findById(subjectId)!!
+                        val existsSubject = SubjectService(application).findSubjectById(subjectId)!!
                         report.connectId = existsSubject.connectId
                         report.subjectId = subjectId
                     }

@@ -12,7 +12,7 @@ import io.ktor.routing.*
 fun Route.findLastSnapshotRoute() {
     get(RouteConstants.LAST_SNAPSHOT) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val lastSnapshot = LastSnapshotService(application).findById(principal.name)
+        val lastSnapshot = LastSnapshotService(application).findLastSnapshotById(principal.name)
         if (lastSnapshot != null) {
             lastSnapshot.userId = null
             call.respond(lastSnapshot)

@@ -55,4 +55,7 @@ object RouteConstants {
 
     const val LAST_SNAPSHOT_SAVE: String = "/last-snapshot/save"
     const val LAST_SNAPSHOT: String = "/last-snapshot"
+
+    const val PIPELINE_GRAPHICS_SAVE_BY_ME: String = "pipeline/graphics/me"
+    const val PIPELINE_GRAPHICS_MINE: String = "pipeline/graphics/mine"
 }

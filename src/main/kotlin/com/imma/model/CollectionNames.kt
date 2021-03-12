@@ -21,4 +21,5 @@ object CollectionNames {
     const val PIPELINE_STAGE: String = "pipeline_stages"
     const val PIPELINE_STAGE_UNIT: String = "pipeline_stage_units"
     const val PIPELINE_STAGE_UNIT_ACTION: String = "pipeline_stage_unit_actions"
+    const val PIPELINE_GRAPHICS: String = "pipeline_graphics"
 }

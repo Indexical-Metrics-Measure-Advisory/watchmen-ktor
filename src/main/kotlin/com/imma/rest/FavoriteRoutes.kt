@@ -12,12 +12,17 @@ import io.ktor.routing.*
 fun Route.findFavoriteRoute() {
     get(RouteConstants.FAVORITE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val favorite = FavoriteService(application).findById(principal.name)
+        val favorite = FavoriteService(application).findFavoriteById(principal.name)
         if (favorite != null) {
             favorite.userId = null
             call.respond(favorite)
         } else {
-            call.respond(mapOf<String, String>())
+            call.respond(
+                mapOf(
+                    "connectedSpaceIds" to listOf<String>(),
+                    "dashboardIds" to listOf()
+                )
+            )
         }
     }
 }

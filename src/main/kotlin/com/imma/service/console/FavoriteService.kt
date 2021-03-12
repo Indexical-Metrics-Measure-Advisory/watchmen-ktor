@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 
 class FavoriteService(application: Application) : Service(application) {
-    fun findById(userId: String): Favorite? {
+    fun findFavoriteById(userId: String): Favorite? {
         return findFromMongo {
             it.findById(userId, Favorite::class.java, CollectionNames.FAVORITE)
         }

@@ -44,7 +44,7 @@ class SubjectService(application: Application) : Service(application) {
         })
     }
 
-    fun findById(subjectId: String): Subject? {
+    fun findSubjectById(subjectId: String): Subject? {
         return findFromMongo {
             it.findById(subjectId, Subject::class.java, CollectionNames.SUBJECT)
         }

@@ -115,6 +115,7 @@ fun Application.module(testing: Boolean = false) {
 
         spaceRoutes()
         topicRoutes()
+        pipelineSpaceRoutes()
 
         connectedSpaceRoutes()
         dashboardRoutes()

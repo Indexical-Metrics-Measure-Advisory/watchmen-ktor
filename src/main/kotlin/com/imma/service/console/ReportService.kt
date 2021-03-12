@@ -40,7 +40,7 @@ class ReportService(application: Application) : Service(application) {
         }
     }
 
-    fun findById(reportId: String): Report? {
+    fun findReportById(reportId: String): Report? {
         return findFromMongo {
             it.findById(reportId, Report::class.java, CollectionNames.REPORT)
         }

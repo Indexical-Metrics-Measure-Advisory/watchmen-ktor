@@ -61,7 +61,7 @@ fun Route.subjectSaveByMeRoute() {
                     // in this case, subject must be valid, it is checked in above logic already
                     connectId.isNullOrBlank() -> {
                         // must exists, it is checked in above logic already
-                        val existsSubject = SubjectService(application).findById(subject.subjectId!!)!!
+                        val existsSubject = SubjectService(application).findSubjectById(subject.subjectId!!)!!
                         subject.connectId = existsSubject.connectId
                     }
                     // if connect id in query parameter exists, assign to subject
