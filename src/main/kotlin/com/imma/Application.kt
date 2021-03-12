@@ -119,5 +119,6 @@ fun Application.module(testing: Boolean = false) {
         connectedSpaceRoutes()
         dashboardRoutes()
         subjectRoutes()
+        favoriteRoutes()
     }
 }
