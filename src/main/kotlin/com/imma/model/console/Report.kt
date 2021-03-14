@@ -11,18 +11,18 @@ import java.time.ZoneOffset
 import java.util.*
 
 enum class ReportIndicatorArithmetic(val arithmetic: String) {
-    NONE("none"),
-    COUNT("count"),
-    SUMMARY("sum"),
-    AVERAGE("avg"),
-    MAXIMUM("max"),
-    MINIMUM("min"),
+    none("none"),
+    count("count"),
+    sum("sum"),
+    avg("avg"),
+    max("max"),
+    min("min");
 }
 
 data class ReportIndicator(
     var columnId: String,
     var name: String,
-    var arithmetic: ReportIndicatorArithmetic = ReportIndicatorArithmetic.COUNT
+    var arithmetic: ReportIndicatorArithmetic = ReportIndicatorArithmetic.count
 )
 
 data class ReportDimension(

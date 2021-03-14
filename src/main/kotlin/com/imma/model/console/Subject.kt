@@ -19,9 +19,9 @@ data class SubjectDataSetColumn(
 )
 
 enum class TopicJoinType(val type: String) {
-    LEFT("left"),
-    RIGHT("right"),
-    INNER("inner"),
+    left("left"),
+    right("right"),
+    `inner`("inner");
 }
 
 data class SubjectDataSetJoin(
@@ -29,7 +29,7 @@ data class SubjectDataSetJoin(
     var factorId: String = "",
     var secondaryTopicId: String = "",
     var secondaryFactorId: String = "",
-    var type: TopicJoinType = TopicJoinType.INNER,
+    var type: TopicJoinType = TopicJoinType.`inner`,
 )
 
 data class SubjectDataSet(

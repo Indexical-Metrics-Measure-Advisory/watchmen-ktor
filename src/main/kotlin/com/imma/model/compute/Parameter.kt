@@ -1,9 +1,9 @@
 package com.imma.model.compute
 
 enum class ParameterKind(val kind: String) {
-    TOPIC("topic"),
-    CONSTANT("constant"),
-    COMPUTED("computed")
+    topic("topic"),
+    constant("constant"),
+    computed("computed");
 }
 
 open class Parameter(var kind: ParameterKind)
@@ -11,30 +11,30 @@ open class Parameter(var kind: ParameterKind)
 data class TopicFactorParameter(
     var topicId: String,
     var factorId: String,
-) : Parameter(kind = ParameterKind.TOPIC)
+) : Parameter(kind = ParameterKind.topic)
 
 data class ConstantParameter(
     var value: String = ""
-) : Parameter(kind = ParameterKind.CONSTANT)
+) : Parameter(kind = ParameterKind.constant)
 
 enum class ParameterComputeType(val type: String) {
-    NONE("none"),
-    ADD("add"),
-    SUBTRACT("subtract"),
-    MULTIPLY("multiply"),
-    DIVIDE("divide"),
-    MODULUS("modulus"),
-    YEAR_OF("year-of"),
-    HALF_YEAR_OF("half-year-of"),
-    QUARTER_OF("quarter-of"),
-    MONTH_OF("month-of"),
-    WEEK_OF_YEAR("week-of-year"),
-    WEEK_OF_MONTH("week-of-month"),
-    DAY_OF_MONTH("day-of-month"),
-    DAY_OF_WEEK("weekdays")
+    none("none"),
+    add("add"),
+    subtract("subtract"),
+    multiply("multiply"),
+    divide("divide"),
+    modulus("modulus"),
+    `year-of`("year-of"),
+    `half-year-of`("half-year-of"),
+    `quarter-of`("quarter-of"),
+    `month-of`("month-of"),
+    `week-of-year`("week-of-year"),
+    `week-of-month`("week-of-month"),
+    `day-of-month`("day-of-month"),
+    `day-of-week`("day-of-week");
 }
 
 data class ComputedParameter(
-    var type: ParameterComputeType = ParameterComputeType.NONE,
+    var type: ParameterComputeType = ParameterComputeType.none,
     var parameters: List<Parameter>
-) : Parameter(kind = ParameterKind.COMPUTED)
+) : Parameter(kind = ParameterKind.computed)

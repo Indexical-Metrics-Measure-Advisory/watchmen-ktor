@@ -1,20 +1,20 @@
 package com.imma.model.chart
 
 enum class ChartType(val type: String) {
-    COUNT("count"),
-    BAR("bar"),
-    LINE("line"),
-    SCATTER("scatter"),
-    PIE("pie"),
-    DOUGHNUT("doughnut"),
-    NIGHTINGALE("nightingale"),
-    SUNBURST("sunburst"),
-    TREE("tree"),
-    TREEMAP("treemap"),
-    MAP("map")
+    count("count"),
+    bar("bar"),
+    line("line"),
+    scatter("scatter"),
+    pie("pie"),
+    doughnut("doughnut"),
+    nightingale("nightingale"),
+    sunburst("sunburst"),
+    tree("tree"),
+    treemap("treemap"),
+    map("map");
 }
 
 data class Chart(
-    var type: ChartType = ChartType.COUNT,
+    var type: ChartType = ChartType.count,
     var settings: Any? = null
 )

@@ -11,20 +11,20 @@ import java.time.ZoneOffset
 import java.util.*
 
 enum class PipelineStageUnitActionType(val type: String) {
-    ALARM("alarm"),
-    COPY_TO_MEMORY("copy-to-memory"),
-    READ_ROW("read-row"),
-    READ_FACTOR("read-factor"),
-    EXISTS("exists"),
-    MERGE_ROW("merge-row"),
-    INSERT_ROW("insert-row"),
-    INSERT_OR_MERGE_ROW("insert-or-merge-row"),
-    WRITE_FACTOR("write-factor"),
+    alarm("alarm"),
+    `copy-to-memory`("copy-to-memory"),
+    `read-row`("read-row"),
+    `read-factor`("read-factor"),
+    exists("exists"),
+    `merge-row`("merge-row"),
+    `insert-row`("insert-row"),
+    `insert-or-merge-row`("insert-or-merge-row"),
+    `write-factor`("write-factor");
 }
 
 data class PipelineStageUnitAction(
     var actionId: String? = null,
-    var type: PipelineStageUnitActionType = PipelineStageUnitActionType.ALARM,
+    var type: PipelineStageUnitActionType = PipelineStageUnitActionType.alarm,
 ) : HashMap<String, Any>()
 
 data class PipelineStageUnit(
@@ -43,12 +43,12 @@ data class PipelineStage(
 ) : Conditional
 
 enum class PipelineTriggerType(val type: String) {
-    INSERT("insert"),
-    MERGE("merge"),
+    insert("insert"),
+    merge("merge"),
 
     // insert or merge
-    INSERT_OR_MERGE("insert-or-merge"),
-    DELETE("delete"),
+    `insert-or-merge`("insert-or-merge"),
+    delete("delete");
 }
 
 @Document(collection = CollectionNames.PIPELINE)
@@ -60,7 +60,7 @@ data class Pipeline(
     @Field("name")
     var name: String? = null,
     @Field("type")
-    var type: PipelineTriggerType = PipelineTriggerType.INSERT_OR_MERGE,
+    var type: PipelineTriggerType = PipelineTriggerType.`insert-or-merge`,
     @Field("conditional")
     override var conditional: Boolean = false,
     @Field("condition_on")
