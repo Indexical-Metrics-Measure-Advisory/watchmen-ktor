@@ -90,8 +90,12 @@ data class Factor(
     var description: String? = null,
 )
 
-enum class TopicType(val type: String) {
+enum class TopicKind(val kind: String) {
     system("system"),
+    business("business")
+}
+
+enum class TopicType(val type: String) {
     raw("raw"),
     distinct("distinct"),
     aggregate("aggregate"),
@@ -105,6 +109,8 @@ data class Topic(
     var topicId: String? = null,
     @Field("name")
     var name: String? = null,
+    @Field("kind")
+    var kind: TopicKind = TopicKind.business,
     @Field("type")
     var type: TopicType = TopicType.distinct,
     @Field("description")
