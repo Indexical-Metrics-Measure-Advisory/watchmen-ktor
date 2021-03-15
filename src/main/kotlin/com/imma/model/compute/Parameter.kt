@@ -6,7 +6,14 @@ enum class ParameterKind(val kind: String) {
     computed("computed");
 }
 
-open class Parameter(var kind: ParameterKind)
+/**
+ * parameter can be conditional, depends on where to use
+ */
+open class Parameter(
+    var kind: ParameterKind,
+    var conditional: Boolean? = null,
+    var on: ParameterJoint? = null
+)
 
 data class TopicFactorParameter(
     var topicId: String,
@@ -31,7 +38,8 @@ enum class ParameterComputeType(val type: String) {
     `week-of-year`("week-of-year"),
     `week-of-month`("week-of-month"),
     `day-of-month`("day-of-month"),
-    `day-of-week`("day-of-week");
+    `day-of-week`("day-of-week"),
+    `case-then`("case-then");
 }
 
 data class ComputedParameter(
