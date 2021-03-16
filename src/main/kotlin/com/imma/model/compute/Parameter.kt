@@ -11,17 +11,21 @@ enum class ParameterKind(val kind: String) {
  */
 open class Parameter(
     var kind: ParameterKind,
-    var conditional: Boolean? = null,
-    var on: ParameterJointDelegate? = null
+    open var conditional: Boolean? = null,
+    open var on: ParameterJoint? = null
 )
 
 data class TopicFactorParameter(
-    var topicId: String,
-    var factorId: String,
+    var topicId: String? = "",
+    var factorId: String? = "",
+    override var conditional: Boolean? = null,
+    override var on: ParameterJoint? = null
 ) : Parameter(kind = ParameterKind.topic)
 
 data class ConstantParameter(
-    var value: String = ""
+    var value: String? = "",
+    override var conditional: Boolean? = null,
+    override var on: ParameterJoint? = null
 ) : Parameter(kind = ParameterKind.constant)
 
 enum class ParameterComputeType(val type: String) {
@@ -44,12 +48,14 @@ enum class ParameterComputeType(val type: String) {
 
 data class ComputedParameter(
     var type: ParameterComputeType = ParameterComputeType.none,
-    var parameters: MutableList<Parameter> = mutableListOf()
+    var parameters: MutableList<Parameter> = mutableListOf(),
+    override var conditional: Boolean? = null,
+    override var on: ParameterJoint? = null
 ) : Parameter(kind = ParameterKind.computed)
 
 typealias ParameterDelegate = MutableMap<String, Any>
 
-fun ParameterDelegate.takeOrThrow(): Parameter {
+fun ParameterDelegate.takeAsParameterOrThrow(): Parameter {
     var parameter: Parameter? = this.takeIfIsTopicFactor()
     if (parameter != null) {
         return parameter
@@ -65,32 +71,62 @@ fun ParameterDelegate.takeOrThrow(): Parameter {
     throw RuntimeException("Parameter[kind=${this["kind"]}] cannot be determined.")
 }
 
-fun ParameterDelegate.takeIfIsTopicFactor(): TopicFactorParameter? {
+private fun ParameterDelegate.takeIfConditional(): Pair<Boolean, ParameterJoint?> {
+    val conditional = (this["conditional"] as String?).toBoolean()
+    val on: ParameterJoint?
+    if (conditional) {
+        @Suppress("UNCHECKED_CAST")
+        on = (this["on"] as ParameterJointDelegate?)?.takeAsParameterJointOrThrow()
+    } else {
+        on = null
+    }
+    return Pair(conditional, on)
+}
+
+private fun ParameterDelegate.takeIfIsTopicFactor(): TopicFactorParameter? {
     val kind = this["kind"]
     if (kind == ParameterKind.topic.kind) {
-        return TopicFactorParameter(this["topicId"] as String, this["factorId"] as String)
+        val (conditional, on: ParameterJoint?) = takeIfConditional()
+        return TopicFactorParameter(
+            conditional = conditional,
+            on = on,
+            topicId = this["topicId"] as String?,
+            factorId = this["factorId"] as String?
+        )
     } else {
         return null
     }
 }
 
-fun ParameterDelegate.takeIfIsConstant(): ConstantParameter? {
+private fun ParameterDelegate.takeIfIsConstant(): ConstantParameter? {
     val kind = this["kind"]
     if (kind == ParameterKind.topic.kind) {
-        return ConstantParameter(this["value"] as String)
+        val (conditional, on: ParameterJoint?) = takeIfConditional()
+        return ConstantParameter(
+            conditional = conditional,
+            on = on,
+            value = this["value"] as String?
+        )
     } else {
         return null
     }
 }
 
-fun ParameterDelegate.takeIfIsCompute(): ComputedParameter? {
+private fun ParameterDelegate.takeIfIsCompute(): ComputedParameter? {
     val kind = this["kind"]
     if (kind == ParameterKind.computed.kind) {
+        val (conditional, on: ParameterJoint?) = takeIfConditional()
         val type = ParameterComputeType.valueOf(this["type"] as String)
-
         @Suppress("UNCHECKED_CAST")
-        val parameters = (this["parameters"] as List<ParameterDelegate>?)?.map { it.takeOrThrow() }?.toMutableList()
-        return ComputedParameter(type, parameters ?: mutableListOf<Parameter>())
+        val parameters = (this["parameters"] as List<ParameterDelegate>?)?.map {
+            it.takeAsParameterOrThrow()
+        }?.toMutableList()
+        return ComputedParameter(
+            conditional = conditional,
+            on = on,
+            type = type,
+            parameters = parameters ?: mutableListOf()
+        )
     } else {
         return null
     }
