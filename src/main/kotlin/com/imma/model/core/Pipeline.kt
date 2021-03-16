@@ -2,7 +2,7 @@ package com.imma.model.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import com.imma.model.compute.ParameterJoint
+import com.imma.model.compute.ParameterJointDelegate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.mapping.Document
@@ -30,7 +30,7 @@ data class PipelineStageUnitAction(
 data class PipelineStageUnit(
     var unitId: String? = null,
     override var conditional: Boolean = false,
-    override var on: ParameterJoint = ParameterJoint(),
+    override var on: ParameterJointDelegate = mutableMapOf(),
     var `do`: List<PipelineStageUnitAction> = mutableListOf(),
 ) : Conditional
 
@@ -38,7 +38,7 @@ data class PipelineStage(
     var stageId: String? = null,
     var name: String? = null,
     override var conditional: Boolean = false,
-    override var on: ParameterJoint = ParameterJoint(),
+    override var on: ParameterJointDelegate = mutableMapOf(),
     var units: List<PipelineStageUnit> = mutableListOf(),
 ) : Conditional
 
@@ -64,7 +64,7 @@ data class Pipeline(
     @Field("conditional")
     override var conditional: Boolean = false,
     @Field("condition_on")
-    override var on: ParameterJoint = ParameterJoint(),
+    override var on: ParameterJointDelegate = mutableMapOf(),
     @Field("stages")
     var stages: MutableList<PipelineStage> = mutableListOf(),
     @Field("enabled")

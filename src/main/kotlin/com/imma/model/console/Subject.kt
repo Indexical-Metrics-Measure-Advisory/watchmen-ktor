@@ -2,8 +2,8 @@ package com.imma.model.console
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import com.imma.model.compute.Parameter
-import com.imma.model.compute.ParameterJoint
+import com.imma.model.compute.ParameterDelegate
+import com.imma.model.compute.ParameterJointDelegate
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.annotation.Transient
@@ -14,7 +14,7 @@ import java.util.*
 
 data class SubjectDataSetColumn(
     var columnId: String = "",
-    var parameter: Parameter,
+    var parameter: ParameterDelegate = mutableMapOf(),
     var alias: String = ""
 )
 
@@ -33,7 +33,7 @@ data class SubjectDataSetJoin(
 )
 
 data class SubjectDataSet(
-    var filters: ParameterJoint = ParameterJoint(),
+    var filters: ParameterJointDelegate = mutableMapOf(),
     var columns: List<SubjectDataSetColumn> = mutableListOf(),
     var joins: List<SubjectDataSetJoin> = mutableListOf()
 )

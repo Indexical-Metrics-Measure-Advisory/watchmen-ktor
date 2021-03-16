@@ -15,19 +15,21 @@ enum class ParameterExpressionOperator(val operator: String) {
     `not-in`("not-in");
 }
 
-open class ParameterExpression : ParameterCondition {
-    open var left: Parameter = ConstantParameter()
-    open var operator: ParameterExpressionOperator = ParameterExpressionOperator.equals
-    open var right: Parameter = ConstantParameter()
-}
+data class ParameterExpression(
+    var left: ParameterDelegate = mutableMapOf(),
+    var operator: ParameterExpressionOperator = ParameterExpressionOperator.equals,
+    var right: ParameterDelegate = mutableMapOf()
+) : ParameterCondition
 
 enum class ParameterJointType(val joint: String) {
     and("and"),
     or("or");
 }
 
-open class ParameterJoint : ParameterCondition {
-    open var jointType: ParameterJointType = ParameterJointType.and
-    open var filters: List<ParameterCondition> = mutableListOf()
-}
+data class ParameterJoint(
+    var jointType: ParameterJointType = ParameterJointType.and,
+    // ParamCondition List
+    var filters: MutableList<ParameterCondition> = mutableListOf()
+) : ParameterCondition
 
+typealias ParameterJointDelegate = MutableMap<String, Any>

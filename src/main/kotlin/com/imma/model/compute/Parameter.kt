@@ -12,7 +12,7 @@ enum class ParameterKind(val kind: String) {
 open class Parameter(
     var kind: ParameterKind,
     var conditional: Boolean? = null,
-    var on: ParameterJoint? = null
+    var on: ParameterJointDelegate? = null
 )
 
 data class TopicFactorParameter(
@@ -44,5 +44,54 @@ enum class ParameterComputeType(val type: String) {
 
 data class ComputedParameter(
     var type: ParameterComputeType = ParameterComputeType.none,
-    var parameters: List<Parameter>
+    var parameters: MutableList<Parameter> = mutableListOf()
 ) : Parameter(kind = ParameterKind.computed)
+
+typealias ParameterDelegate = MutableMap<String, Any>
+
+fun ParameterDelegate.takeOrThrow(): Parameter {
+    var parameter: Parameter? = this.takeIfIsTopicFactor()
+    if (parameter != null) {
+        return parameter
+    }
+    parameter = this.takeIfIsConstant()
+    if (parameter != null) {
+        return parameter
+    }
+    parameter = this.takeIfIsCompute()
+    if (parameter != null) {
+        return parameter
+    }
+    throw RuntimeException("Parameter[kind=${this["kind"]}] cannot be determined.")
+}
+
+fun ParameterDelegate.takeIfIsTopicFactor(): TopicFactorParameter? {
+    val kind = this["kind"]
+    if (kind == ParameterKind.topic.kind) {
+        return TopicFactorParameter(this["topicId"] as String, this["factorId"] as String)
+    } else {
+        return null
+    }
+}
+
+fun ParameterDelegate.takeIfIsConstant(): ConstantParameter? {
+    val kind = this["kind"]
+    if (kind == ParameterKind.topic.kind) {
+        return ConstantParameter(this["value"] as String)
+    } else {
+        return null
+    }
+}
+
+fun ParameterDelegate.takeIfIsCompute(): ComputedParameter? {
+    val kind = this["kind"]
+    if (kind == ParameterKind.computed.kind) {
+        val type = ParameterComputeType.valueOf(this["type"] as String)
+
+        @Suppress("UNCHECKED_CAST")
+        val parameters = (this["parameters"] as List<ParameterDelegate>?)?.map { it.takeOrThrow() }?.toMutableList()
+        return ComputedParameter(type, parameters ?: mutableListOf<Parameter>())
+    } else {
+        return null
+    }
+}
