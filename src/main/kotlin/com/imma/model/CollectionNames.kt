@@ -15,6 +15,7 @@ object CollectionNames {
     const val FAVORITE: String = "favorites"
     const val LAST_SNAPSHOT: String = "last_snapshots"
 
+    const val ENUM: String = "enums"
     const val TOPIC: String = "topics"
     const val PIPELINE: String = "pipelines"
     const val PIPELINE_GRAPHICS: String = "pipeline_graphics"

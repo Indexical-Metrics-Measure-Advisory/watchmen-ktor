@@ -16,7 +16,7 @@ data class EnumItem(
     var parentCode: String? = null
 )
 
-@Document(collection = CollectionNames.TOPIC)
+@Document(collection = CollectionNames.ENUM)
 data class Enum(
     @Id
     var enumId: String? = null,

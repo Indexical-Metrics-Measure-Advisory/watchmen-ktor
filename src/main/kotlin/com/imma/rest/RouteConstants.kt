@@ -22,6 +22,11 @@ object RouteConstants {
     const val SPACE_LIST_BY_IDS_FOR_HOLDER: String = "/space/list/by-ids/for-holder"
     const val AVAILABLE_SPACE_LIST_MINE: String = "/space/list/available/mine"
 
+    const val ENUM_SAVE: String = "/enum/save"
+    const val ENUM_FIND_BY_ID: String = "/enum/find/by-id"
+    const val ENUM_LIST_FOR_HOLDER: String = "/enum/list/for-holder"
+    const val ENUM_LIST_ALL: String = "/enum/list/all"
+
     const val TOPIC_SAVE: String = "/topic/save"
     const val TOPIC_FIND_BY_ID: String = "/topic/find/by-id"
     const val TOPIC_LIST_BY_NAME: String = "/topic/list/by-name"
