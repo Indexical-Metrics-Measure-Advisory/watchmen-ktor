@@ -84,9 +84,11 @@ enum class FactorType(val type: String) {
 data class Factor(
     var factorId: String? = null,
     var name: String? = null,
-    var type: FactorType = FactorType.text,
     var label: String? = null,
+    var type: FactorType = FactorType.text,
+    var enumId: String? = null,
     var defaultValue: String? = null,
+    var indexGroup: String? = null,
     var description: String? = null,
 )
 
