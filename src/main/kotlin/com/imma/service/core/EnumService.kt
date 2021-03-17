@@ -21,6 +21,17 @@ class EnumService(application: Application) : TupleService(application) {
         } else {
             updateTuple(enumeration)
         }
+
+        // save collection name separately
+        val name = enumeration.name?.replace(' ', '_')?.replace('-', '_')
+        writeIntoMongo {
+            val collectionName = "e_${name}"
+            val query: Query = Query.query(Criteria.where("code").all())
+            it.remove(query, collectionName)
+            if (enumeration.items.isNotEmpty()) {
+                it.insert(enumeration.items, collectionName)
+            }
+        }
     }
 
     fun findEnumById(enumId: String): Enum? {
