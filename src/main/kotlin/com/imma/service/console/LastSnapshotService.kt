@@ -23,6 +23,7 @@ class LastSnapshotService(application: Application) : Service(application) {
                     set("userId", lastSnapshot.userId)
                     set("language", lastSnapshot.language)
                     set("lastDashboardId", lastSnapshot.lastDashboardId)
+                    set("adminDashboardId", lastSnapshot.adminDashboardId)
                     set("favoritePin", lastSnapshot.favoritePin)
                 },
                 LastSnapshot::class.java,

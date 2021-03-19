@@ -13,6 +13,8 @@ class LastSnapshot(
     var language: String? = null,
     @Field("last_dashboard_id")
     var lastDashboardId: String? = null,
+    @Field("admin_dashboard_id")
+    var adminDashboardId: String? = null,
     @Field("favorite_pin")
     var favoritePin: Boolean? = false
 )
