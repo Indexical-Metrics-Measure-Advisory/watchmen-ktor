@@ -25,9 +25,7 @@ class TopicService(application: Application) : TupleService(application) {
     }
 
     fun findTopicById(topicId: String): Topic? {
-        return findFromMongo {
-            it.findById(topicId, Topic::class.java, CollectionNames.TOPIC)
-        }
+        return persistKit.findById(topicId, Topic::class.java, CollectionNames.TOPIC)
     }
 
     fun findTopicsByName(name: String? = "", pageable: Pageable): DataPage<Topic> {

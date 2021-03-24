@@ -4,8 +4,7 @@ import com.imma.auth.Roles
 import com.imma.model.admin.UserGroup
 import com.imma.model.admin.UserGroupForHolder
 import com.imma.model.page.Pageable
-import com.imma.rest.RouteConstants
-import com.imma.service.admin.UserGroupService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -17,7 +16,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.saveUserGroupRoute() {
     post(RouteConstants.USER_GROUP_SAVE) {
         val userGroup = call.receive<UserGroup>()
-        UserGroupService(application).saveUserGroup(userGroup)
+        Services(application).use { it.userGroup { saveUserGroup(userGroup) } }
         call.respond(userGroup)
     }
 }
@@ -29,7 +28,7 @@ fun Route.findUserGroupByIdRoute() {
             // TODO a empty object
             call.respond(mapOf<String, String>())
         } else {
-            val userGroup = UserGroupService(application).findUserGroupById(userGroupId)
+            val userGroup = Services(application).use { it.userGroup { findUserGroupById(userGroupId) } }
             if (userGroup == null) {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
@@ -47,7 +46,7 @@ fun Route.listUserGroupsByNameRoute() {
     post(RouteConstants.USER_GROUP_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = UserGroupService(application).findUserGroupsByName(name, pageable)
+        val page = Services(application).use { it.userGroup { findUserGroupsByName(name, pageable) } }
         call.respond(page)
     }
 }
@@ -55,7 +54,7 @@ fun Route.listUserGroupsByNameRoute() {
 fun Route.listUserGroupsByNameForHolderRoute() {
     get(RouteConstants.USER_GROUP_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
-        val userGroups = UserGroupService(application).findUserGroupsByNameForHolder(name)
+        val userGroups = Services(application).use { it.userGroup { findUserGroupsByNameForHolder(name) } }
         call.respond(userGroups)
     }
 }
@@ -66,7 +65,7 @@ fun Route.listUserGroupsByIdsForHolderRoute() {
         if (userGroupIds.isEmpty()) {
             call.respond(listOf<UserGroupForHolder>())
         } else {
-            val userGroups = UserGroupService(application).findUserGroupsByIdsForHolder(userGroupIds)
+            val userGroups = Services(application).use { it.userGroup { findUserGroupsByIdsForHolder(userGroupIds) } }
             call.respond(userGroups)
         }
     }

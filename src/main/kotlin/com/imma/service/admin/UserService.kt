@@ -8,16 +8,16 @@ import com.imma.model.admin.UserForHolder
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
+import com.imma.persist.core.change
+import com.imma.persist.core.select
+import com.imma.persist.core.where
+import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class UserService(application: Application) : TupleService(application) {
+class UserService(services: Services) : TupleService(services) {
     private fun updateCredential(user: User) {
         // update credential only when password is given
         if (!user.password.isNullOrEmpty()) {
@@ -26,7 +26,9 @@ class UserService(application: Application) : TupleService(application) {
                 name = user.name
                 credential = user.password
             }
-            UserCredentialService(application).saveCredential(credential)
+            services.userCredential {
+                saveCredential(credential)
+            }
         }
     }
 
@@ -44,93 +46,117 @@ class UserService(application: Application) : TupleService(application) {
     }
 
     fun findUserById(userId: String): User? {
-        return findFromMongo {
-            it.findById(userId, User::class.java, CollectionNames.USER)
-        }
+        return services.persist().findById(userId, User::class.java, CollectionNames.USER)
     }
 
     /**
      * exactly match given username
      */
     fun findUserByName(username: String): User? {
-        return findFromMongo {
-            it.findOne(Query.query(Criteria.where("name").`is`(username)), User::class.java, CollectionNames.USER)
-        }
+        return services.persist().findOne(
+            where {
+                column("name") eq username
+            },
+            User::class.java, CollectionNames.USER
+        )
     }
 
     fun findUsersByName(name: String? = "", pageable: Pageable): DataPage<User> {
-        val query: Query = if (name!!.isEmpty()) {
-            Query.query(Criteria.where("name").all())
+        return if (name!!.isEmpty()) {
+            persist().page(pageable, User::class.java, CollectionNames.USER)
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            persist().page(
+                where {
+                    column("name") regex name
+                },
+                pageable,
+                User::class.java, CollectionNames.USER
+            )
         }
-        return findPageFromMongo(User::class.java, CollectionNames.USER, query, pageable)
     }
 
     fun findUsersByNameForHolder(name: String? = ""): List<UserForHolder> {
-        val query: Query = if (name!!.isEmpty()) {
-            Query.query(Criteria.where("name").all())
+        return if (name!!.isEmpty()) {
+            persist().listAll(
+                select {
+                    include("userId")
+                    include("name")
+                },
+                UserForHolder::class.java, CollectionNames.USER
+            )
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            persist().list(
+                select {
+                    include("userId")
+                    include("name")
+                },
+                where {
+                    column("name") regex name
+                },
+                UserForHolder::class.java, CollectionNames.USER
+            )
         }
-        query.fields().include("userId", "name")
-        return findListFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
     }
 
     fun findUsersByIdsForHolder(userIds: List<String>): List<UserForHolder> {
-        val query: Query = Query.query(Criteria.where("userId").`in`(userIds))
-        query.fields().include("userId", "name")
-        return findListFromMongo(UserForHolder::class.java, CollectionNames.USER, query)
+        return persist().list(
+            select {
+                include("userId")
+                include("name")
+            },
+            where {
+                column("userId") `in` userIds
+            },
+            UserForHolder::class.java, CollectionNames.USER
+        )
     }
 
     fun unassignUserGroup(userGroupId: String) {
-        writeIntoMongo {
-            it.updateMulti(
-                Query.query(Criteria.where("groupIds").`is`(userGroupId)),
-                Update().apply {
-                    pull("groupIds", userGroupId)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                User::class.java,
-                CollectionNames.USER
-            )
-        }
+        persist().update(
+            where {
+                column("groupIds") include userGroupId
+            },
+            change {
+                pull(userGroupId) from "groupIds"
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            User::class.java, CollectionNames.USER
+        )
     }
 
     fun assignUserGroup(userIds: List<String>, userGroupId: String) {
-        writeIntoMongo {
-            it.updateMulti(
-                Query.query(Criteria.where("userId").`in`(userIds)),
-                Update().apply {
-                    push("groupIds", userGroupId)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                User::class.java,
-                CollectionNames.USER
-            )
-        }
+        persist().update(
+            where {
+                column("userId") `in` userIds
+            },
+            change {
+                push(userGroupId) into "groupIds"
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            User::class.java, CollectionNames.USER
+        )
     }
 
     fun isActive(userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("userId").`is`(userId).and("active").`is`(true)),
-                User::class.java,
-                CollectionNames.USER
-            )
-        }
+        return persist().exists(
+            where {
+                column("userId") eq userId
+                column("active") eq true
+            },
+            User::class.java, CollectionNames.USER
+        )
     }
 
     fun isAdmin(userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("userId").`is`(userId).and("role").`is`(Roles.ADMIN.ROLE)),
-                User::class.java,
-                CollectionNames.USER
-            )
-        }
+        return persist().exists(
+            where {
+                column("userId") eq userId
+                column("role") eq Roles.ADMIN.ROLE
+            },
+            User::class.java, CollectionNames.USER
+        )
     }
 }
 

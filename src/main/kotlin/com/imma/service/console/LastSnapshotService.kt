@@ -10,9 +10,7 @@ import org.springframework.data.mongodb.core.query.Update
 
 class LastSnapshotService(application: Application) : Service(application) {
     fun findLastSnapshotById(userId: String): LastSnapshot? {
-        return findFromMongo {
-            it.findById(userId, LastSnapshot::class.java, CollectionNames.LAST_SNAPSHOT)
-        }
+        return persistKit.findById(userId, LastSnapshot::class.java, CollectionNames.LAST_SNAPSHOT)
     }
 
     fun saveLastSnapshot(lastSnapshot: LastSnapshot) {

@@ -10,9 +10,7 @@ import org.springframework.data.mongodb.core.query.Update
 
 class PipelineGraphicsService(application: Application) : Service(application) {
     fun findPipelineGraphicsById(userId: String): PipelineGraphics? {
-        return findFromMongo {
-            it.findById(userId, PipelineGraphics::class.java, CollectionNames.PIPELINE_GRAPHICS)
-        }
+        return persistKit.findById(userId, PipelineGraphics::class.java, CollectionNames.PIPELINE_GRAPHICS)
     }
 
     fun savePipelineGraphicsByUser(graphics: PipelineGraphics) {

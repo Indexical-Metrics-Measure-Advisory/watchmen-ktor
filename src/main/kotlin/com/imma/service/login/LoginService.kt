@@ -5,18 +5,17 @@ import com.imma.auth.adminPassword
 import com.imma.auth.adminUsername
 import com.imma.model.admin.User
 import com.imma.service.Service
-import com.imma.service.admin.UserCredentialService
-import com.imma.service.admin.UserService
+import com.imma.service.Services
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
 import org.mindrot.jbcrypt.BCrypt
 
-class LoginService(application: Application) : Service(application) {
+class LoginService(services: Services) : Service(services) {
     fun login(username: String?, plainPassword: String?): User? {
         if (username == null || username.isBlank()) {
             return null
         }
 
+        val application = services.application()
         if (application.adminEnabled
             && username == application.adminUsername
             && plainPassword == application.adminPassword
@@ -33,8 +32,8 @@ class LoginService(application: Application) : Service(application) {
             }
         }
 
-        val user = UserService(application).findUserByName(username)
-        val credential = UserCredentialService(application).findCredentialByName(username) ?: return null
+        val user = services.user { findUserByName(username) }
+        val credential = services.userCredential { findCredentialByName(username) } ?: return null
 
         val hashedPassword: String = credential.credential!!
         return if (BCrypt.checkpw(plainPassword, hashedPassword)) {

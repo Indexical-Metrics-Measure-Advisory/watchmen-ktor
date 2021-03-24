@@ -1,6 +1,7 @@
 package com.imma.service.console
 
 import com.imma.model.CollectionNames
+import com.imma.model.admin.Space
 import com.imma.model.console.Subject
 import com.imma.model.determineFakeOrNullId
 import com.imma.service.TupleService
@@ -33,9 +34,7 @@ class SubjectService(application: Application) : TupleService(application) {
     }
 
     fun findSubjectById(subjectId: String): Subject? {
-        return findFromMongo {
-            it.findById(subjectId, Subject::class.java, CollectionNames.SUBJECT)
-        }
+        return persistKit.findById(subjectId, Subject::class.java, CollectionNames.SUBJECT)
     }
 
     fun renameSubject(subjectId: String, name: String? = "") {

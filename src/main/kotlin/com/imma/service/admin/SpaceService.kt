@@ -7,13 +7,13 @@ import com.imma.model.console.AvailableSpace
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
+import com.imma.persist.core.select
+import com.imma.persist.core.where
+import com.imma.service.Services
 import com.imma.service.TupleService
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
 import kotlin.contracts.ExperimentalContracts
 
-class SpaceService(application: Application) : TupleService(application) {
+class SpaceService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun saveSpace(space: Space) {
         val fake = determineFakeOrNullId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
@@ -25,61 +25,96 @@ class SpaceService(application: Application) : TupleService(application) {
         }
 
         val userGroupIds = space.groupIds
-        val userGroupService = UserGroupService(application)
-        userGroupService.unassignSpace(space.spaceId!!)
-        if (!userGroupIds.isNullOrEmpty()) {
-            userGroupService.assignSpace(userGroupIds, space.spaceId!!)
+        services.userGroup {
+            unassignSpace(space.spaceId!!)
+            if (!userGroupIds.isNullOrEmpty()) {
+                assignSpace(userGroupIds, space.spaceId!!)
+            }
         }
     }
 
     fun findSpaceById(spaceId: String): Space? {
-        return findFromMongo {
-            it.findById(spaceId, Space::class.java, CollectionNames.SPACE)
-        }
+        return persist().findById(spaceId, Space::class.java, CollectionNames.SPACE)
     }
 
     fun findSpacesByName(name: String? = "", pageable: Pageable): DataPage<Space> {
-        val query: Query = if (name!!.isEmpty()) {
-            Query.query(Criteria.where("name").all())
+        return if (name!!.isEmpty()) {
+            persist().page(pageable, Space::class.java, CollectionNames.SPACE)
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            persist().page(
+                where {
+                    column("name") regex name
+                },
+                pageable,
+                Space::class.java, CollectionNames.SPACE
+            )
         }
-        return findPageFromMongo(Space::class.java, CollectionNames.SPACE, query, pageable)
     }
 
     fun findSpacesByNameForHolder(name: String? = ""): List<SpaceForHolder> {
-        val query: Query = if (name!!.isEmpty()) {
-            Query.query(Criteria.where("name").all())
+        if (name!!.isEmpty()) {
+            return persist().listAll(
+                select {
+                    include("spaceId")
+                    include("name")
+                },
+                SpaceForHolder::class.java, CollectionNames.SPACE
+            )
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            return persist().list(
+                select {
+                    include("spaceId")
+                    include("name")
+                },
+                where {
+                    column("name") regex name
+                },
+                SpaceForHolder::class.java, CollectionNames.SPACE
+            )
         }
-        query.fields().include("spaceId", "name")
-        return findListFromMongo(SpaceForHolder::class.java, CollectionNames.SPACE, query)
     }
 
     fun findSpacesByIdsForHolder(spaceIds: List<String>): List<SpaceForHolder> {
-        val query: Query = Query.query(Criteria.where("spaceId").`in`(spaceIds))
-        query.fields().include("spaceId", "name")
-        return findListFromMongo(SpaceForHolder::class.java, CollectionNames.SPACE, query)
+        return persist().list(
+            select {
+                include("spaceId")
+                include("name")
+            },
+            where {
+                column("spaceId") `in` spaceIds
+            },
+            SpaceForHolder::class.java, CollectionNames.SPACE
+        )
     }
 
     fun findAvailableSpaces(userId: String): List<AvailableSpace> {
-        val user = UserService(application).findUserById(userId)!!
+        val user = services.user { findUserById(userId)!! }
         val userGroupIds = user.groupIds.orEmpty()
         if (userGroupIds.isEmpty()) {
             return mutableListOf()
         }
 
-        val spaceIds = UserGroupService(application).findUserGroupsByIds(userGroupIds).map {
-            it.spaceIds.orEmpty()
-        }.flatten()
+        val spaceIds = services.userGroup {
+            findUserGroupsByIds(userGroupIds).map {
+                it.spaceIds.orEmpty()
+            }.flatten()
+        }
         if (spaceIds.isEmpty()) {
             return mutableListOf()
         }
 
-        val query: Query = Query.query(Criteria.where("spaceId").`in`(spaceIds))
-        query.fields().include("spaceId", "name", "topicIds", "description")
-        return findListFromMongo(AvailableSpace::class.java, CollectionNames.SPACE, query)
+        return persist().list(
+            select {
+                include("spaceId")
+                include("name")
+                include("topicIds")
+                include("description")
+            },
+            where {
+                column("spaceId") `in` spaceIds
+            },
+            AvailableSpace::class.java, CollectionNames.SPACE
+        )
     }
 }
 

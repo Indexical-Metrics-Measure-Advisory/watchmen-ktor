@@ -35,9 +35,7 @@ class EnumService(application: Application) : TupleService(application) {
     }
 
     fun findEnumById(enumId: String): Enum? {
-        return findFromMongo {
-            it.findById(enumId, Enum::class.java, CollectionNames.ENUM)
-        }
+        return persistKit.findById(enumId, Enum::class.java, CollectionNames.ENUM)
     }
 
     fun findEnumsForHolder(): List<EnumForHolder> {

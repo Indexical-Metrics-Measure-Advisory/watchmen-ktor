@@ -4,7 +4,7 @@ import com.imma.auth.Roles
 import com.imma.model.admin.User
 import com.imma.model.admin.UserForHolder
 import com.imma.model.page.Pageable
-import com.imma.service.admin.UserService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -16,7 +16,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.saveUserRoute() {
     post(RouteConstants.USER_SAVE) {
         val user = call.receive<User>()
-        UserService(application).saveUser(user)
+        Services(application).use { it.user { saveUser(user) } }
         call.respond(user)
     }
 }
@@ -28,7 +28,7 @@ fun Route.findUserByIdRoute() {
             // TODO a empty object
             call.respond(mapOf<String, String>())
         } else {
-            val user = UserService(application).findUserById(userId)
+            val user = Services(application).use { it.user { findUserById(userId) } }
             if (user == null) {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
@@ -46,7 +46,7 @@ fun Route.listUsersByNameRoute() {
     post(RouteConstants.USER_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = UserService(application).findUsersByName(name, pageable)
+        val page = Services(application).use { it.user { findUsersByName(name, pageable) } }
         call.respond(page)
     }
 }
@@ -54,7 +54,7 @@ fun Route.listUsersByNameRoute() {
 fun Route.listUsersByNameForHolderRoute() {
     get(RouteConstants.USER_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
-        val users = UserService(application).findUsersByNameForHolder(name)
+        val users = Services(application).use { it.user { findUsersByNameForHolder(name) } }
         call.respond(users)
     }
 }
@@ -65,7 +65,7 @@ fun Route.listUsersByIdsForHolderRoute() {
         if (userIds.isEmpty()) {
             call.respond(listOf<UserForHolder>())
         } else {
-            val users = UserService(application).findUsersByIdsForHolder(userIds)
+            val users = Services(application).use { it.user { findUsersByIdsForHolder(userIds) } }
             call.respond(users)
         }
     }

@@ -3,16 +3,15 @@ package com.imma.service
 import com.imma.model.Tuple
 import com.imma.model.assignDateTimePair
 import com.imma.model.forceAssignDateTimePair
-import io.ktor.application.*
 
-open class TupleService(application: Application) : Service(application) {
+open class TupleService(services: Services) : Service(services) {
     protected fun createTuple(tuple: Tuple) {
         forceAssignDateTimePair(tuple)
-        this.writeIntoMongo { it.insert(tuple) }
+        services.persist().insertOne(tuple)
     }
 
     protected fun updateTuple(tuple: Tuple) {
         assignDateTimePair(tuple)
-        writeIntoMongo { it.save(tuple) }
+        services.persist().updateOne(tuple)
     }
 }

@@ -29,9 +29,7 @@ class ReportService(application: Application) : TupleService(application) {
     }
 
     fun findReportById(reportId: String): Report? {
-        return findFromMongo {
-            it.findById(reportId, Report::class.java, CollectionNames.REPORT)
-        }
+        return persistKit.findById(reportId, Report::class.java, CollectionNames.REPORT)
     }
 
     fun renameReport(reportId: String, name: String? = "") {

@@ -6,6 +6,7 @@ import com.imma.model.admin.UserGroupForHolder
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
+import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
@@ -15,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class UserGroupService(application: Application) : TupleService(application) {
+class UserGroupService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun saveUserGroup(userGroup: UserGroup) {
         val fake = determineFakeOrNullId(
@@ -30,17 +31,16 @@ class UserGroupService(application: Application) : TupleService(application) {
         }
 
         val userIds = userGroup.userIds
-        val userService = UserService(application)
-        userService.unassignUserGroup(userGroup.userGroupId!!)
-        if (!userIds.isNullOrEmpty()) {
-            userService.assignUserGroup(userIds, userGroup.userGroupId!!)
+        services.user {
+            unassignUserGroup(userGroup.userGroupId!!)
+            if (!userIds.isNullOrEmpty()) {
+                assignUserGroup(userIds, userGroup.userGroupId!!)
+            }
         }
     }
 
     fun findUserGroupById(userGroupId: String): UserGroup? {
-        return findFromMongo {
-            it.findById(userGroupId, UserGroup::class.java, CollectionNames.USER_GROUP)
-        }
+        return services.persist().findById(userGroupId, UserGroup::class.java, CollectionNames.USER_GROUP)
     }
 
     fun findUserGroupsByName(name: String? = "", pageable: Pageable): DataPage<UserGroup> {

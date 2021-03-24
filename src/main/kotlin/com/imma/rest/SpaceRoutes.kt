@@ -4,7 +4,7 @@ import com.imma.auth.Roles
 import com.imma.model.admin.Space
 import com.imma.model.admin.SpaceForHolder
 import com.imma.model.page.Pageable
-import com.imma.service.admin.SpaceService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -16,7 +16,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.saveSpaceRoute() {
     post(RouteConstants.SPACE_SAVE) {
         val space = call.receive<Space>()
-        SpaceService(application).saveSpace(space)
+        Services(application).use { it.space { saveSpace(space) } }
         call.respond(space)
     }
 }
@@ -28,7 +28,7 @@ fun Route.findSpaceByIdRoute() {
             // TODO a empty object
             call.respond(mapOf<String, String>())
         } else {
-            val space = SpaceService(application).findSpaceById(spaceId)
+            val space = Services(application).use { it.space { findSpaceById(spaceId) } }
             if (space == null) {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
@@ -46,7 +46,7 @@ fun Route.listSpacesByNameRoute() {
     post(RouteConstants.SPACE_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = SpaceService(application).findSpacesByName(name, pageable)
+        val page = Services(application).use { it.space { findSpacesByName(name, pageable) } }
         call.respond(page)
     }
 }
@@ -54,7 +54,7 @@ fun Route.listSpacesByNameRoute() {
 fun Route.listSpacesByNameForHolderRoute() {
     get(RouteConstants.SPACE_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
-        val spaces = SpaceService(application).findSpacesByNameForHolder(name)
+        val spaces = Services(application).use { it.space { findSpacesByNameForHolder(name) } }
         call.respond(spaces)
     }
 }
@@ -65,7 +65,7 @@ fun Route.listSpacesByIdsForHolderRoute() {
         if (spaceIds.isEmpty()) {
             call.respond(listOf<SpaceForHolder>())
         } else {
-            val spaces = SpaceService(application).findSpacesByIdsForHolder(spaceIds)
+            val spaces = Services(application).use { it.space { findSpacesByIdsForHolder(spaceIds) } }
             call.respond(spaces)
         }
     }
@@ -74,7 +74,7 @@ fun Route.listSpacesByIdsForHolderRoute() {
 fun Route.listAvailableSpacesRoute() {
     get(RouteConstants.AVAILABLE_SPACE_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val spaces = SpaceService(application).findAvailableSpaces(principal.name)
+        val spaces = Services(application).use { it.space { findAvailableSpaces(principal.name) } }
         call.respond(spaces)
     }
 }
