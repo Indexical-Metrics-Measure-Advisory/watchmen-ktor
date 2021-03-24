@@ -37,8 +37,8 @@ class SpaceService(services: Services) : TupleService(services) {
         return persist().findById(spaceId, Space::class.java, CollectionNames.SPACE)
     }
 
-    fun findSpacesByName(name: String? = "", pageable: Pageable): DataPage<Space> {
-        return if (name!!.isEmpty()) {
+    fun findSpacesByName(name: String?, pageable: Pageable): DataPage<Space> {
+        return if (name.isNullOrEmpty()) {
             persist().page(pageable, Space::class.java, CollectionNames.SPACE)
         } else {
             persist().page(
@@ -51,9 +51,9 @@ class SpaceService(services: Services) : TupleService(services) {
         }
     }
 
-    fun findSpacesByNameForHolder(name: String? = ""): List<SpaceForHolder> {
-        if (name!!.isEmpty()) {
-            return persist().listAll(
+    fun findSpacesByNameForHolder(name: String?): List<SpaceForHolder> {
+        return if (name.isNullOrEmpty()) {
+            persist().listAll(
                 select {
                     include("spaceId")
                     include("name")
@@ -61,7 +61,7 @@ class SpaceService(services: Services) : TupleService(services) {
                 SpaceForHolder::class.java, CollectionNames.SPACE
             )
         } else {
-            return persist().list(
+            persist().list(
                 select {
                     include("spaceId")
                     include("name")

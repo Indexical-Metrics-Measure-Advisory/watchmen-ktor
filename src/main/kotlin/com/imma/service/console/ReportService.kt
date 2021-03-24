@@ -32,7 +32,7 @@ class ReportService(application: Application) : TupleService(application) {
         return persistKit.findById(reportId, Report::class.java, CollectionNames.REPORT)
     }
 
-    fun renameReport(reportId: String, name: String? = "") {
+    fun renameReport(reportId: String, name: String?) {
         writeIntoMongo {
             it.updateFirst(
                 Query.query(Criteria.where("reportId").`is`(reportId)),

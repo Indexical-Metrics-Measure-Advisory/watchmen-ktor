@@ -25,7 +25,7 @@ class PipelineService(application: Application) : TupleService(application) {
         }
     }
 
-    fun renamePipeline(pipelineId: String, name: String? = "") {
+    fun renamePipeline(pipelineId: String, name: String?) {
         writeIntoMongo {
             it.updateFirst(
                 Query.query(Criteria.where("pipelineId").`is`(pipelineId)),

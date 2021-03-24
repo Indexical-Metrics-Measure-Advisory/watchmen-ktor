@@ -37,7 +37,7 @@ class SubjectService(application: Application) : TupleService(application) {
         return persistKit.findById(subjectId, Subject::class.java, CollectionNames.SUBJECT)
     }
 
-    fun renameSubject(subjectId: String, name: String? = "") {
+    fun renameSubject(subjectId: String, name: String?) {
         writeIntoMongo {
             it.updateFirst(
                 Query.query(Criteria.where("subjectId").`is`(subjectId)),

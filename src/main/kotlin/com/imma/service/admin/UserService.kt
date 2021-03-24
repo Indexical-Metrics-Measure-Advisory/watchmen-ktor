@@ -61,8 +61,8 @@ class UserService(services: Services) : TupleService(services) {
         )
     }
 
-    fun findUsersByName(name: String? = "", pageable: Pageable): DataPage<User> {
-        return if (name!!.isEmpty()) {
+    fun findUsersByName(name: String?, pageable: Pageable): DataPage<User> {
+        return if (name.isNullOrEmpty()) {
             persist().page(pageable, User::class.java, CollectionNames.USER)
         } else {
             persist().page(
@@ -75,8 +75,8 @@ class UserService(services: Services) : TupleService(services) {
         }
     }
 
-    fun findUsersByNameForHolder(name: String? = ""): List<UserForHolder> {
-        return if (name!!.isEmpty()) {
+    fun findUsersByNameForHolder(name: String?): List<UserForHolder> {
+        return if (name.isNullOrEmpty()) {
             persist().listAll(
                 select {
                     include("userId")

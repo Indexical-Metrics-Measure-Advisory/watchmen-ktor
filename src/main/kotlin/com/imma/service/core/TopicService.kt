@@ -28,7 +28,7 @@ class TopicService(application: Application) : TupleService(application) {
         return persistKit.findById(topicId, Topic::class.java, CollectionNames.TOPIC)
     }
 
-    fun findTopicsByName(name: String? = "", pageable: Pageable): DataPage<Topic> {
+    fun findTopicsByName(name: String?, pageable: Pageable): DataPage<Topic> {
         val query: Query = if (name!!.isEmpty()) {
             Query.query(Criteria.where("name").all())
         } else {
@@ -37,7 +37,7 @@ class TopicService(application: Application) : TupleService(application) {
         return findPageFromMongo(Topic::class.java, CollectionNames.TOPIC, query, pageable)
     }
 
-    fun findTopicsByNameForHolder(name: String? = ""): List<TopicForHolder> {
+    fun findTopicsByNameForHolder(name: String?): List<TopicForHolder> {
         val query: Query = if (name!!.isEmpty()) {
             Query.query(Criteria.where("name").all())
         } else {

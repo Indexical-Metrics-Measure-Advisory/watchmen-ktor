@@ -26,7 +26,7 @@ class DashboardService(application: Application) : TupleService(application) {
         }
     }
 
-    fun renameDashboard(dashboardId: String, name: String? = "") {
+    fun renameDashboard(dashboardId: String, name: String?) {
         writeIntoMongo {
             it.updateFirst(
                 Query.query(Criteria.where("dashboardId").`is`(dashboardId)),

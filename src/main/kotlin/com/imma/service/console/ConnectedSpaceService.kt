@@ -31,7 +31,7 @@ class ConnectedSpaceService(application: Application) : TupleService(application
         })
     }
 
-    fun renameConnectedSpace(connectId: String, name: String? = "") {
+    fun renameConnectedSpace(connectId: String, name: String?) {
         writeIntoMongo {
             it.updateFirst(
                 Query.query(Criteria.where("connectId").`is`(connectId)),

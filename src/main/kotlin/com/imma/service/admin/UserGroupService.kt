@@ -43,8 +43,8 @@ class UserGroupService(services: Services) : TupleService(services) {
         return services.persist().findById(userGroupId, UserGroup::class.java, CollectionNames.USER_GROUP)
     }
 
-    fun findUserGroupsByName(name: String? = "", pageable: Pageable): DataPage<UserGroup> {
-        val query: Query = if (name!!.isEmpty()) {
+    fun findUserGroupsByName(name: String?, pageable: Pageable): DataPage<UserGroup> {
+        val query: Query = if (name.isNullOrEmpty()) {
             Query.query(Criteria.where("name").all())
         } else {
             Query.query(Criteria.where("name").regex(name, "i"))
@@ -52,8 +52,8 @@ class UserGroupService(services: Services) : TupleService(services) {
         return findPageFromMongo(UserGroup::class.java, CollectionNames.USER_GROUP, query, pageable)
     }
 
-    fun findUserGroupsByNameForHolder(name: String? = ""): List<UserGroupForHolder> {
-        val query: Query = if (name!!.isEmpty()) {
+    fun findUserGroupsByNameForHolder(name: String?): List<UserGroupForHolder> {
+        val query: Query = if (name.isNullOrEmpty()) {
             Query.query(Criteria.where("name").all())
         } else {
             Query.query(Criteria.where("name").regex(name, "i"))
