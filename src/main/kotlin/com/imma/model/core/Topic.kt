@@ -13,7 +13,7 @@ enum class FactorType(val type: String) {
     sequence("sequence"),
 
     number("number"),
-    unsigned("unsigned"),              // 0 & positive
+    unsigned("unsigned"),                   // 0 & positive
 
     text("text"),
 
@@ -38,32 +38,34 @@ enum class FactorType(val type: String) {
     fax("fax"),
 
     // date time related
-    datetime("datetime"),              // YYYY-MM-DD HH:mm:ss
-    date("date"),                      // YYYY-MM-DD
-    time("time"),                      // HH:mm:ss
-    year("year"),                      // 4 digits
-    `half-year`("half-year"),            // 1: first half, 2: second half
-    quarter("quarter"),                // 1 - 4
-    season("season"),                  // 1: spring, 2: summer, 3: autumn, 4: winter
-    month("month"),                    // 1 - 12
-    `half-month`("half-month"),          // 1: first half, 2: second half
-    `ten-days`("ten-days"),              // 1, 2, 3
-    `week-of-year`("week-of-year"),      // 1 - 53
-    `week-of-month`("week-of-month"),    // 1 - 6
-    `half-week`("half-week"),            // 1: first half, 2: second half
-    `day-of-month`("day-of-month"),      // 1 - 31, according to month/year
-    `day-of-week`("day-of-week"),        // 1 - 7
-    `day-kind`("day-kind"),              // 1: workday, 2: weekend, 3: holiday
-    hour("hour"),                      // 0 - 23
-    `hour-kind`("hour-kind"),            // 1: work time, 2: off hours, 3: sleeping time
-    minute("minute"),                  // 0 - 59
-    second("second"),                  // 0 - 59
-    `am-pm`("am-pm"),                    // 1, 2
+    datetime("datetime"),                   // YYYY-MM-DD HH:mm:ss
+    `full-datetime`("full-datetime"),
+    date("date"),                           // YYYY-MM-DD
+    time("time"),                           // HH:mm:ss
+    year("year"),                           // 4 digits
+    `half-year`("half-year"),               // 1: first half, 2: second half
+    quarter("quarter"),                     // 1 - 4
+    season("season"),                       // 1: spring, 2: summer, 3: autumn, 4: winter
+    month("month"),                         // 1 - 12
+    `half-month`("half-month"),             // 1: first half, 2: second half
+    `ten-days`("ten-days"),                 // 1, 2, 3
+    `week-of-year`("week-of-year"),         // 1 - 53
+    `week-of-month`("week-of-month"),       // 1 - 6
+    `half-week`("half-week"),               // 1: first half, 2: second half
+    `day-of-month`("day-of-month"),         // 1 - 31, according to month/year
+    `day-of-week`("day-of-week"),           // 1 - 7
+    `day-kind`("day-kind"),                 // 1: workday, 2: weekend, 3: holiday
+    hour("hour"),                           // 0 - 23
+    `hour-kind`("hour-kind"),               // 1: work time, 2: off hours, 3: sleeping time
+    minute("minute"),                       // 0 - 59
+    second("second"),                       // 0 - 59
+    millisecond("millisecond"),             // 0 - 999
+    `am-pm`("am-pm"),                       // 1, 2
 
     // individual
     gender("gender"),
     occupation("occupation"),
-    `date-of-birth`("date-of-birth"),    // YYYY-MM-DD
+    `date-of-birth`("date-of-birth"),       // YYYY-MM-DD
     age("age"),
     `id-no`("id-no"),
     religion("religion"),
