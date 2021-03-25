@@ -2,7 +2,7 @@ package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.console.Favorite
-import com.imma.service.console.FavoriteService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -12,7 +12,7 @@ import io.ktor.routing.*
 fun Route.findFavoriteRoute() {
     get(RouteConstants.FAVORITE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val favorite = FavoriteService(application).findFavoriteById(principal.name)
+        val favorite = Services(application).use { it.favorite { findFavoriteById(principal.name) } }
         if (favorite != null) {
             favorite.userId = null
             call.respond(favorite)
@@ -32,7 +32,7 @@ fun Route.saveFavoriteRoute() {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val favorite = call.receive<Favorite>()
         favorite.userId = principal.name
-        FavoriteService(application).saveFavorite(favorite)
+        Services(application).use { it.favorite { saveFavorite(favorite) } }
         favorite.userId = null
         call.respond(favorite)
     }

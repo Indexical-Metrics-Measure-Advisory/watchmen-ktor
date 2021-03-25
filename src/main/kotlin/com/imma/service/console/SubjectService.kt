@@ -1,19 +1,17 @@
 package com.imma.service.console
 
 import com.imma.model.CollectionNames
-import com.imma.model.admin.Space
 import com.imma.model.console.Subject
 import com.imma.model.determineFakeOrNullId
+import com.imma.persist.core.update
+import com.imma.persist.core.where
+import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class SubjectService(application: Application) : TupleService(application) {
+class SubjectService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun saveSubject(subject: Subject) {
         val fake = determineFakeOrNullId({ subject.subjectId },
@@ -21,48 +19,50 @@ class SubjectService(application: Application) : TupleService(application) {
             { subject.subjectId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(subject)
+            createTuple(subject, Subject::class.java, CollectionNames.SUBJECT)
         } else {
-            updateTuple(subject)
+            updateTuple(subject, Subject::class.java, CollectionNames.SUBJECT)
         }
 
-        ReportService(application).saveReports(subject.reports.onEach {
-            it.connectId = subject.connectId
-            it.subjectId = subject.subjectId
-            it.userId = subject.userId
-        })
+        services.report {
+            saveReports(subject.reports.onEach {
+                it.connectId = subject.connectId
+                it.subjectId = subject.subjectId
+                it.userId = subject.userId
+            })
+        }
     }
 
     fun findSubjectById(subjectId: String): Subject? {
-        return persistKit.findById(subjectId, Subject::class.java, CollectionNames.SUBJECT)
+        return persist().findById(subjectId, Subject::class.java, CollectionNames.SUBJECT)
     }
 
     fun renameSubject(subjectId: String, name: String?) {
-        writeIntoMongo {
-            it.updateFirst(
-                Query.query(Criteria.where("subjectId").`is`(subjectId)),
-                Update().apply {
-                    set("name", name)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                Subject::class.java,
-                CollectionNames.SUBJECT
-            )
-        }
+        persist().updateOne(
+            where {
+                column("subjectId") eq subjectId
+            },
+            update {
+                set("name") to name
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            Subject::class.java, CollectionNames.SUBJECT
+        )
     }
 
     fun deleteSubject(subjectId: String) {
-        writeIntoMongo {
-            // delete reports
-            ReportService(application).deleteReportsBySubject(subjectId)
-            // delete subject
-            it.remove(
-                Query.query(Criteria.where("subjectId").`is`(subjectId)),
-                Subject::class.java,
-                CollectionNames.SUBJECT
-            )
+        // delete reports
+        services.report {
+            deleteReportsBySubject(subjectId)
         }
+        // delete subject
+        persist().delete(
+            where {
+                column("subjectId") eq subjectId
+            },
+            Subject::class.java, CollectionNames.SUBJECT
+        )
     }
 
     @ExperimentalContracts
@@ -71,10 +71,14 @@ class SubjectService(application: Application) : TupleService(application) {
     }
 
     fun listSubjectsByConnectedSpaces(connectedSpaceIds: List<String>): List<Subject> {
-        val query: Query = Query.query(Criteria.where("connectId").`in`(connectedSpaceIds))
-        val subjects = findListFromMongo(Subject::class.java, CollectionNames.SUBJECT, query)
+        val subjects = persist().list(
+            where {
+                column("connectId") `in` connectedSpaceIds
+            },
+            Subject::class.java, CollectionNames.SUBJECT
+        )
 
-        val reports = ReportService(application).listReportsByConnectedSpaces(connectedSpaceIds)
+        val reports = services.report { listReportsByConnectedSpaces(connectedSpaceIds) }
 
         // assemble reports to subjects
         val subjectMap = subjects.map { it.subjectId to it }.toMap()
@@ -88,22 +92,21 @@ class SubjectService(application: Application) : TupleService(application) {
     }
 
     fun deleteSubjectsByConnectedSpace(connectId: String) {
-        writeIntoMongo {
-            it.remove(
-                Query.query(Criteria.where("connectId").`is`(connectId)),
-                Subject::class.java,
-                CollectionNames.SUBJECT
-            )
-        }
+        persist().delete(
+            where {
+                column("connectId") eq connectId
+            },
+            Subject::class.java, CollectionNames.SUBJECT
+        )
     }
 
     fun isSubjectBelongsTo(subjectId: String, userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("subjectId").`is`(subjectId).and("userId").`is`(userId)),
-                Subject::class.java,
-                CollectionNames.SUBJECT
-            )
-        }
+        return persist().exists(
+            where {
+                column("subjectId") eq subjectId
+                column("userId") eq userId
+            },
+            Subject::class.java, CollectionNames.SUBJECT
+        )
     }
 }

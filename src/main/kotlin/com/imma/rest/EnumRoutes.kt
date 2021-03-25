@@ -2,7 +2,7 @@ package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.core.Enum
-import com.imma.service.core.EnumService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -14,7 +14,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.saveEnumRoute() {
     post(RouteConstants.ENUM_SAVE) {
         val enumeration = call.receive<Enum>()
-        EnumService(application).saveEnum(enumeration)
+        Services(application).use { it.enumeration { saveEnum(enumeration) } }
         call.respond(enumeration)
     }
 }
@@ -26,7 +26,7 @@ fun Route.findEnumByIdRoute() {
             // TODO a empty object
             call.respond(mapOf<String, String>())
         } else {
-            val enumeration = EnumService(application).findEnumById(enumerationId)
+            val enumeration = Services(application).use { it.enumeration { findEnumById(enumerationId) } }
             if (enumeration == null) {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
@@ -39,14 +39,14 @@ fun Route.findEnumByIdRoute() {
 
 fun Route.listEnumsForHolderRoute() {
     post(RouteConstants.ENUM_LIST_FOR_HOLDER) {
-        val enumerations = EnumService(application).findEnumsForHolder()
+        val enumerations = Services(application).use { it.enumeration { findEnumsForHolder() } }
         call.respond(enumerations)
     }
 }
 
 fun Route.findAllEnumsRoute() {
     get(RouteConstants.ENUM_LIST_ALL) {
-        val enumerations = EnumService(application).findAllEnums()
+        val enumerations = Services(application).use { it.enumeration { findAllEnums() } }
         call.respond(enumerations)
     }
 }

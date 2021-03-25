@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.*
 import com.imma.rest.*
-import com.imma.service.admin.UserService
+import com.imma.service.Services
 import com.imma.utils.EnvConstants
 import com.imma.utils.isDev
 import io.ktor.application.*
@@ -71,7 +71,7 @@ fun Application.module(testing: Boolean = false) {
                         if (userId == adminUsername && adminEnabled) {
                             // pass validation when admin enabled and username matched
                             UserIdPrincipal(userId)
-                        } else if (UserService(application).isActive(userId)) {
+                        } else if (Services(application).use { it.user { isActive(userId) } }) {
                             UserIdPrincipal(userId)
                         } else {
                             null
@@ -94,7 +94,7 @@ fun Application.module(testing: Boolean = false) {
                 // authorise anything when admin enabled and username matched
                 true
             } else {
-                UserService(application).isAdmin(userId)
+                Services(application).use { it.user { isAdmin(userId) } }
             }
         })
     }

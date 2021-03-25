@@ -5,16 +5,15 @@ import com.imma.model.console.Report
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
+import com.imma.persist.core.update
+import com.imma.persist.core.where
+import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class ReportService(application: Application) : TupleService(application) {
+class ReportService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun saveReport(report: Report) {
         val fake = determineFakeOrNullId({ report.reportId },
@@ -22,39 +21,37 @@ class ReportService(application: Application) : TupleService(application) {
             { report.reportId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(report)
+            createTuple(report, Report::class.java, CollectionNames.REPORT)
         } else {
-            updateTuple(report)
+            updateTuple(report, Report::class.java, CollectionNames.REPORT)
         }
     }
 
     fun findReportById(reportId: String): Report? {
-        return persistKit.findById(reportId, Report::class.java, CollectionNames.REPORT)
+        return persist().findById(reportId, Report::class.java, CollectionNames.REPORT)
     }
 
     fun renameReport(reportId: String, name: String?) {
-        writeIntoMongo {
-            it.updateFirst(
-                Query.query(Criteria.where("reportId").`is`(reportId)),
-                Update().apply {
-                    set("name", name)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                Report::class.java,
-                CollectionNames.REPORT
-            )
-        }
+        persist().updateOne(
+            where {
+                column("reportId") eq reportId
+            },
+            update {
+                set("name") to name
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            Report::class.java, CollectionNames.REPORT
+        )
     }
 
     fun deleteReport(reportId: String) {
-        writeIntoMongo {
-            it.remove(
-                Query.query(Criteria.where("reportId").`is`(reportId)),
-                Report::class.java,
-                CollectionNames.REPORT
-            )
-        }
+        persist().delete(
+            where {
+                column("reportId") eq reportId
+            },
+            Report::class.java, CollectionNames.REPORT
+        )
     }
 
     @ExperimentalContracts
@@ -63,46 +60,55 @@ class ReportService(application: Application) : TupleService(application) {
     }
 
     fun listReportsByConnectedSpaces(connectedSpaceIds: List<String>): List<Report> {
-        val query: Query = Query.query(Criteria.where("connectId").`in`(connectedSpaceIds))
-        return findListFromMongo(Report::class.java, CollectionNames.REPORT, query)
+        return persist().list(
+            where {
+                column("connectId") `in` connectedSpaceIds
+            },
+            Report::class.java, CollectionNames.REPORT
+        )
     }
 
     fun deleteReportsByConnectedSpace(connectId: String) {
-        writeIntoMongo {
-            it.remove(
-                Query.query(Criteria.where("connectId").`is`(connectId)),
-                Report::class.java,
-                CollectionNames.REPORT
-            )
-        }
+        persist().delete(
+            where {
+                column("connectId") eq connectId
+            },
+            Report::class.java, CollectionNames.REPORT
+        )
     }
 
     fun deleteReportsBySubject(subjectId: String) {
-        writeIntoMongo {
-            it.remove(
-                Query.query(Criteria.where("subjectId").`is`(subjectId)),
-                Report::class.java,
-                CollectionNames.REPORT
-            )
-        }
+        persist().delete(
+            where {
+                column("subjectId") eq subjectId
+            },
+            Report::class.java, CollectionNames.REPORT
+        )
     }
 
     fun isReportBelongsTo(reportId: String, userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("reportId").`is`(reportId).and("userId").`is`(userId)),
-                Report::class.java,
-                CollectionNames.REPORT
-            )
-        }
+        return persist().exists(
+            where {
+                column("reportId") eq reportId
+                column("userId") eq userId
+            },
+            Report::class.java, CollectionNames.REPORT
+        )
     }
 
     fun findReportsByName(name: String?, pageable: Pageable): DataPage<Report> {
-        val query: Query = if (name!!.isEmpty()) {
-            Query.query(Criteria.where("name").all())
+        return if (name.isNullOrEmpty()) {
+            persist().page(
+                pageable, Report::class.java, CollectionNames.REPORT
+            )
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            persist().page(
+                where {
+                    column("name") regex name
+                },
+                pageable,
+                Report::class.java, CollectionNames.REPORT
+            )
         }
-        return findPageFromMongo(Report::class.java, CollectionNames.REPORT, query, pageable)
     }
 }

@@ -3,16 +3,15 @@ package com.imma.service.console
 import com.imma.model.CollectionNames
 import com.imma.model.console.ConnectedSpace
 import com.imma.model.determineFakeOrNullId
+import com.imma.persist.core.update
+import com.imma.persist.core.where
+import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class ConnectedSpaceService(application: Application) : TupleService(application) {
+class ConnectedSpaceService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun saveConnectedSpace(connectedSpace: ConnectedSpace) {
         val fake = determineFakeOrNullId({ connectedSpace.connectId },
@@ -20,55 +19,59 @@ class ConnectedSpaceService(application: Application) : TupleService(application
             { connectedSpace.connectId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(connectedSpace)
+            createTuple(connectedSpace, ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE)
         } else {
-            updateTuple(connectedSpace)
+            updateTuple(connectedSpace, ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE)
         }
 
-        SubjectService(application).saveSubjects(connectedSpace.subjects.onEach {
-            it.connectId = connectedSpace.connectId
-            it.userId = connectedSpace.userId
-        })
+        services.subject {
+            saveSubjects(connectedSpace.subjects.onEach {
+                it.connectId = connectedSpace.connectId
+                it.userId = connectedSpace.userId
+            })
+        }
     }
 
     fun renameConnectedSpace(connectId: String, name: String?) {
-        writeIntoMongo {
-            it.updateFirst(
-                Query.query(Criteria.where("connectId").`is`(connectId)),
-                Update().apply {
-                    set("name", name)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                ConnectedSpace::class.java,
-                CollectionNames.CONNECTED_SPACE
-            )
-        }
+        persist().updateOne(
+            where {
+                column("connectId") eq connectId
+            },
+            update {
+                set("name") to name
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
+        )
     }
 
     fun deleteConnectedSpace(connectId: String) {
-        writeIntoMongo {
-            // delete graphics
-            ConnectedSpaceGraphicsService(application).deleteConnectedSpaceGraphics(connectId)
-            // delete reports
-            ReportService(application).deleteReportsByConnectedSpace(connectId)
-            // delete subjects
-            SubjectService(application).deleteSubjectsByConnectedSpace(connectId)
-            // delete connected space
-            it.remove(
-                Query.query(Criteria.where("connectId").`is`(connectId)),
-                ConnectedSpace::class.java,
-                CollectionNames.CONNECTED_SPACE
-            )
-        }
+        // delete graphics
+        services.connectedSpaceGraphics { deleteConnectedSpaceGraphics(connectId) }
+        // delete reports
+        services.report { deleteReportsByConnectedSpace(connectId) }
+        // delete subjects
+        services.subject { deleteSubjectsByConnectedSpace(connectId) }
+        // delete connected space
+        persist().delete(
+            where {
+                column("connectId") eq connectId
+            },
+            ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
+        )
     }
 
     fun listConnectedSpaceByUser(userId: String): List<ConnectedSpace> {
-        val query: Query = Query.query(Criteria.where("userId").`is`(userId))
-        val connectedSpaces = findListFromMongo(ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE, query)
+        val connectedSpaces = persist().list(
+            where {
+                column("userId") eq userId
+            },
+            ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
+        )
 
         val connectedSpaceIds = connectedSpaces.map { it.connectId!! }
-        val subjects = SubjectService(application).listSubjectsByConnectedSpaces(connectedSpaceIds)
+        val subjects = services.subject { listSubjectsByConnectedSpaces(connectedSpaceIds) }
 
         // assemble subjects to connected spaces
         val connectedSpaceMap = connectedSpaces.map { it.connectId to it }.toMap()
@@ -82,13 +85,13 @@ class ConnectedSpaceService(application: Application) : TupleService(application
     }
 
     fun isConnectedSpaceBelongsTo(connectId: String, userId: String): Boolean {
-        return getFromMongo {
-            it.exists(
-                Query.query(Criteria.where("connectId").`is`(connectId).and("userId").`is`(userId)),
-                ConnectedSpace::class.java,
-                CollectionNames.CONNECTED_SPACE
-            )
-        }
+        return persist().exists(
+            where {
+                column("connectId") eq connectId
+                column("userId") eq userId
+            },
+            ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
+        )
     }
 }
 

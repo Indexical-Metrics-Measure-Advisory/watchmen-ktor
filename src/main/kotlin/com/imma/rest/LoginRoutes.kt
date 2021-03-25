@@ -1,10 +1,10 @@
 package com.imma.rest
 
-import com.imma.service.login.LoginService
 import com.auth0.jwt.JWT
 import com.imma.auth.jwtAlgorithm
 import com.imma.auth.jwtAudience
 import com.imma.auth.jwtIssuer
+import com.imma.service.Services
 import com.imma.utils.EnvConstants
 import io.ktor.application.*
 import io.ktor.http.*
@@ -20,7 +20,7 @@ fun Route.loginRoute() {
         val parameters = call.receiveParameters()
         val username = parameters["username"]
         val password = parameters["password"]
-        val user = LoginService(application).login(username, password)
+        val user = Services(application).use { it.auth { login(username, password) } }
         if (user == null) {
             call.respond(HttpStatusCode.BadRequest, "Incorrect username or password.")
         } else if (!user.active) {

@@ -2,28 +2,26 @@ package com.imma.service.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.core.PipelineGraphics
+import com.imma.persist.core.update
+import com.imma.persist.core.where
 import com.imma.service.Service
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
+import com.imma.service.Services
 
-class PipelineGraphicsService(application: Application) : Service(application) {
+class PipelineGraphicsService(services: Services) : Service(services) {
     fun findPipelineGraphicsById(userId: String): PipelineGraphics? {
-        return persistKit.findById(userId, PipelineGraphics::class.java, CollectionNames.PIPELINE_GRAPHICS)
+        return persist().findById(userId, PipelineGraphics::class.java, CollectionNames.PIPELINE_GRAPHICS)
     }
 
     fun savePipelineGraphicsByUser(graphics: PipelineGraphics) {
-        writeIntoMongo {
-            it.upsert(
-                Query.query(Criteria.where("userId").`is`(graphics.userId)),
-                Update().apply {
-                    set("userId", graphics.userId)
-                    set("topics", graphics.topics)
-                },
-                PipelineGraphics::class.java,
-                CollectionNames.PIPELINE_GRAPHICS
-            )
-        }
+        persist().upsert(
+            where {
+                column("userId") eq graphics.userId
+            },
+            update {
+                set("userId") to graphics.userId
+                set("topics") to graphics.topics
+            },
+            PipelineGraphics::class.java, CollectionNames.PIPELINE_GRAPHICS
+        )
     }
 }

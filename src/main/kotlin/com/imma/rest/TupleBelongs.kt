@@ -1,9 +1,6 @@
 package com.imma.rest
 
-import com.imma.service.console.ConnectedSpaceService
-import com.imma.service.console.DashboardService
-import com.imma.service.console.ReportService
-import com.imma.service.console.SubjectService
+import com.imma.service.Services
 import com.imma.utils.isFakeOrNull
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -20,7 +17,7 @@ fun PipelineContext<Unit, ApplicationCall>.connectedSpaceBelongsToCurrentUser(
         // belongs to current user anyway
         connectId.isFakeOrNull() -> true
         // check persist
-        else -> ConnectedSpaceService(application).isConnectedSpaceBelongsTo(connectId, principal.name)
+        else -> Services(application).use { it.connectedSpace { isConnectedSpaceBelongsTo(connectId, principal.name) } }
     }
 }
 
@@ -34,7 +31,7 @@ fun PipelineContext<Unit, ApplicationCall>.subjectBelongsToCurrentUser(
         // belongs to current user anyway
         subjectId.isFakeOrNull() -> true
         // check persist
-        else -> SubjectService(application).isSubjectBelongsTo(subjectId, principal.name)
+        else -> Services(application).use { it.subject { isSubjectBelongsTo(subjectId, principal.name) } }
     }
 }
 
@@ -48,7 +45,7 @@ fun PipelineContext<Unit, ApplicationCall>.reportBelongsToCurrentUser(
         // belongs to current user anyway
         reportId.isFakeOrNull() -> true
         // check persist
-        else -> ReportService(application).isReportBelongsTo(reportId, principal.name)
+        else -> Services(application).use { it.report { isReportBelongsTo(reportId, principal.name) } }
     }
 }
 
@@ -62,6 +59,6 @@ fun PipelineContext<Unit, ApplicationCall>.dashboardBelongsToCurrentUser(
         // belongs to current user anyway
         dashboardId.isFakeOrNull() -> true
         // check persist
-        else -> DashboardService(application).isDashboardBelongsTo(dashboardId, principal.name)
+        else -> Services(application).use { it.dashboard { isDashboardBelongsTo(dashboardId, principal.name) } }
     }
 }

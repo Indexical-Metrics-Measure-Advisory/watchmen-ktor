@@ -3,50 +3,50 @@ package com.imma.service.core
 import com.imma.model.CollectionNames
 import com.imma.model.core.Enum
 import com.imma.model.core.EnumForHolder
+import com.imma.model.core.EnumItem
 import com.imma.model.determineFakeOrNullId
+import com.imma.persist.core.select
+import com.imma.service.Services
 import com.imma.service.TupleService
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
 import kotlin.contracts.ExperimentalContracts
 
-class EnumService(application: Application) : TupleService(application) {
+class EnumService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun saveEnum(enumeration: Enum) {
         val fake =
             determineFakeOrNullId({ enumeration.enumId }, true, { enumeration.enumId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(enumeration)
+            createTuple(enumeration, Enum::class.java, CollectionNames.ENUM)
         } else {
-            updateTuple(enumeration)
+            updateTuple(enumeration, Enum::class.java, CollectionNames.ENUM)
         }
 
         // save collection name separately
         val name = enumeration.name?.replace(' ', '_')?.replace('-', '_')
-        writeIntoMongo {
-            val collectionName = "e_${name}"
-            val query: Query = Query.query(Criteria.where("code").all())
-            it.remove(query, collectionName)
-            if (enumeration.items.isNotEmpty()) {
-                it.insert(enumeration.items, collectionName)
-            }
+        val collectionName = "e_${name}"
+        persist().deleteAll(EnumItem::class.java, collectionName)
+        if (enumeration.items.isNotEmpty()) {
+            persist().insertAll(enumeration.items, EnumItem::class.java, collectionName)
         }
     }
 
     fun findEnumById(enumId: String): Enum? {
-        return persistKit.findById(enumId, Enum::class.java, CollectionNames.ENUM)
+        return persist().findById(enumId, Enum::class.java, CollectionNames.ENUM)
     }
 
     fun findEnumsForHolder(): List<EnumForHolder> {
-        val query: Query = Query.query(Criteria.where("name").all())
-        query.fields().include("enumId", "name")
-        return findListFromMongo(EnumForHolder::class.java, CollectionNames.ENUM, query)
+        return persist().listAll(
+            select {
+                column("enumId")
+                column("name")
+            },
+            EnumForHolder::class.java, CollectionNames.ENUM
+        )
     }
 
     fun findAllEnums(): List<Enum> {
-        val query: Query = Query.query(Criteria.where("name").all())
-        return findListFromMongo(Enum::class.java, CollectionNames.ENUM, query)
+        return persist().listAll(Enum::class.java, CollectionNames.ENUM)
     }
 }
 

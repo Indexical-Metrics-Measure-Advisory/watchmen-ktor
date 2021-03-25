@@ -3,60 +3,56 @@ package com.imma.service.core
 import com.imma.model.CollectionNames
 import com.imma.model.core.Pipeline
 import com.imma.model.determineFakeOrNullId
+import com.imma.persist.core.update
+import com.imma.persist.core.where
+import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
-class PipelineService(application: Application) : TupleService(application) {
+class PipelineService(services: Services) : TupleService(services) {
     @ExperimentalContracts
     fun savePipeline(pipeline: Pipeline) {
         val fake =
             determineFakeOrNullId({ pipeline.pipelineId }, true, { pipeline.pipelineId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(pipeline)
+            createTuple(pipeline, Pipeline::class.java, CollectionNames.PIPELINE)
         } else {
-            updateTuple(pipeline)
+            updateTuple(pipeline, Pipeline::class.java, CollectionNames.PIPELINE)
         }
     }
 
     fun renamePipeline(pipelineId: String, name: String?) {
-        writeIntoMongo {
-            it.updateFirst(
-                Query.query(Criteria.where("pipelineId").`is`(pipelineId)),
-                Update().apply {
-                    set("name", name)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                Pipeline::class.java,
-                CollectionNames.PIPELINE
-            )
-        }
+        persist().updateOne(
+            where {
+                column("pipelineId") eq pipelineId
+            },
+            update {
+                set("name") to name
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            Pipeline::class.java, CollectionNames.PIPELINE
+        )
     }
 
     fun togglePipelineEnablement(pipelineId: String, enablement: Boolean) {
-        writeIntoMongo {
-            it.updateFirst(
-                Query.query(Criteria.where("pipelineId").`is`(pipelineId)),
-                Update().apply {
-                    set("enabled", enablement)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                Pipeline::class.java,
-                CollectionNames.PIPELINE
-            )
-        }
+        persist().updateOne(
+            where {
+                column("pipelineId") eq pipelineId
+            },
+            update {
+                set("enabled") to enablement
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            Pipeline::class.java, CollectionNames.PIPELINE
+        )
     }
 
     fun findAllPipelines(): List<Pipeline> {
-        val query: Query = Query.query(Criteria.where("name").all())
-        return findListFromMongo(Pipeline::class.java, CollectionNames.PIPELINE, query)
+        return persist().listAll(Pipeline::class.java, CollectionNames.PIPELINE)
     }
 }

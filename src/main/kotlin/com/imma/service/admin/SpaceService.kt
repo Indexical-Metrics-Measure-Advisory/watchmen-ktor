@@ -19,9 +19,9 @@ class SpaceService(services: Services) : TupleService(services) {
         val fake = determineFakeOrNullId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(space)
+            createTuple(space, Space::class.java, CollectionNames.SPACE)
         } else {
-            updateTuple(space)
+            updateTuple(space, Space::class.java, CollectionNames.SPACE)
         }
 
         val userGroupIds = space.groupIds
@@ -55,16 +55,16 @@ class SpaceService(services: Services) : TupleService(services) {
         return if (name.isNullOrEmpty()) {
             persist().listAll(
                 select {
-                    include("spaceId")
-                    include("name")
+                    column("spaceId")
+                    column("name")
                 },
                 SpaceForHolder::class.java, CollectionNames.SPACE
             )
         } else {
             persist().list(
                 select {
-                    include("spaceId")
-                    include("name")
+                    column("spaceId")
+                    column("name")
                 },
                 where {
                     column("name") regex name
@@ -77,8 +77,8 @@ class SpaceService(services: Services) : TupleService(services) {
     fun findSpacesByIdsForHolder(spaceIds: List<String>): List<SpaceForHolder> {
         return persist().list(
             select {
-                include("spaceId")
-                include("name")
+                column("spaceId")
+                column("name")
             },
             where {
                 column("spaceId") `in` spaceIds
@@ -105,10 +105,10 @@ class SpaceService(services: Services) : TupleService(services) {
 
         return persist().list(
             select {
-                include("spaceId")
-                include("name")
-                include("topicIds")
-                include("description")
+                column("spaceId")
+                column("name")
+                column("topicIds")
+                column("description")
             },
             where {
                 column("spaceId") `in` spaceIds

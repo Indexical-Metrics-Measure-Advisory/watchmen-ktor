@@ -3,7 +3,7 @@ package com.imma.persist.core
 class Select {
     val parts: MutableList<String> = mutableListOf()
 
-    fun include(name: String) {
+    fun column(name: String) {
         parts.add(name)
     }
 }

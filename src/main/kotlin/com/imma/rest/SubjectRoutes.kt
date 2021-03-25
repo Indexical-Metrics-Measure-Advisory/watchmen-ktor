@@ -2,7 +2,7 @@ package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.console.Subject
-import com.imma.service.console.SubjectService
+import com.imma.service.Services
 import com.imma.utils.isFake
 import com.imma.utils.isFakeOrNull
 import io.ktor.application.*
@@ -61,13 +61,14 @@ fun Route.subjectSaveByMeRoute() {
                     // in this case, subject must be valid, it is checked in above logic already
                     connectId.isNullOrBlank() -> {
                         // must exists, it is checked in above logic already
-                        val existsSubject = SubjectService(application).findSubjectById(subject.subjectId!!)!!
+                        val existsSubject =
+                            Services(application).use { it.subject { findSubjectById(subject.subjectId!!)!! } }
                         subject.connectId = existsSubject.connectId
                     }
                     // if connect id in query parameter exists, assign to subject
                     else -> subject.connectId = connectId
                 }
-                SubjectService(application).saveSubject(subject)
+                Services(application).use { it.subject { saveSubject(subject) } }
                 // remove ids when respond to client
                 subject.connectId = null
                 subject.userId = null
@@ -92,7 +93,7 @@ fun Route.subjectRenameByMeRoute() {
                 "Cannot use subject belongs to others."
             )
             else -> {
-                SubjectService(application).renameSubject(subjectId, name)
+                Services(application).use { it.subject { renameSubject(subjectId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -113,7 +114,7 @@ fun Route.subjectDeleteByMeRoute() {
                 "Cannot use subject belongs to others."
             )
             else -> {
-                SubjectService(application).deleteSubject(subjectId)
+                Services(application).use { it.subject { deleteSubject(subjectId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }

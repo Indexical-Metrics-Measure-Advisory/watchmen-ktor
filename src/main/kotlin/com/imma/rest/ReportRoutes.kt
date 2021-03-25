@@ -3,8 +3,7 @@ package com.imma.rest
 import com.imma.auth.Roles
 import com.imma.model.console.Report
 import com.imma.model.page.Pageable
-import com.imma.service.console.ReportService
-import com.imma.service.console.SubjectService
+import com.imma.service.Services
 import com.imma.utils.isFake
 import com.imma.utils.isFakeOrNull
 import io.ktor.application.*
@@ -64,18 +63,19 @@ fun Route.reportSaveByMeRoute() {
                     // in this case, report must be valid, it is checked in above logic already
                     subjectId.isNullOrBlank() -> {
                         // must exists, it is checked in above logic already
-                        val existsReport = ReportService(application).findReportById(report.reportId!!)!!
+                        val existsReport =
+                            Services(application).use { it.report { findReportById(report.reportId!!)!! } }
                         report.connectId = existsReport.connectId
                         report.subjectId = existsReport.subjectId
                     }
                     // if subject id in query parameter exists, assign to report
                     else -> {
-                        val existsSubject = SubjectService(application).findSubjectById(subjectId)!!
+                        val existsSubject = Services(application).use { it.subject { findSubjectById(subjectId)!! } }
                         report.connectId = existsSubject.connectId
                         report.subjectId = subjectId
                     }
                 }
-                ReportService(application).saveReport(report)
+                Services(application).use { it.report { saveReport(report) } }
                 // remove ids when respond to client
                 report.connectId = null
                 report.subjectId = null
@@ -101,7 +101,7 @@ fun Route.reportRenameByMeRoute() {
                 "Cannot use report belongs to others."
             )
             else -> {
-                ReportService(application).renameReport(reportId, name)
+                Services(application).use { it.report { renameReport(reportId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -122,7 +122,7 @@ fun Route.reportDeleteByMeRoute() {
                 "Cannot use report belongs to others."
             )
             else -> {
-                ReportService(application).deleteReport(reportId)
+                Services(application).use { it.report { deleteReport(reportId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -136,7 +136,7 @@ fun Route.listReportsByNameRoute() {
     post(RouteConstants.REPORT_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = ReportService(application).findReportsByName(name, pageable)
+        val page = Services(application).use { it.report { findReportsByName(name, pageable) } }
         call.respond(page)
     }
 }

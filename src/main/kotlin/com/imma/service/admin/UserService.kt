@@ -8,8 +8,8 @@ import com.imma.model.admin.UserForHolder
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
-import com.imma.persist.core.change
 import com.imma.persist.core.select
+import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
@@ -37,9 +37,9 @@ class UserService(services: Services) : TupleService(services) {
         val fake = determineFakeOrNullId({ user.userId }, true, { user.userId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(user)
+            createTuple(user, User::class.java, CollectionNames.USER)
         } else {
-            updateTuple(user)
+            updateTuple(user, User::class.java, CollectionNames.USER)
         }
 
         updateCredential(user)
@@ -79,16 +79,16 @@ class UserService(services: Services) : TupleService(services) {
         return if (name.isNullOrEmpty()) {
             persist().listAll(
                 select {
-                    include("userId")
-                    include("name")
+                    column("userId")
+                    column("name")
                 },
                 UserForHolder::class.java, CollectionNames.USER
             )
         } else {
             persist().list(
                 select {
-                    include("userId")
-                    include("name")
+                    column("userId")
+                    column("name")
                 },
                 where {
                     column("name") regex name
@@ -101,8 +101,8 @@ class UserService(services: Services) : TupleService(services) {
     fun findUsersByIdsForHolder(userIds: List<String>): List<UserForHolder> {
         return persist().list(
             select {
-                include("userId")
-                include("name")
+                column("userId")
+                column("name")
             },
             where {
                 column("userId") `in` userIds
@@ -116,7 +116,7 @@ class UserService(services: Services) : TupleService(services) {
             where {
                 column("groupIds") include userGroupId
             },
-            change {
+            update {
                 pull(userGroupId) from "groupIds"
                 set("lastModifyTime") to getCurrentDateTimeAsString()
                 set("lastModified") to getCurrentDateTime()
@@ -130,7 +130,7 @@ class UserService(services: Services) : TupleService(services) {
             where {
                 column("userId") `in` userIds
             },
-            change {
+            update {
                 push(userGroupId) into "groupIds"
                 set("lastModifyTime") to getCurrentDateTimeAsString()
                 set("lastModified") to getCurrentDateTime()

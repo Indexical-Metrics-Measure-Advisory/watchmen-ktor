@@ -3,7 +3,7 @@ package com.imma.service.admin
 import com.imma.model.CollectionNames
 import com.imma.model.admin.UserCredential
 import com.imma.model.assignDateTimePair
-import com.imma.persist.core.change
+import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Service
 import com.imma.service.Services
@@ -18,7 +18,7 @@ class UserCredentialService(services: Services) : Service(services) {
             where {
                 column("userId") eq credential.userId
             },
-            change {
+            update {
                 set("userId") to credential.userId
                 set("name") to credential.name
                 set("credential") to credential.credential

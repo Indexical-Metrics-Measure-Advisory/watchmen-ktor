@@ -2,42 +2,43 @@ package com.imma.service.console
 
 import com.imma.model.CollectionNames
 import com.imma.model.console.ConnectedSpaceGraphics
+import com.imma.persist.core.update
+import com.imma.persist.core.where
 import com.imma.service.Service
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
+import com.imma.service.Services
 
-class ConnectedSpaceGraphicsService(application: Application) : Service(application) {
+class ConnectedSpaceGraphicsService(services: Services) : Service(services) {
     fun saveConnectedSpaceGraphics(graphics: ConnectedSpaceGraphics) {
-        writeIntoMongo {
-            it.upsert(
-                Query.query(Criteria.where("connectId").`is`(graphics.connectId)),
-                Update().apply {
-                    set("connectId", graphics.connectId)
-                    set("userId", graphics.userId)
-                    set("topics", graphics.topics)
-                    set("subjects", graphics.subjects)
-                    set("reports", graphics.reports)
-                },
-                ConnectedSpaceGraphics::class.java,
-                CollectionNames.CONNECTED_SPACE_GRAPHICS
-            )
-        }
+        persist().upsert(
+            where {
+                column("connectId") eq graphics.connectId
+            },
+            update {
+                set("connectId") to graphics.connectId
+                set("userId") to graphics.userId
+                set("topics") to graphics.topics
+                set("subjects") to graphics.subjects
+                set("reports") to graphics.reports
+            },
+            ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS
+        )
     }
 
     fun listConnectedSpaceGraphicsByUser(userId: String): List<ConnectedSpaceGraphics> {
-        val query: Query = Query.query(Criteria.where("userId").`is`(userId))
-        return findListFromMongo(ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS, query)
+        return persist().list(
+            where {
+                column("userId") eq userId
+            },
+            ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS
+        )
     }
 
     fun deleteConnectedSpaceGraphics(connectId: String) {
-        writeIntoMongo {
-            it.remove(
-                Query.query(Criteria.where("connectId").`is`(connectId)),
-                ConnectedSpaceGraphics::class.java,
-                CollectionNames.CONNECTED_SPACE_GRAPHICS
-            )
-        }
+        persist().delete(
+            where {
+                column("connectId") eq connectId
+            },
+            ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS
+        )
     }
 }

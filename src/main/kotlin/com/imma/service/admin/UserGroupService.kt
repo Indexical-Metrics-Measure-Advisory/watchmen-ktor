@@ -6,14 +6,13 @@ import com.imma.model.admin.UserGroupForHolder
 import com.imma.model.determineFakeOrNullId
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
+import com.imma.persist.core.select
+import com.imma.persist.core.update
+import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
-import io.ktor.application.*
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import kotlin.contracts.ExperimentalContracts
 
 class UserGroupService(services: Services) : TupleService(services) {
@@ -25,9 +24,9 @@ class UserGroupService(services: Services) : TupleService(services) {
             { userGroup.userGroupId = nextSnowflakeId().toString() })
 
         if (fake) {
-            createTuple(userGroup)
+            createTuple(userGroup, UserGroup::class.java, CollectionNames.USER_GROUP)
         } else {
-            updateTuple(userGroup)
+            updateTuple(userGroup, UserGroup::class.java, CollectionNames.USER_GROUP)
         }
 
         val userIds = userGroup.userIds
@@ -44,62 +43,89 @@ class UserGroupService(services: Services) : TupleService(services) {
     }
 
     fun findUserGroupsByName(name: String?, pageable: Pageable): DataPage<UserGroup> {
-        val query: Query = if (name.isNullOrEmpty()) {
-            Query.query(Criteria.where("name").all())
+        return if (name.isNullOrEmpty()) {
+            persist().page(pageable, UserGroup::class.java, CollectionNames.USER_GROUP)
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            persist().page(
+                where {
+                    column("name") regex name
+                },
+                pageable,
+                UserGroup::class.java, CollectionNames.USER_GROUP
+            )
         }
-        return findPageFromMongo(UserGroup::class.java, CollectionNames.USER_GROUP, query, pageable)
     }
 
     fun findUserGroupsByNameForHolder(name: String?): List<UserGroupForHolder> {
-        val query: Query = if (name.isNullOrEmpty()) {
-            Query.query(Criteria.where("name").all())
+        return if (name.isNullOrEmpty()) {
+            persist().listAll(
+                select {
+                    column("userGroupId")
+                    column("name")
+                },
+                UserGroupForHolder::class.java, CollectionNames.USER_GROUP
+            )
         } else {
-            Query.query(Criteria.where("name").regex(name, "i"))
+            persist().list(
+                select {
+                    column("userGroupId")
+                    column("name")
+                },
+                where {
+                    column("name") regex name
+                },
+                UserGroupForHolder::class.java, CollectionNames.USER_GROUP
+            )
         }
-        query.fields().include("userGroupId", "name")
-        return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
     }
 
     fun findUserGroupsByIds(userGroupIds: List<String>): List<UserGroup> {
-        val query: Query = Query.query(Criteria.where("userGroupId").`in`(userGroupIds))
-        return findListFromMongo(UserGroup::class.java, CollectionNames.USER_GROUP, query)
+        return persist().list(
+            where {
+                column("userGroupId") `in` userGroupIds
+            },
+            UserGroup::class.java, CollectionNames.USER_GROUP
+        )
     }
 
     fun findUserGroupsByIdsForHolder(userGroupIds: List<String>): List<UserGroupForHolder> {
-        val query: Query = Query.query(Criteria.where("userGroupId").`in`(userGroupIds))
-        query.fields().include("userGroupId", "name")
-        return findListFromMongo(UserGroupForHolder::class.java, CollectionNames.USER_GROUP, query)
+        return persist().list(
+            select {
+                column("userGroupId")
+                column("name")
+            },
+            where {
+                column("userGroupId") `in` userGroupIds
+            },
+            UserGroupForHolder::class.java, CollectionNames.USER_GROUP
+        )
     }
 
     fun unassignSpace(spaceId: String) {
-        writeIntoMongo {
-            it.updateMulti(
-                Query.query(Criteria.where("spaceIds").`is`(spaceId)),
-                Update().apply {
-                    pull("spaceIds", spaceId)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                UserGroup::class.java,
-                CollectionNames.USER_GROUP
-            )
-        }
+        persist().update(
+            where {
+                column("spaceIds") eq spaceId
+            },
+            update {
+                pull(spaceId) from "spaceIds"
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            UserGroup::class.java, CollectionNames.USER_GROUP
+        )
     }
 
     fun assignSpace(userGroupIds: List<String>, spaceId: String) {
-        writeIntoMongo {
-            it.updateMulti(
-                Query.query(Criteria.where("userGroupId").`in`(userGroupIds)),
-                Update().apply {
-                    push("spaceIds", spaceId)
-                    set("lastModifyTime", getCurrentDateTimeAsString())
-                    set("lastModified", getCurrentDateTime())
-                },
-                UserGroup::class.java,
-                CollectionNames.USER_GROUP
-            )
-        }
+        persist().update(
+            where {
+                column("userGroupId") `in` userGroupIds
+            },
+            update {
+                push(spaceId) into "spaceIds"
+                set("lastModifyTime") to getCurrentDateTimeAsString()
+                set("lastModified") to getCurrentDateTime()
+            },
+            UserGroup::class.java, CollectionNames.USER_GROUP
+        )
     }
 }

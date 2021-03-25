@@ -3,8 +3,7 @@ package com.imma.rest
 import com.imma.auth.Roles
 import com.imma.model.console.ConnectedSpace
 import com.imma.model.console.ConnectedSpaceGraphics
-import com.imma.service.console.ConnectedSpaceGraphicsService
-import com.imma.service.console.ConnectedSpaceService
+import com.imma.service.Services
 import com.imma.utils.isFakeOrNull
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -48,7 +47,7 @@ fun Route.connectSpaceByMeRoute() {
             else -> {
                 // assign to current authenticated user
                 connectedSpace.userId = principal.name
-                ConnectedSpaceService(application).saveConnectedSpace(connectedSpace)
+                Services(application).use { it.connectedSpace { saveConnectedSpace(connectedSpace) } }
 
                 clearUnnecessaryFields(connectedSpace)
                 call.respond(connectedSpace)
@@ -72,7 +71,7 @@ fun Route.connectedSpaceRenameByMeRoute() {
                 "Cannot use connected space belongs to others."
             )
             else -> {
-                ConnectedSpaceService(application).renameConnectedSpace(connectId, name)
+                Services(application).use { it.connectedSpace { renameConnectedSpace(connectId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -93,7 +92,7 @@ fun Route.connectedSpaceDeleteByMeRoute() {
                 "Cannot use connected space belongs to others."
             )
             else -> {
-                ConnectedSpaceService(application).deleteConnectedSpace(connectId)
+                Services(application).use { it.connectedSpace { deleteConnectedSpace(connectId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -103,7 +102,8 @@ fun Route.connectedSpaceDeleteByMeRoute() {
 fun Route.listMyConnectedSpacesRoute() {
     get(RouteConstants.CONNECTED_SPACE_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val connectedSpaces = ConnectedSpaceService(application).listConnectedSpaceByUser(principal.name)
+        val connectedSpaces =
+            Services(application).use { it.connectedSpace { listConnectedSpaceByUser(principal.name) } }
         connectedSpaces.forEach { clearUnnecessaryFields(it) }
         call.respond(connectedSpaces)
     }
@@ -136,7 +136,7 @@ fun Route.saveConnectedSpaceGraphicsByMeRoute() {
             )
             else -> {
                 graphics.userId = principal.name
-                ConnectedSpaceGraphicsService(application).saveConnectedSpaceGraphics(graphics)
+                Services(application).use { it.connectedSpaceGraphics { saveConnectedSpaceGraphics(graphics) } }
                 call.respond(graphics)
             }
         }
@@ -146,7 +146,9 @@ fun Route.saveConnectedSpaceGraphicsByMeRoute() {
 fun Route.listMyConnectedSpaceGraphicsRoute() {
     get(RouteConstants.CONNECTED_SPACE_GRAPHICS_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val graphics = ConnectedSpaceGraphicsService(application).listConnectedSpaceGraphicsByUser(principal.name)
+        val graphics = Services(application).use {
+            it.connectedSpaceGraphics { listConnectedSpaceGraphicsByUser(principal.name) }
+        }
         // remove user id when respond to client
         graphics.forEach { it.userId = null }
         call.respond(graphics)

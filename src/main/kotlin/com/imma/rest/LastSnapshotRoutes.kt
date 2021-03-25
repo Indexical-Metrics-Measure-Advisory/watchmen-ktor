@@ -2,7 +2,7 @@ package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.console.LastSnapshot
-import com.imma.service.console.LastSnapshotService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.request.*
@@ -12,7 +12,7 @@ import io.ktor.routing.*
 fun Route.findLastSnapshotRoute() {
     get(RouteConstants.LAST_SNAPSHOT) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val lastSnapshot = LastSnapshotService(application).findLastSnapshotById(principal.name)
+        val lastSnapshot = Services(application).use { it.lastSnapshot { findLastSnapshotById(principal.name) } }
         if (lastSnapshot != null) {
             lastSnapshot.userId = null
             call.respond(lastSnapshot)
@@ -27,7 +27,7 @@ fun Route.saveLastSnapshotRoute() {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val lastSnapshot = call.receive<LastSnapshot>()
         lastSnapshot.userId = principal.name
-        LastSnapshotService(application).saveLastSnapshot(lastSnapshot)
+        Services(application).use { it.lastSnapshot { saveLastSnapshot(lastSnapshot) } }
         lastSnapshot.userId = null
         call.respond(lastSnapshot)
     }

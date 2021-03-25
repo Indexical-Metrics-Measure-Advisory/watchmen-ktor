@@ -2,7 +2,7 @@ package com.imma.rest
 
 import com.imma.auth.Roles
 import com.imma.model.console.Dashboard
-import com.imma.service.console.DashboardService
+import com.imma.service.Services
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
@@ -32,7 +32,7 @@ fun Route.dashboardSaveByMeRoute() {
             else -> {
                 // assign to current authenticated user
                 dashboard.userId = principal.name
-                DashboardService(application).saveDashboard(dashboard)
+                Services(application).use { it.dashboard { saveDashboard(dashboard) } }
                 // remove user id when respond to client
                 dashboard.userId = null
                 call.respond(dashboard)
@@ -56,7 +56,7 @@ fun Route.dashboardRenameByMeRoute() {
                 "Cannot use dashboard belongs to others."
             )
             else -> {
-                DashboardService(application).renameDashboard(dashboardId, name)
+                Services(application).use { it.dashboard { renameDashboard(dashboardId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -77,7 +77,7 @@ fun Route.dashboardDeleteByMeRoute() {
                 "Cannot use dashboard belongs to others."
             )
             else -> {
-                DashboardService(application).deleteDashboard(dashboardId)
+                Services(application).use { it.dashboard { deleteDashboard(dashboardId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -87,7 +87,7 @@ fun Route.dashboardDeleteByMeRoute() {
 fun Route.listMyDashboardsRoute() {
     get(RouteConstants.DASHBOARD_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val dashboards = DashboardService(application).listDashboardByUser(principal.name)
+        val dashboards = Services(application).use { it.dashboard { listDashboardByUser(principal.name) } }
         // remove user id when respond to client
         dashboards.forEach { it.userId = null }
         call.respond(dashboards)

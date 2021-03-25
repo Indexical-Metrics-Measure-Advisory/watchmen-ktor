@@ -3,10 +3,7 @@ package com.imma.persist.mango
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.AbstractPersistKit
-import com.imma.persist.core.Changed
-import com.imma.persist.core.Changes
-import com.imma.persist.core.Select
-import com.imma.persist.core.Where
+import com.imma.persist.core.*
 import com.imma.utils.EnvConstants
 import com.imma.utils.findPageData
 import com.imma.utils.toDataPage
@@ -46,25 +43,51 @@ class MongoPersistKit(application: Application) : AbstractPersistKit(application
         return MongoTemplate(SimpleMongoClientDatabaseFactory(mongoClient, name))
     }
 
-    override fun <T> insertOne(one: T): T {
+    override fun <T> insertOne(one: T, entityClass: Class<T>, entityName: String): T {
         return mongoTemplate.insert(one)
     }
 
-    override fun <T> updateOne(one: T): T {
+    override fun <T> insertAll(list: List<T>, entityClass: Class<T>, entityName: String): List<T> {
+        mongoTemplate.insert(list, entityName)
+        return list
+    }
+
+    override fun <T> updateOne(one: T, entityClass: Class<T>, entityName: String): T {
         return mongoTemplate.save(one)
     }
 
-    override fun <T> upsert(where: Where, changes: Changes, entityClass: Class<T>, entityName: String): Changed? {
-        mongoTemplate.upsert(buildQuery(where), buildUpdate(changes), entityClass, entityName)
+    override fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): T? {
+        mongoTemplate.updateFirst(buildQuery(where), buildUpdate(updates), entityClass, entityName)
 
         // TODO retrieve changed data, both old and new values
         return null
     }
 
-    override fun <T> update(where: Where, changes: Changes, entityClass: Class<T>, entityName: String): List<Changed> {
-        mongoTemplate.updateMulti(buildQuery(where), buildUpdate(changes), entityClass, entityName)
+    override fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): Changed? {
+        mongoTemplate.upsert(buildQuery(where), buildUpdate(updates), entityClass, entityName)
 
         // TODO retrieve changed data, both old and new values
+        return null
+    }
+
+    override fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): List<Changed> {
+        mongoTemplate.updateMulti(buildQuery(where), buildUpdate(updates), entityClass, entityName)
+
+        // TODO retrieve changed data, both old and new values
+        return listOf()
+    }
+
+    override fun <T> delete(where: Where, entityClass: Class<T>, entityName: String): List<T> {
+        mongoTemplate.remove(buildQuery(where), entityClass, entityName)
+
+        // TODO retrieve deleted data
+        return listOf()
+    }
+
+    override fun <T> deleteAll(entityClass: Class<T>, entityName: String): List<T> {
+        mongoTemplate.remove(Query(), entityName)
+
+        // TODO retrieve deleted data
         return listOf()
     }
 
@@ -78,6 +101,10 @@ class MongoPersistKit(application: Application) : AbstractPersistKit(application
 
     override fun <T> exists(where: Where, entityClass: Class<T>, entityName: String): Boolean {
         return mongoTemplate.exists(buildQuery(where), entityClass, entityName)
+    }
+
+    override fun <T> listAll(entityClass: Class<T>, entityName: String): List<T> {
+        return mongoTemplate.findAll(entityClass, entityName)
     }
 
     override fun <T> listAll(select: Select, entityClass: Class<T>, entityName: String): List<T> {
@@ -128,8 +155,18 @@ class MongoPersistKit(application: Application) : AbstractPersistKit(application
         return Query.query(Criteria.where("mock"))
     }
 
-    private fun buildUpdate(changes: Changes): Update {
-        // TODO transform changes to update
-        return Update.update("mock", "value")
+    private fun buildUpdate(updates: Updates): Update {
+        return Update().apply {
+            val update = this
+            updates.parts.forEach {
+                @Suppress("REDUNDANT_ELSE_IN_WHEN")
+                when (it.type) {
+                    ColumnUpdateType.SET -> update.set(it.column.name, it.value)
+                    ColumnUpdateType.PULL -> update.pull(it.column.name, it.value)
+                    ColumnUpdateType.PUSH -> update.push(it.column.name, it.value)
+                    else -> throw RuntimeException("Unsupported column update[type=${it.type}].")
+                }
+            }
+        }
     }
 }

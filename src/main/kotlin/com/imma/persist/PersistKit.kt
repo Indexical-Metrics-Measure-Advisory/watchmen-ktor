@@ -3,8 +3,8 @@ package com.imma.persist
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.core.Changed
-import com.imma.persist.core.Changes
 import com.imma.persist.core.Select
+import com.imma.persist.core.Updates
 import com.imma.persist.core.Where
 import java.io.Closeable
 
@@ -14,19 +14,29 @@ import java.io.Closeable
 interface PersistKit : Closeable {
     fun nextSnowflakeId(): Long
 
-    fun <T> insertOne(one: T): T
+    fun <T> insertOne(one: T, entityClass: Class<T>, entityName: String): T
 
-    fun <T> updateOne(one: T): T
+    fun <T> insertAll(list: List<T>, entityClass: Class<T>, entityName: String): List<T>
 
-    fun <T> upsert(where: Where, changes: Changes, entityClass: Class<T>, entityName: String): Changed?
+    fun <T> updateOne(one: T, entityClass: Class<T>, entityName: String): T
 
-    fun <T> update(where: Where, changes: Changes, entityClass: Class<T>, entityName: String): List<Changed>
+    fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): T?
+
+    fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): Changed?
+
+    fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): List<Changed>
+
+    fun <T> delete(where: Where, entityClass: Class<T>, entityName: String): List<T>
+
+    fun <T> deleteAll(entityClass: Class<T>, entityName: String): List<T>
 
     fun <T> findById(id: String, entityClass: Class<T>, entityName: String): T?
 
     fun <T> findOne(where: Where, entityClass: Class<T>, entityName: String): T?
 
     fun <T> exists(where: Where, entityClass: Class<T>, entityName: String): Boolean
+
+    fun <T> listAll(entityClass: Class<T>, entityName: String): List<T>
 
     fun <T> listAll(select: Select, entityClass: Class<T>, entityName: String): List<T>
 
