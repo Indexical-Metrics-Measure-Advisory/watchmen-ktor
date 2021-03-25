@@ -151,8 +151,47 @@ class MongoPersistKit(application: Application) : AbstractPersistKit(application
     }
 
     private fun buildQuery(where: Where): Query {
-        // TODO transform where to query
-        return Query.query(Criteria.where("mock"))
+        val criteria = when (where) {
+            is And -> buildAnd(where)
+            is Or -> buildOr(where)
+            else -> throw RuntimeException("Unsupported where[${where}].")
+        }
+        return Query(criteria)
+    }
+
+    private fun buildAnd(and: And): Criteria {
+        val criteria = and.parts.map { exp ->
+            when (exp) {
+                is And -> buildAnd(exp)
+                is Or -> buildOr(exp)
+                is ColumnExpression -> buildColumnExpression(exp)
+                else -> throw RuntimeException("Unsupported criteria expression[$exp].")
+            }
+        }
+        return Criteria().andOperator(*criteria.toTypedArray())
+    }
+
+    private fun buildOr(or: Or): Criteria {
+        val criteria = or.parts.map { exp ->
+            when (exp) {
+                is And -> buildAnd(exp)
+                is Or -> buildOr(exp)
+                is ColumnExpression -> buildColumnExpression(exp)
+                else -> throw RuntimeException("Unsupported criteria expression[$exp].")
+            }
+        }
+        return Criteria().orOperator(*criteria.toTypedArray())
+    }
+
+    private fun buildColumnExpression(exp: ColumnExpression): Criteria {
+        return when (exp.operator) {
+            ColumnExpressionOperator.EQUALS -> Criteria.where(exp.column.name).`is`(exp.value)
+            ColumnExpressionOperator.IN -> Criteria.where(exp.column.name).`in`(exp.value)
+            ColumnExpressionOperator.INCLUDE -> Criteria.where(exp.column.name).`is`(exp.value)
+            ColumnExpressionOperator.REGEXP -> Criteria.where(exp.column.name).regex(exp.value as String, "i")
+            ColumnExpressionOperator.NOT_SET -> throw RuntimeException("Unsupported criteria expression operator[${exp.operator}].")
+            else -> throw RuntimeException("Unsupported criteria expression operator[${exp.operator}].")
+        }
     }
 
     private fun buildUpdate(updates: Updates): Update {

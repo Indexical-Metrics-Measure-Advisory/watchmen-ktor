@@ -6,12 +6,14 @@ enum class ColumnExpressionOperator {
     EQUALS,
     IN,
     INCLUDE,    // array value includes given value
-    REGEXP      // ignore case
+    REGEXP,     // ignore case
+
+    NOT_SET
 }
 
 class ColumnExpression(val column: Column) : Expression {
-    private var operator: Any? = NotSet
-    private var value: Any? = NotSet
+    var operator: ColumnExpressionOperator? = ColumnExpressionOperator.NOT_SET
+    var value: Any? = NotSet
 
     infix fun eq(value: Any?) {
         this.operator = ColumnExpressionOperator.EQUALS
