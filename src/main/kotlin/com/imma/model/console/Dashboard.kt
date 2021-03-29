@@ -41,6 +41,8 @@ data class Dashboard(
     var name: String? = null,
     @Field("user_id")
     var userId: String? = null,
+    @Field("auto_refresh_interval")
+    var autoRefreshInterval: Boolean? = null,
     @Field("reports")
     var reports: List<DashboardReport> = mutableListOf(),
     @Field("paragraphs")

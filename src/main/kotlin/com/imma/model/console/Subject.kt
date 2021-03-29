@@ -48,6 +48,8 @@ data class Subject(
     var connectId: String? = null,
     @Field("user_id")
     var userId: String? = null,
+    @Field("auto_refresh_interval")
+    var autoRefreshInterval: Boolean? = null,
     @Field("dataset")
     var dataset: SubjectDataSet = SubjectDataSet(),
     @Field("last_visit_time")
