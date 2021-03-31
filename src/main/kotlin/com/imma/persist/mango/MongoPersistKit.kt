@@ -3,6 +3,9 @@ package com.imma.persist.mango
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.AbstractPersistKit
+import com.imma.persist.PersistKit
+import com.imma.persist.PersistKitProvider
+import com.imma.persist.PersistKits
 import com.imma.persist.core.*
 import com.imma.utils.EnvConstants
 import com.imma.utils.Envs
@@ -16,6 +19,16 @@ import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+
+class MongoPersistKitProvider(name: String) : PersistKitProvider(name) {
+    override fun createKit(): PersistKit {
+        return MongoPersistKit()
+    }
+}
+
+fun mongo() {
+    PersistKits.register(MongoPersistKitProvider("mongo"))
+}
 
 /**
  * thread unsafe

@@ -2,13 +2,11 @@ package com.imma.rest
 
 import com.imma.service.Services
 import com.imma.utils.isFakeOrNull
-import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.util.pipeline.*
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts
-fun PipelineContext<Unit, ApplicationCall>.connectedSpaceBelongsToCurrentUser(
+fun connectedSpaceBelongsToCurrentUser(
     connectId: String?,
     principal: UserIdPrincipal
 ): Boolean {
@@ -22,7 +20,7 @@ fun PipelineContext<Unit, ApplicationCall>.connectedSpaceBelongsToCurrentUser(
 }
 
 @ExperimentalContracts
-fun PipelineContext<Unit, ApplicationCall>.subjectBelongsToCurrentUser(
+fun subjectBelongsToCurrentUser(
     subjectId: String?,
     principal: UserIdPrincipal
 ): Boolean {
@@ -36,7 +34,7 @@ fun PipelineContext<Unit, ApplicationCall>.subjectBelongsToCurrentUser(
 }
 
 @ExperimentalContracts
-fun PipelineContext<Unit, ApplicationCall>.reportBelongsToCurrentUser(
+fun reportBelongsToCurrentUser(
     reportId: String?,
     principal: UserIdPrincipal
 ): Boolean {
@@ -50,7 +48,7 @@ fun PipelineContext<Unit, ApplicationCall>.reportBelongsToCurrentUser(
 }
 
 @ExperimentalContracts
-fun PipelineContext<Unit, ApplicationCall>.dashboardBelongsToCurrentUser(
+fun dashboardBelongsToCurrentUser(
     dashboardId: String?,
     principal: UserIdPrincipal
 ): Boolean {
