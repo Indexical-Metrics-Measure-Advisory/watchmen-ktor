@@ -1,4 +1,4 @@
-package com.imma.service.core
+package com.imma.service.admin
 
 import com.imma.model.CollectionNames
 import com.imma.model.core.PipelineGraphics

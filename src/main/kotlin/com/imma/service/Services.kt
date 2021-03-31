@@ -7,10 +7,10 @@ import com.imma.service.admin.UserCredentialService
 import com.imma.service.admin.UserGroupService
 import com.imma.service.admin.UserService
 import com.imma.service.console.*
-import com.imma.service.core.EnumService
-import com.imma.service.core.PipelineGraphicsService
-import com.imma.service.core.PipelineService
-import com.imma.service.core.TopicService
+import com.imma.service.admin.EnumService
+import com.imma.service.admin.PipelineGraphicsService
+import com.imma.service.admin.PipelineService
+import com.imma.service.admin.TopicService
 import com.imma.service.login.LoginService
 import io.ktor.application.*
 import java.io.Closeable
