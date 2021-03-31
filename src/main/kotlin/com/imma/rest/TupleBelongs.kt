@@ -17,7 +17,7 @@ fun PipelineContext<Unit, ApplicationCall>.connectedSpaceBelongsToCurrentUser(
         // belongs to current user anyway
         connectId.isFakeOrNull() -> true
         // check persist
-        else -> Services(application).use { it.connectedSpace { isConnectedSpaceBelongsTo(connectId, principal.name) } }
+        else -> Services().use { it.connectedSpace { isConnectedSpaceBelongsTo(connectId, principal.name) } }
     }
 }
 
@@ -31,7 +31,7 @@ fun PipelineContext<Unit, ApplicationCall>.subjectBelongsToCurrentUser(
         // belongs to current user anyway
         subjectId.isFakeOrNull() -> true
         // check persist
-        else -> Services(application).use { it.subject { isSubjectBelongsTo(subjectId, principal.name) } }
+        else -> Services().use { it.subject { isSubjectBelongsTo(subjectId, principal.name) } }
     }
 }
 
@@ -45,7 +45,7 @@ fun PipelineContext<Unit, ApplicationCall>.reportBelongsToCurrentUser(
         // belongs to current user anyway
         reportId.isFakeOrNull() -> true
         // check persist
-        else -> Services(application).use { it.report { isReportBelongsTo(reportId, principal.name) } }
+        else -> Services().use { it.report { isReportBelongsTo(reportId, principal.name) } }
     }
 }
 
@@ -59,6 +59,6 @@ fun PipelineContext<Unit, ApplicationCall>.dashboardBelongsToCurrentUser(
         // belongs to current user anyway
         dashboardId.isFakeOrNull() -> true
         // check persist
-        else -> Services(application).use { it.dashboard { isDashboardBelongsTo(dashboardId, principal.name) } }
+        else -> Services().use { it.dashboard { isDashboardBelongsTo(dashboardId, principal.name) } }
     }
 }

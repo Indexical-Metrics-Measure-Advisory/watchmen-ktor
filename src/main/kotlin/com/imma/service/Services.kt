@@ -2,31 +2,19 @@ package com.imma.service
 
 import com.imma.persist.PersistKit
 import com.imma.persist.PersistKits
-import com.imma.service.admin.SpaceService
-import com.imma.service.admin.UserCredentialService
-import com.imma.service.admin.UserGroupService
-import com.imma.service.admin.UserService
+import com.imma.service.admin.*
 import com.imma.service.console.*
-import com.imma.service.admin.EnumService
-import com.imma.service.admin.PipelineGraphicsService
-import com.imma.service.admin.PipelineService
-import com.imma.service.admin.TopicService
 import com.imma.service.login.LoginService
-import io.ktor.application.*
 import java.io.Closeable
 
 /**
  * thread unsafe
  */
-class Services(val application: Application) : Closeable {
-    private val persistKits: PersistKits = PersistKits(application)
+class Services : Closeable {
+    private val persistKits: PersistKits = PersistKits()
 
     override fun close() {
         persistKits.close()
-    }
-
-    fun application(): Application {
-        return application
     }
 
     fun persist(): PersistKit {

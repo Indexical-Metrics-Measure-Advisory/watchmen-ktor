@@ -1,29 +1,39 @@
 package com.imma.persist
 
 import com.imma.utils.EnvConstants
-import io.ktor.application.*
+import com.imma.utils.Envs
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 
+abstract class PersistKitProvider(val name: String) {
+    abstract fun createKit(): PersistKit
+}
+
 /**
  * thread unsafe
  */
-class PersistKits(val application: Application) : Closeable {
+class PersistKits : Closeable {
     companion object {
-        const val DEFAULT_KEY: String = "default"
+        private const val DEFAULT_KEY: String = "default"
+        private val providers: MutableMap<String, PersistKitProvider> = mutableMapOf()
+
+        fun register(provider: PersistKitProvider) {
+            providers[provider.name] = provider
+        }
     }
 
     private val logger: Logger by lazy {
         LoggerFactory.getLogger(PersistKits::class.java)
     }
     private val kits: MutableMap<String, PersistKit> = mutableMapOf()
+    private val defaultKitName: String by lazy {
+        Envs.string(EnvConstants.DEFAULT_PERSIST_KIT, DEFAULT_KEY)
+    }
 
     private fun createKit(key: String): PersistKit {
-        val env = application.environment
-        val dialectClass = env.config.property(EnvConstants.PERSIST_DIALECT_CLASS).getString()
-        val constructor = Class.forName(dialectClass).getConstructor(Application::class.java)
-        val kit = constructor.newInstance(application) as PersistKit
+        val provider = providers[key] ?: throw RuntimeException("Persist kit provider[$key] not found.")
+        val kit = provider.createKit()
         kits[key] = kit
         return kit
     }
@@ -32,7 +42,7 @@ class PersistKits(val application: Application) : Closeable {
      * current support only one
      */
     fun select(): PersistKit {
-        return kits[DEFAULT_KEY] ?: createKit(DEFAULT_KEY)
+        return kits[defaultKitName] ?: createKit(defaultKitName)
     }
 
     override fun close() {

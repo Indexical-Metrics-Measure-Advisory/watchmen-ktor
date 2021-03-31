@@ -16,7 +16,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.saveTopicRoute() {
     post(RouteConstants.TOPIC_SAVE) {
         val topic = call.receive<Topic>()
-        Services(application).use { it.topic { saveTopic(topic) } }
+        Services().use { it.topic { saveTopic(topic) } }
         call.respond(topic)
     }
 }
@@ -28,7 +28,7 @@ fun Route.findTopicByIdRoute() {
             // TODO a empty object
             call.respond(mapOf<String, String>())
         } else {
-            val topic = Services(application).use { it.topic { findTopicById(topicId) } }
+            val topic = Services().use { it.topic { findTopicById(topicId) } }
             if (topic == null) {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
@@ -46,7 +46,7 @@ fun Route.listTopicsByNameRoute() {
     post(RouteConstants.TOPIC_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = Services(application).use { it.topic { findTopicsByName(name, pageable) } }
+        val page = Services().use { it.topic { findTopicsByName(name, pageable) } }
         call.respond(page)
     }
 }
@@ -54,7 +54,7 @@ fun Route.listTopicsByNameRoute() {
 fun Route.listTopicsByNameForHolderRoute() {
     get(RouteConstants.TOPIC_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
-        val topics = Services(application).use { it.topic { findTopicsByNameForHolder(name) } }
+        val topics = Services().use { it.topic { findTopicsByNameForHolder(name) } }
         call.respond(topics)
     }
 }
@@ -65,7 +65,7 @@ fun Route.listTopicsByIdsForHolderRoute() {
         if (topicIds.isEmpty()) {
             call.respond(listOf<TopicForHolder>())
         } else {
-            val topics = Services(application).use { it.topic { findTopicsByIdsForHolder(topicIds) } }
+            val topics = Services().use { it.topic { findTopicsByIdsForHolder(topicIds) } }
             call.respond(topics)
         }
     }
@@ -73,7 +73,7 @@ fun Route.listTopicsByIdsForHolderRoute() {
 
 fun Route.findAllTopicsRoute() {
     get(RouteConstants.TOPIC_LIST_ALL) {
-        val topics = Services(application).use { it.topic { findAllTopics() } }
+        val topics = Services().use { it.topic { findAllTopics() } }
         call.respond(topics)
     }
 }

@@ -12,7 +12,7 @@ import io.ktor.routing.*
 fun Route.findFavoriteRoute() {
     get(RouteConstants.FAVORITE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val favorite = Services(application).use { it.favorite { findFavoriteById(principal.name) } }
+        val favorite = Services().use { it.favorite { findFavoriteById(principal.name) } }
         if (favorite != null) {
             favorite.userId = null
             call.respond(favorite)
@@ -32,7 +32,7 @@ fun Route.saveFavoriteRoute() {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val favorite = call.receive<Favorite>()
         favorite.userId = principal.name
-        Services(application).use { it.favorite { saveFavorite(favorite) } }
+        Services().use { it.favorite { saveFavorite(favorite) } }
         favorite.userId = null
         call.respond(favorite)
     }

@@ -5,11 +5,11 @@ import com.imma.model.page.Pageable
 import com.imma.persist.AbstractPersistKit
 import com.imma.persist.core.*
 import com.imma.utils.EnvConstants
+import com.imma.utils.Envs
 import com.imma.utils.findPageData
 import com.imma.utils.toDataPage
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
-import io.ktor.application.*
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory
@@ -20,7 +20,7 @@ import org.springframework.data.mongodb.core.query.Update
 /**
  * thread unsafe
  */
-class MongoPersistKit(application: Application) : AbstractPersistKit(application) {
+class MongoPersistKit() : AbstractPersistKit() {
     private val mongoClient: MongoClient by lazy {
         createMongoClient()
     }
@@ -29,16 +29,14 @@ class MongoPersistKit(application: Application) : AbstractPersistKit(application
     }
 
     private fun createMongoClient(): MongoClient {
-        val env = application.environment
-        val host = env.config.property(EnvConstants.MONGO_HOST).getString()
-        val port = env.config.property(EnvConstants.MONGO_PORT).getString()
+        val host = Envs.string(EnvConstants.MONGO_HOST)
+        val port = Envs.string(EnvConstants.MONGO_PORT)
 
         return MongoClients.create("mongodb://$host:$port")
     }
 
     private fun createMongoTemplate(): MongoTemplate {
-        val env = application.environment
-        val name = env.config.property(EnvConstants.MONGO_NAME).getString()
+        val name = Envs.string(EnvConstants.MONGO_NAME)
 
         return MongoTemplate(SimpleMongoClientDatabaseFactory(mongoClient, name))
     }

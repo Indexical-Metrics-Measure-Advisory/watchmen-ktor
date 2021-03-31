@@ -3,13 +3,13 @@ package com.imma.persist
 import com.imma.persist.snowflake.SnowflakeIdGenerator
 import com.imma.persist.snowflake.SnowflakeIdWorker
 import com.imma.utils.EnvConstants
-import io.ktor.application.*
+import com.imma.utils.Envs
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 var snowflakeWorker: SnowflakeIdWorker? = null
 
-abstract class AbstractPersistKit(val application: Application) : PersistKit {
+abstract class AbstractPersistKit : PersistKit {
     private val logger: Logger by lazy {
         LoggerFactory.getLogger(this::class.java)
     }
@@ -23,9 +23,8 @@ abstract class AbstractPersistKit(val application: Application) : PersistKit {
             logger.warn("Snowflake worker: [{}]", snowflakeWorker)
             synchronized(this) {
                 if (snowflakeWorker == null) {
-                    val env = application.environment
-                    val workerId = env.config.property(EnvConstants.SNOWFLAKE_WORKER).getString().toLong()
-                    val dataCenterId = env.config.property(EnvConstants.SNOWFLAKE_DATA_CENTER).getString().toLong()
+                    val workerId = Envs.long(EnvConstants.SNOWFLAKE_WORKER)
+                    val dataCenterId = Envs.long(EnvConstants.SNOWFLAKE_DATA_CENTER)
                     snowflakeWorker = SnowflakeIdGenerator().createWorker(workerId, dataCenterId, true)
                 }
             }

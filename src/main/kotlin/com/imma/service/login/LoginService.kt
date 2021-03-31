@@ -1,8 +1,6 @@
 package com.imma.service.login
 
-import com.imma.auth.adminEnabled
-import com.imma.auth.adminPassword
-import com.imma.auth.adminUsername
+import com.imma.auth.AdminReserved
 import com.imma.model.admin.User
 import com.imma.service.Service
 import com.imma.service.Services
@@ -15,10 +13,9 @@ class LoginService(services: Services) : Service(services) {
             return null
         }
 
-        val application = services.application()
-        if (application.adminEnabled
-            && username == application.adminUsername
-            && plainPassword == application.adminPassword
+        if (AdminReserved.enabled
+            && username == AdminReserved.username
+            && plainPassword == AdminReserved.password
         ) {
             // successfully login when admin enabled and username/password matched
             return User().apply {

@@ -8,6 +8,7 @@ import com.imma.auth.*
 import com.imma.rest.*
 import com.imma.service.Services
 import com.imma.utils.EnvConstants
+import com.imma.utils.envs
 import com.imma.utils.isDev
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -29,7 +30,9 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @ExperimentalContracts
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun Application.module(@Suppress("UNUSED_PARAMETER") testing: Boolean = false) {
+    envs {}
+
     install(CORS) {
     }
     install(CallLogging) {
@@ -68,10 +71,10 @@ fun Application.module(testing: Boolean = false) {
                 } else {
                     val userId = verify(credentials.token)
                     if (!userId.isNullOrBlank()) {
-                        if (userId == adminUsername && adminEnabled) {
+                        if (AdminReserved.enabled && userId == AdminReserved.username) {
                             // pass validation when admin enabled and username matched
                             UserIdPrincipal(userId)
-                        } else if (Services(application).use { it.user { isActive(userId) } }) {
+                        } else if (Services().use { it.user { isActive(userId) } }) {
                             UserIdPrincipal(userId)
                         } else {
                             null
@@ -90,11 +93,11 @@ fun Application.module(testing: Boolean = false) {
         role(name = "authenticated", roleBasedAuthorise { true })
         role(name = "admin", roleBasedAuthorise { principal ->
             val userId = principal.name
-            if (userId == adminUsername && adminEnabled) {
+            if (AdminReserved.enabled && userId == AdminReserved.username) {
                 // authorise anything when admin enabled and username matched
                 true
             } else {
-                Services(application).use { it.user { isAdmin(userId) } }
+                Services().use { it.user { isAdmin(userId) } }
             }
         })
     }

@@ -20,7 +20,7 @@ fun Route.loginRoute() {
         val parameters = call.receiveParameters()
         val username = parameters["username"]
         val password = parameters["password"]
-        val user = Services(application).use { it.auth { login(username, password) } }
+        val user = Services().use { it.auth { login(username, password) } }
         if (user == null) {
             call.respond(HttpStatusCode.BadRequest, "Incorrect username or password.")
         } else if (!user.active) {

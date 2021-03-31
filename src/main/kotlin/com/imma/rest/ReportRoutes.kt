@@ -64,18 +64,18 @@ fun Route.reportSaveByMeRoute() {
                     subjectId.isNullOrBlank() -> {
                         // must exists, it is checked in above logic already
                         val existsReport =
-                            Services(application).use { it.report { findReportById(report.reportId!!)!! } }
+                            Services().use { it.report { findReportById(report.reportId!!)!! } }
                         report.connectId = existsReport.connectId
                         report.subjectId = existsReport.subjectId
                     }
                     // if subject id in query parameter exists, assign to report
                     else -> {
-                        val existsSubject = Services(application).use { it.subject { findSubjectById(subjectId)!! } }
+                        val existsSubject = Services().use { it.subject { findSubjectById(subjectId)!! } }
                         report.connectId = existsSubject.connectId
                         report.subjectId = subjectId
                     }
                 }
-                Services(application).use { it.report { saveReport(report) } }
+                Services().use { it.report { saveReport(report) } }
                 // remove ids when respond to client
                 report.connectId = null
                 report.subjectId = null
@@ -101,7 +101,7 @@ fun Route.reportRenameByMeRoute() {
                 "Cannot use report belongs to others."
             )
             else -> {
-                Services(application).use { it.report { renameReport(reportId, name) } }
+                Services().use { it.report { renameReport(reportId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -122,7 +122,7 @@ fun Route.reportDeleteByMeRoute() {
                 "Cannot use report belongs to others."
             )
             else -> {
-                Services(application).use { it.report { deleteReport(reportId) } }
+                Services().use { it.report { deleteReport(reportId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -136,7 +136,7 @@ fun Route.listReportsByNameRoute() {
     post(RouteConstants.REPORT_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = Services(application).use { it.report { findReportsByName(name, pageable) } }
+        val page = Services().use { it.report { findReportsByName(name, pageable) } }
         call.respond(page)
     }
 }

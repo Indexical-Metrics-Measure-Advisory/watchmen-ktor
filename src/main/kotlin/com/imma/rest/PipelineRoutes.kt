@@ -15,7 +15,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.findMyPipelineGraphicsRoute() {
     get(RouteConstants.PIPELINE_GRAPHICS_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val graphics = Services(application).use { it.pipelineGraphics { findPipelineGraphicsById(principal.name) } }
+        val graphics = Services().use { it.pipelineGraphics { findPipelineGraphicsById(principal.name) } }
         if (graphics != null) {
             // remove user id when respond to client
             graphics.userId = null
@@ -31,7 +31,7 @@ fun Route.saveMyPipelineGraphicsRoute() {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val graphics = call.receive<PipelineGraphics>()
         graphics.userId = principal.name
-        Services(application).use { it.pipelineGraphics { savePipelineGraphicsByUser(graphics) } }
+        Services().use { it.pipelineGraphics { savePipelineGraphicsByUser(graphics) } }
         // remove user id when respond to client
         graphics.userId = null
         call.respond(graphics)
@@ -42,7 +42,7 @@ fun Route.saveMyPipelineGraphicsRoute() {
 fun Route.savePipelineRoute() {
     post(RouteConstants.PIPELINE_SAVE) {
         val pipeline = call.receive<Pipeline>()
-        Services(application).use { it.pipeline { savePipeline(pipeline) } }
+        Services().use { it.pipeline { savePipeline(pipeline) } }
         call.respond(pipeline)
     }
 }
@@ -55,7 +55,7 @@ fun Route.renamePipelineRoute() {
         when {
             pipelineId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Pipeline id is required.")
             else -> {
-                Services(application).use { it.pipeline { renamePipeline(pipelineId, name) } }
+                Services().use { it.pipeline { renamePipeline(pipelineId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -70,7 +70,7 @@ fun Route.togglePipelineEnablementRoute() {
         when {
             pipelineId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Pipeline id is required.")
             else -> {
-                Services(application).use { it.pipeline { togglePipelineEnablement(pipelineId, enabled.toBoolean()) } }
+                Services().use { it.pipeline { togglePipelineEnablement(pipelineId, enabled.toBoolean()) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -79,7 +79,7 @@ fun Route.togglePipelineEnablementRoute() {
 
 fun Route.findAllPipelinesRoute() {
     get(RouteConstants.PIPELINE_LIST_ALL) {
-        val pipelines = Services(application).use { it.pipeline { findAllPipelines() } }
+        val pipelines = Services().use { it.pipeline { findAllPipelines() } }
         call.respond(pipelines)
     }
 }

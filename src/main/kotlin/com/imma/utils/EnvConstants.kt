@@ -12,7 +12,7 @@ object EnvConstants {
     const val ADMIN_PASSWORD = "ktor.admin.password"
     const val ADMIN_ENABLED = "ktor.admin.enabled"
 
-    const val PERSIST_DIALECT_CLASS: String = "ktor.persist.dialectClass"
+    const val DEFAULT_PERSIST_KIT: String = "ktor.persist.defaultKit"
     const val MONGO_HOST: String = "ktor.mongo.host"
     const val MONGO_PORT: String = "ktor.mongo.port"
     const val MONGO_NAME: String = "ktor.mongo.name"

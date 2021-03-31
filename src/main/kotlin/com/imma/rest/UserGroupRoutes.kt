@@ -16,7 +16,7 @@ import kotlin.contracts.ExperimentalContracts
 fun Route.saveUserGroupRoute() {
     post(RouteConstants.USER_GROUP_SAVE) {
         val userGroup = call.receive<UserGroup>()
-        Services(application).use { it.userGroup { saveUserGroup(userGroup) } }
+        Services().use { it.userGroup { saveUserGroup(userGroup) } }
         call.respond(userGroup)
     }
 }
@@ -28,7 +28,7 @@ fun Route.findUserGroupByIdRoute() {
             // TODO a empty object
             call.respond(mapOf<String, String>())
         } else {
-            val userGroup = Services(application).use { it.userGroup { findUserGroupById(userGroupId) } }
+            val userGroup = Services().use { it.userGroup { findUserGroupById(userGroupId) } }
             if (userGroup == null) {
                 // TODO a empty object
                 call.respond(mapOf<String, String>())
@@ -46,7 +46,7 @@ fun Route.listUserGroupsByNameRoute() {
     post(RouteConstants.USER_GROUP_LIST_BY_NAME) {
         val pageable = call.receive<Pageable>()
         val name: String? = call.request.queryParameters["query_name"]
-        val page = Services(application).use { it.userGroup { findUserGroupsByName(name, pageable) } }
+        val page = Services().use { it.userGroup { findUserGroupsByName(name, pageable) } }
         call.respond(page)
     }
 }
@@ -54,7 +54,7 @@ fun Route.listUserGroupsByNameRoute() {
 fun Route.listUserGroupsByNameForHolderRoute() {
     get(RouteConstants.USER_GROUP_LIST_BY_NAME_FOR_HOLDER) {
         val name: String? = call.request.queryParameters["query_name"]
-        val userGroups = Services(application).use { it.userGroup { findUserGroupsByNameForHolder(name) } }
+        val userGroups = Services().use { it.userGroup { findUserGroupsByNameForHolder(name) } }
         call.respond(userGroups)
     }
 }
@@ -65,7 +65,7 @@ fun Route.listUserGroupsByIdsForHolderRoute() {
         if (userGroupIds.isEmpty()) {
             call.respond(listOf<UserGroupForHolder>())
         } else {
-            val userGroups = Services(application).use { it.userGroup { findUserGroupsByIdsForHolder(userGroupIds) } }
+            val userGroups = Services().use { it.userGroup { findUserGroupsByIdsForHolder(userGroupIds) } }
             call.respond(userGroups)
         }
     }

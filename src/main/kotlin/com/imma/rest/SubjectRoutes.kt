@@ -62,13 +62,13 @@ fun Route.subjectSaveByMeRoute() {
                     connectId.isNullOrBlank() -> {
                         // must exists, it is checked in above logic already
                         val existsSubject =
-                            Services(application).use { it.subject { findSubjectById(subject.subjectId!!)!! } }
+                            Services().use { it.subject { findSubjectById(subject.subjectId!!)!! } }
                         subject.connectId = existsSubject.connectId
                     }
                     // if connect id in query parameter exists, assign to subject
                     else -> subject.connectId = connectId
                 }
-                Services(application).use { it.subject { saveSubject(subject) } }
+                Services().use { it.subject { saveSubject(subject) } }
                 // remove ids when respond to client
                 subject.connectId = null
                 subject.userId = null
@@ -93,7 +93,7 @@ fun Route.subjectRenameByMeRoute() {
                 "Cannot use subject belongs to others."
             )
             else -> {
-                Services(application).use { it.subject { renameSubject(subjectId, name) } }
+                Services().use { it.subject { renameSubject(subjectId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -114,7 +114,7 @@ fun Route.subjectDeleteByMeRoute() {
                 "Cannot use subject belongs to others."
             )
             else -> {
-                Services(application).use { it.subject { deleteSubject(subjectId) } }
+                Services().use { it.subject { deleteSubject(subjectId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }

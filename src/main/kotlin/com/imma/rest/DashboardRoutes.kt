@@ -32,7 +32,7 @@ fun Route.dashboardSaveByMeRoute() {
             else -> {
                 // assign to current authenticated user
                 dashboard.userId = principal.name
-                Services(application).use { it.dashboard { saveDashboard(dashboard) } }
+                Services().use { it.dashboard { saveDashboard(dashboard) } }
                 // remove user id when respond to client
                 dashboard.userId = null
                 call.respond(dashboard)
@@ -56,7 +56,7 @@ fun Route.dashboardRenameByMeRoute() {
                 "Cannot use dashboard belongs to others."
             )
             else -> {
-                Services(application).use { it.dashboard { renameDashboard(dashboardId, name) } }
+                Services().use { it.dashboard { renameDashboard(dashboardId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -77,7 +77,7 @@ fun Route.dashboardDeleteByMeRoute() {
                 "Cannot use dashboard belongs to others."
             )
             else -> {
-                Services(application).use { it.dashboard { deleteDashboard(dashboardId) } }
+                Services().use { it.dashboard { deleteDashboard(dashboardId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -87,7 +87,7 @@ fun Route.dashboardDeleteByMeRoute() {
 fun Route.listMyDashboardsRoute() {
     get(RouteConstants.DASHBOARD_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val dashboards = Services(application).use { it.dashboard { listDashboardByUser(principal.name) } }
+        val dashboards = Services().use { it.dashboard { listDashboardByUser(principal.name) } }
         // remove user id when respond to client
         dashboards.forEach { it.userId = null }
         call.respond(dashboards)

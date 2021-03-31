@@ -47,7 +47,7 @@ fun Route.connectSpaceByMeRoute() {
             else -> {
                 // assign to current authenticated user
                 connectedSpace.userId = principal.name
-                Services(application).use { it.connectedSpace { saveConnectedSpace(connectedSpace) } }
+                Services().use { it.connectedSpace { saveConnectedSpace(connectedSpace) } }
 
                 clearUnnecessaryFields(connectedSpace)
                 call.respond(connectedSpace)
@@ -71,7 +71,7 @@ fun Route.connectedSpaceRenameByMeRoute() {
                 "Cannot use connected space belongs to others."
             )
             else -> {
-                Services(application).use { it.connectedSpace { renameConnectedSpace(connectId, name) } }
+                Services().use { it.connectedSpace { renameConnectedSpace(connectId, name) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -92,7 +92,7 @@ fun Route.connectedSpaceDeleteByMeRoute() {
                 "Cannot use connected space belongs to others."
             )
             else -> {
-                Services(application).use { it.connectedSpace { deleteConnectedSpace(connectId) } }
+                Services().use { it.connectedSpace { deleteConnectedSpace(connectId) } }
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -103,7 +103,7 @@ fun Route.listMyConnectedSpacesRoute() {
     get(RouteConstants.CONNECTED_SPACE_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
         val connectedSpaces =
-            Services(application).use { it.connectedSpace { listConnectedSpaceByUser(principal.name) } }
+            Services().use { it.connectedSpace { listConnectedSpaceByUser(principal.name) } }
         connectedSpaces.forEach { clearUnnecessaryFields(it) }
         call.respond(connectedSpaces)
     }
@@ -136,7 +136,7 @@ fun Route.saveConnectedSpaceGraphicsByMeRoute() {
             )
             else -> {
                 graphics.userId = principal.name
-                Services(application).use { it.connectedSpaceGraphics { saveConnectedSpaceGraphics(graphics) } }
+                Services().use { it.connectedSpaceGraphics { saveConnectedSpaceGraphics(graphics) } }
                 call.respond(graphics)
             }
         }
@@ -146,7 +146,7 @@ fun Route.saveConnectedSpaceGraphicsByMeRoute() {
 fun Route.listMyConnectedSpaceGraphicsRoute() {
     get(RouteConstants.CONNECTED_SPACE_GRAPHICS_LIST_MINE) {
         val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val graphics = Services(application).use {
+        val graphics = Services().use {
             it.connectedSpaceGraphics { listConnectedSpaceGraphicsByUser(principal.name) }
         }
         // remove user id when respond to client
