@@ -5,9 +5,9 @@ import com.imma.model.compute.ParameterKind
 import com.imma.model.core.Topic
 
 class ParameterWorker(
-    val topics: MutableMap<String, Topic>,
-    val sourceData: Map<String, Any>,
-    val variables: MutableMap<String, Any> = mutableMapOf()
+    private val topics: MutableMap<String, Topic>,
+    private val sourceData: Map<String, Any>,
+    private val variables: MutableMap<String, Any> = mutableMapOf()
 ) {
     fun computeParameter(param: Parameter): Any? {
         @Suppress("REDUNDANT_ELSE_IN_WHEN")

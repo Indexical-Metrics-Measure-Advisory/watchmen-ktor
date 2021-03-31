@@ -8,25 +8,10 @@ import java.io.Closeable
 
 class PipelineWorker(private val pipeline: Pipeline) : Closeable {
     private val services: Services by lazy { Services() }
-
-    // logger use independent services
-    private val logger: LoggerWorker by lazy { LoggerWorker(Services()) }
     private val instanceId: String by lazy { services.persist().nextSnowflakeId().toString() }
 
-    private fun log(msg: String, runType: PipelineRunType) {
-        logger.output(instanceId) {
-            message = msg
-            type = runType
-        }
-    }
-
-    private fun error(msg: String, t: Throwable) {
-        logger.output(instanceId) {
-            message = "$msg\nCaused by ${t.stackTraceToString()}."
-            type = PipelineRunType.fail
-            status = PipelineRunStatus.error
-        }
-    }
+    // logger use independent services
+    private val logger: LoggerWorker by lazy { LoggerWorker(instanceId, Services()) }
 
     private fun findPipelineSourceTopic(pipeline: Pipeline): MutableMap<String, Topic> {
         val topicId =
@@ -39,36 +24,40 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
         return mutableMapOf(topicId to topic)
     }
 
-    private fun shouldRun(pipeline: Pipeline, topics: MutableMap<String, Topic>, data: TriggerData): Boolean {
+    private fun shouldRun(
+        pipeline: Pipeline,
+        topics: MutableMap<String, Topic>,
+        sourceData: Map<String, Any>
+    ): Boolean {
         if (!pipeline.conditional || pipeline.on.isNullOrEmpty()) {
             return true
         }
 
         val joint = pipeline.on.takeAsParameterJointOrThrow()
 
-        return ConditionWorker(topics, data.now, mutableMapOf()).computeJoint(joint)
+        return ConditionWorker(topics, sourceData, mutableMapOf()).computeJoint(joint)
     }
 
     private fun doRun(pipeline: Pipeline, data: TriggerData) {
-        log("Start to run pipeline.", PipelineRunType.start)
+        logger.log("Start to run pipeline.", PipelineRunType.start)
 
         try {
             val topics: MutableMap<String, Topic> = findPipelineSourceTopic(pipeline)
-            pipeline.takeIf { shouldRun(it, topics, data) }?.let {
+            pipeline.takeIf { shouldRun(it, topics, data.now) }?.let {
                 // TODO run pipeline body
             }
         } catch (t: Throwable) {
-            error("Failed to run pipeline", t)
+            logger.error("Failed to run pipeline.", t)
         } finally {
-            log("End of run pipeline.", PipelineRunType.end)
+            logger.log("End of run pipeline.", PipelineRunType.end)
         }
     }
 
 
     fun run(data: TriggerData) {
         when {
-            !pipeline.validated -> log("Pipeline is invalidated.", PipelineRunType.invalidate)
-            !pipeline.enabled -> log("Pipeline is not enabled.", PipelineRunType.disable)
+            !pipeline.validated -> logger.log("Pipeline is invalidated.", PipelineRunType.invalidate)
+            !pipeline.enabled -> logger.log("Pipeline is not enabled.", PipelineRunType.disable)
             else -> doRun(pipeline, data)
         }
     }

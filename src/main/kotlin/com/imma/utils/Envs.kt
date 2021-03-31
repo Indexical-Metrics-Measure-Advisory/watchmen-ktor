@@ -1,10 +1,27 @@
 package com.imma.utils
 
 import io.ktor.application.*
+import java.util.concurrent.atomic.AtomicBoolean
+
 
 class Envs {
     companion object {
-        internal var environment: ApplicationEnvironment? = null
+        private val initialized = AtomicBoolean()
+        private var environment: ApplicationEnvironment? = null
+
+        /**
+         * this method can be called exactly once only.
+         * @see envs
+         */
+        fun env(environment: ApplicationEnvironment) {
+            if (initialized.get()) {
+                throw RuntimeException("Environment was set already, cannot be set twice.")
+            }
+
+            if (initialized.compareAndSet(false, true)) {
+                this.environment = environment
+            }
+        }
 
         private fun env(): ApplicationEnvironment {
             return environment!!
@@ -45,6 +62,6 @@ class Envs {
 }
 
 fun Application.envs(block: (application: Application) -> Unit) {
-    Envs.environment = this.environment
+    Envs.env(this.environment)
     block(this)
 }
