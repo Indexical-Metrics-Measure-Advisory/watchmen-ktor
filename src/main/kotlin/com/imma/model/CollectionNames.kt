@@ -19,4 +19,6 @@ object CollectionNames {
     const val TOPIC: String = "topics"
     const val PIPELINE: String = "pipelines"
     const val PIPELINE_GRAPHICS: String = "pipeline_graphics"
+
+    const val RUN_LOG: String = "run_logs"
 }
