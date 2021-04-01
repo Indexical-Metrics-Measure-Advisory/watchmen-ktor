@@ -34,7 +34,6 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
         }
 
         val joint = pipeline.on.takeAsParameterJointOrThrow()
-
         return ConditionWorker(topics, sourceData, mutableMapOf()).computeJoint(joint)
     }
 

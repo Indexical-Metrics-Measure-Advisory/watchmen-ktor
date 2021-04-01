@@ -2,6 +2,9 @@ package com.imma.service.core
 
 import com.imma.model.compute.*
 import com.imma.model.core.Topic
+import java.time.chrono.ChronoLocalDate
+import java.time.chrono.ChronoLocalDateTime
+import java.util.*
 
 class ConditionWorker(
     private val topics: MutableMap<String, Topic>,
@@ -18,6 +21,7 @@ class ConditionWorker(
         return when {
             value1 == null -> value2 == null
             value2 == null -> false
+            value1 is Number && value2 is Number -> value1.toDouble() == value2.toDouble()
             value1 == value2 -> true
             else -> value1.toString() == value2.toString()
         }
@@ -30,6 +34,9 @@ class ConditionWorker(
             // not null value always not less than null value
             value2 == null -> false
             value1 is Number && value2 is Number -> value1.toDouble() < value2.toDouble()
+            value1 is Date && value2 is Date -> value1 < value2
+            value1 is ChronoLocalDate && value2 is ChronoLocalDate -> value1 < value2
+            value1 is ChronoLocalDateTime<*> && value2 is ChronoLocalDateTime<*> -> value1 < value2
             else -> throw RuntimeException("Less than operator is only compatible for numeric or null values, currently are [$value1] and [$value2].")
         }
     }
@@ -41,6 +48,9 @@ class ConditionWorker(
             // not null value always not less than null value
             value1 == null -> false
             value1 is Number && value2 is Number -> value1.toDouble() > value2.toDouble()
+            value1 is Date && value2 is Date -> value1 > value2
+            value1 is ChronoLocalDate && value2 is ChronoLocalDate -> value1 > value2
+            value1 is ChronoLocalDateTime<*> && value2 is ChronoLocalDateTime<*> -> value1 > value2
             else -> throw RuntimeException("More than operator is only compatible for numeric or null values, currently are [$value1] and [$value2].")
         }
     }
