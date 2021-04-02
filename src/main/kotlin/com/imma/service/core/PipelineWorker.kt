@@ -46,8 +46,8 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
         try {
             val topics: MutableMap<String, Topic> = findPipelineSourceTopic(pipeline)
             @Suppress("NAME_SHADOWING")
-            pipeline.takeIf {
-                if (shouldRun(it, topics, data.now)) {
+            pipeline.takeIf { pipeline ->
+                if (shouldRun(pipeline, topics, data.now)) {
                     pipelineLogger.log("Pipeline ignored because of condition not reached.", PipelineRunType.ignore)
                     true
                 } else {

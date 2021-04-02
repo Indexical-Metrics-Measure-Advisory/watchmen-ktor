@@ -3,6 +3,8 @@ package com.imma.service.core
 import com.imma.model.CollectionNames
 import com.imma.model.core.Pipeline
 import com.imma.model.core.PipelineStage
+import com.imma.model.core.PipelineStageUnit
+import com.imma.model.core.PipelineStageUnitAction
 import com.imma.service.Service
 import com.imma.service.Services
 import java.io.Closeable
@@ -74,9 +76,38 @@ class PipelineLogger(private val pipeline: Pipeline, logger: LoggerWorker) : Log
     }
 }
 
-class StageLogger(private val pipeline: Pipeline, private val stage: PipelineStage, logger: LoggerWorker) : Logger(logger) {
+class StageLogger(private val pipeline: Pipeline, private val stage: PipelineStage, logger: LoggerWorker) :
+    Logger(logger) {
     override fun fillIds(log: RunLog) {
         log.pipelineId = pipeline.pipelineId
         log.stageId = stage.stageId
+    }
+}
+
+class UnitLogger(
+    private val pipeline: Pipeline,
+    private val stage: PipelineStage,
+    private val unit: PipelineStageUnit,
+    logger: LoggerWorker
+) : Logger(logger) {
+    override fun fillIds(log: RunLog) {
+        log.pipelineId = pipeline.pipelineId
+        log.stageId = stage.stageId
+        log.unitId = unit.unitId
+    }
+}
+
+class ActionLogger(
+    private val pipeline: Pipeline,
+    private val stage: PipelineStage,
+    private val unit: PipelineStageUnit,
+    private val action: PipelineStageUnitAction,
+    logger: LoggerWorker
+) : Logger(logger) {
+    override fun fillIds(log: RunLog) {
+        log.pipelineId = pipeline.pipelineId
+        log.stageId = stage.stageId
+        log.unitId = unit.unitId
+        log.actionId = action.actionId
     }
 }
