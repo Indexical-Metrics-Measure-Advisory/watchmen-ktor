@@ -76,6 +76,8 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
                 PipelineRunType.end,
                 (System.nanoTime() - startTime.toDouble()) / 1000
             )
+            // write log
+            logger.output()
         }
     }
 

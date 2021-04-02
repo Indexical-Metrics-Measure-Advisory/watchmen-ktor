@@ -10,18 +10,23 @@ import com.imma.service.Services
 import java.io.Closeable
 
 class LoggerWorker(private val instanceId: String, services: Services) : Service(services), Closeable {
-    internal fun output(block: RunLog.() -> Unit): RunLog {
+    private val logs: MutableList<RunLog> = mutableListOf()
+
+    internal fun append(block: RunLog.() -> Unit) {
         val log = RunLog(
             logId = services.persist().nextSnowflakeId().toString(),
             instanceId = instanceId
         ).apply(block)
-        output(log)
-        return log
+        logs.add(log)
     }
 
-    private fun output(log: RunLog) {
+    private fun asMonitorLogs(): MonitorLogs {
+        TODO("Convert in-memory logs to monitor logs.")
+    }
+
+    fun output() {
         // TODO should be autonomous transaction
-        services.persist().insertOne(log, RunLog::class.java, CollectionNames.RUN_LOG)
+        services.persist().insertOne(asMonitorLogs(), MonitorLogs::class.java, CollectionNames.RUN_LOG)
     }
 
     override fun close() {
@@ -33,7 +38,7 @@ abstract class Logger(private val logger: LoggerWorker) {
     abstract fun fillIds(log: RunLog)
 
     fun log(msg: String, previous: Map<String, Any>, now: Map<String, Any>) {
-        logger.output {
+        logger.append {
             fillIds(this)
             message = msg
             type = PipelineRunType.start
@@ -43,7 +48,7 @@ abstract class Logger(private val logger: LoggerWorker) {
     }
 
     fun log(msg: String, runType: PipelineRunType) {
-        logger.output {
+        logger.append {
             fillIds(this)
             message = msg
             type = runType
@@ -51,7 +56,7 @@ abstract class Logger(private val logger: LoggerWorker) {
     }
 
     fun log(msg: String, runType: PipelineRunType, spent: Double) {
-        logger.output {
+        logger.append {
             fillIds(this)
             message = msg
             type = runType
@@ -60,7 +65,7 @@ abstract class Logger(private val logger: LoggerWorker) {
     }
 
     fun error(msg: String, t: Throwable, spent: Double) {
-        logger.output {
+        logger.append {
             fillIds(this)
             error = "$msg\nCaused by ${t.stackTraceToString()}."
             type = PipelineRunType.fail
