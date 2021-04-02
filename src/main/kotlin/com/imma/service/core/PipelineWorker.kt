@@ -30,6 +30,7 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
         sourceData: Map<String, Any>
     ): Boolean {
         if (!pipeline.conditional || pipeline.on.isNullOrEmpty()) {
+            // no condition, run it
             return true
         }
 
@@ -38,30 +39,45 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
     }
 
     private fun doRun(pipeline: Pipeline, data: TriggerData) {
-        logger.log("Start to run pipeline.", PipelineRunType.start)
+        val startTime = System.nanoTime()
+        logger.log("Start to run pipeline.", data.previous, data.now)
 
         try {
             val topics: MutableMap<String, Topic> = findPipelineSourceTopic(pipeline)
-            pipeline.takeIf { shouldRun(it, topics, data.now) }?.let {
-                // TODO run pipeline body
+            @Suppress("NAME_SHADOWING")
+            pipeline.takeIf { shouldRun(it, topics, data.now) }?.let { pipeline ->
+                pipeline.stages.forEach { stage ->
+                    StageWorker(StageWorkerContextBuilder().let { builder ->
+                        builder.instanceId = instanceId
+                        builder.pipeline = pipeline
+                        builder.stage = stage
+                        builder.topics = topics
+                        builder.sourceData = data.now
+                        builder.variables = mutableMapOf()
+                        builder.services = services
+                        builder.logger = logger
+                        builder
+                    }.build()).run()
+                }
             }
         } catch (t: Throwable) {
-            logger.error("Failed to run pipeline.", t)
+            logger.error("Failed to run pipeline.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
         } finally {
-            logger.log("End of run pipeline.", PipelineRunType.end)
+            logger.log("End of run pipeline.", PipelineRunType.end, (System.nanoTime() - startTime.toDouble()) / 1000)
         }
     }
 
 
     fun run(data: TriggerData) {
         when {
-            !pipeline.validated -> logger.log("Pipeline is invalidated.", PipelineRunType.invalidate)
-            !pipeline.enabled -> logger.log("Pipeline is not enabled.", PipelineRunType.disable)
+            !pipeline.validated -> logger.log("Pipeline is invalidated.", PipelineRunType.invalidate, 0.toDouble())
+            !pipeline.enabled -> logger.log("Pipeline is not enabled.", PipelineRunType.disable, 0.toDouble())
             else -> doRun(pipeline, data)
         }
     }
 
     override fun close() {
+        logger.close()
         services.close()
     }
 }

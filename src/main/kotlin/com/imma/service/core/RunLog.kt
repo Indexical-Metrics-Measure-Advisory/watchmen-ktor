@@ -46,6 +46,14 @@ data class RunLog(
     var actionId: String? = null,
     @Field("message")
     var message: String? = null,
+    @Field("error")
+    var error: String? = null,
+    @Field("old_value")
+    var oldValue: Map<String, Any>? = null,
+    @Field("new_value")
+    var newValue: Map<String, Any>? = null,
     @Field("create_time")
-    var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
+    var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time,
+    @Field("complete_time")
+    var completeTime: Double? = null
 )
