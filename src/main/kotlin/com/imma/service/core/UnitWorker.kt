@@ -93,6 +93,7 @@ class UnitWorker(private val context: UnitWorkerContext) {
             }
         } catch (t: Throwable) {
             logger.error("Failed to run unit.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
+            throw t
         } finally {
             logger.log(
                 "End of run unit.",

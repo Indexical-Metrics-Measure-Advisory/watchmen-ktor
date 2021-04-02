@@ -89,6 +89,7 @@ class StageWorker(private val context: StageWorkerContext) {
             }
         } catch (t: Throwable) {
             logger.error("Failed to run stage.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
+            throw t
         } finally {
             logger.log(
                 "End of run stage.",

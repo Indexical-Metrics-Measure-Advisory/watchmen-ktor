@@ -63,8 +63,30 @@ class ActionWorker(private val context: ActionWorkerContext) {
 
         try {
             // TODO run action
+            val action = context.action
+            when (action.type) {
+                PipelineStageUnitActionType.alarm -> {
+                }
+                PipelineStageUnitActionType.`copy-to-memory` -> {
+                }
+                PipelineStageUnitActionType.exists -> {
+                }
+                PipelineStageUnitActionType.`read-factor` -> {
+                }
+                PipelineStageUnitActionType.`read-row` -> {
+                }
+                PipelineStageUnitActionType.`write-factor` -> {
+                }
+                PipelineStageUnitActionType.`insert-row` -> {
+                }
+                PipelineStageUnitActionType.`merge-row` -> {
+                }
+                PipelineStageUnitActionType.`insert-or-merge-row` -> {
+                }
+            }
         } catch (t: Throwable) {
             logger.error("Failed to run action.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
+            throw t
         } finally {
             logger.log(
                 "End of run action.",
