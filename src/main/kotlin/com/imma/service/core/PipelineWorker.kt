@@ -12,6 +12,7 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
 
     // logger use independent services
     private val logger: LoggerWorker by lazy { LoggerWorker(instanceId, Services()) }
+    private val pipelineLogger: PipelineLogger by lazy { PipelineLogger(pipeline, logger) }
 
     private fun findPipelineSourceTopic(pipeline: Pipeline): MutableMap<String, Topic> {
         val topicId =
@@ -40,12 +41,19 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
 
     private fun doRun(pipeline: Pipeline, data: TriggerData) {
         val startTime = System.nanoTime()
-        logger.log("Start to run pipeline.", data.previous, data.now)
+        pipelineLogger.log("Start to run pipeline.", data.previous, data.now)
 
         try {
             val topics: MutableMap<String, Topic> = findPipelineSourceTopic(pipeline)
             @Suppress("NAME_SHADOWING")
-            pipeline.takeIf { shouldRun(it, topics, data.now) }?.let { pipeline ->
+            pipeline.takeIf {
+                if (shouldRun(it, topics, data.now)) {
+                    pipelineLogger.log("Pipeline ignored because of condition not reached.", PipelineRunType.ignore)
+                    true
+                } else {
+                    false
+                }
+            }?.let { pipeline ->
                 pipeline.stages.forEach { stage ->
                     StageWorker(StageWorkerContextBuilder().let { builder ->
                         builder.instanceId = instanceId
@@ -61,17 +69,24 @@ class PipelineWorker(private val pipeline: Pipeline) : Closeable {
                 }
             }
         } catch (t: Throwable) {
-            logger.error("Failed to run pipeline.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
+            pipelineLogger.error("Failed to run pipeline.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
         } finally {
-            logger.log("End of run pipeline.", PipelineRunType.end, (System.nanoTime() - startTime.toDouble()) / 1000)
+            pipelineLogger.log(
+                "End of run pipeline.",
+                PipelineRunType.end,
+                (System.nanoTime() - startTime.toDouble()) / 1000
+            )
         }
     }
 
-
     fun run(data: TriggerData) {
         when {
-            !pipeline.validated -> logger.log("Pipeline is invalidated.", PipelineRunType.invalidate, 0.toDouble())
-            !pipeline.enabled -> logger.log("Pipeline is not enabled.", PipelineRunType.disable, 0.toDouble())
+            !pipeline.validated -> pipelineLogger.log(
+                "Pipeline is invalidated.",
+                PipelineRunType.invalidate,
+                0.toDouble()
+            )
+            !pipeline.enabled -> pipelineLogger.log("Pipeline is not enabled.", PipelineRunType.disable, 0.toDouble())
             else -> doRun(pipeline, data)
         }
     }

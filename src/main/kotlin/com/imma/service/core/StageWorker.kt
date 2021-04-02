@@ -1,5 +1,6 @@
 package com.imma.service.core
 
+import com.imma.model.compute.takeAsParameterJointOrThrow
 import com.imma.model.core.Pipeline
 import com.imma.model.core.PipelineStage
 import com.imma.model.core.Topic
@@ -42,8 +43,48 @@ data class StageWorkerContext(
     var logger: LoggerWorker
 )
 
-class StageWorker(context: StageWorkerContext) {
+class StageWorker(private val context: StageWorkerContext) {
+    private val logger: StageLogger by lazy { StageLogger(context.pipeline, context.stage, context.logger) }
+
+    private fun shouldRun(
+        stage: PipelineStage,
+        topics: MutableMap<String, Topic>,
+        sourceData: Map<String, Any>
+    ): Boolean {
+        if (!stage.conditional || stage.on.isNullOrEmpty()) {
+            // no condition, run it
+            return true
+        }
+
+        val joint = stage.on.takeAsParameterJointOrThrow()
+        return ConditionWorker(topics, sourceData, mutableMapOf()).computeJoint(joint)
+    }
+
     fun run() {
-        // TODO run stage
+        val startTime = System.nanoTime()
+        logger.log("Start to run stage.", PipelineRunType.start)
+
+        try {
+            context.stage.takeIf {
+                if (shouldRun(it, context.topics, context.sourceData)) {
+                    logger.log("Stage ignored because of condition not reached.", PipelineRunType.ignore)
+                    true
+                } else {
+                    false
+                }
+            }?.let { stage ->
+                stage.units.forEach { unit ->
+                    // TODO run unit
+                }
+            }
+        } catch (t: Throwable) {
+            logger.error("Failed to run stage.", t, (System.nanoTime() - startTime.toDouble()) / 1000)
+        } finally {
+            logger.log(
+                "End of run stage.",
+                PipelineRunType.end,
+                (System.nanoTime() - startTime.toDouble()) / 1000
+            )
+        }
     }
 }
