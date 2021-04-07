@@ -16,6 +16,7 @@ data class RunLog(
     var error: String? = null,
     var oldValue: Map<String, Any>? = null,
     var newValue: Map<String, Any>? = null,
+    var data: Map<String, Any>? = null,
     var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time,
     var completeTime: Double? = null,
     var insertCount: Int? = null,

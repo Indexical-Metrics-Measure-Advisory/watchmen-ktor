@@ -8,6 +8,7 @@ enum class RunType(val type: String) {
     fail("fail"),
 
     start("start"),
+    process("process"),
     end("end"),
 
     `not-defined`("not-defined")

@@ -2,9 +2,9 @@ package com.imma.service.core
 
 import com.imma.service.Service
 import com.imma.service.Services
+import com.imma.service.core.log.RunLog
 import com.imma.service.core.log.RunStatus
 import com.imma.service.core.log.RunType
-import com.imma.service.core.log.RunLog
 import java.io.Closeable
 
 class EngineLogger(private val instanceId: String, services: Services) : Service(services), Closeable {
@@ -34,6 +34,14 @@ abstract class EngineLoggerDelegate(protected val logger: EngineLogger) {
         logger.append {
             fillIds(this)
             message = msg
+            type = runType
+        }
+    }
+
+    fun log(map: Map<String, Any>, runType: RunType) {
+        logger.append {
+            fillIds(this)
+            data = map
             type = runType
         }
     }
