@@ -9,7 +9,7 @@ import java.util.*
 class ConditionWorker(
     private val topics: MutableMap<String, Topic>,
     private val sourceData: Map<String, Any>,
-    private val variables: MutableMap<String, Any> = mutableMapOf()
+    private val variables: MutableMap<String, Any?> = mutableMapOf()
 ) {
     private val parameterWorker: ParameterWorker by lazy { ParameterWorker(topics, sourceData, variables) }
 
@@ -58,7 +58,7 @@ class ConditionWorker(
     private fun computeExpression(expression: ParameterExpression): Boolean {
         val left = parameterWorker.computeParameter(expression.left)
         // lazy compute
-        val right = { parameterWorker.computeParameter(expression.right) }
+        val right = { expression.right.takeIf { it != null }?.run { parameterWorker.computeParameter(this) } }
         @Suppress("REDUNDANT_ELSE_IN_WHEN")
         return when (expression.operator) {
             ParameterExpressionOperator.equals -> eq(left, right())
@@ -91,7 +91,7 @@ class ConditionWorker(
                     throw throw RuntimeException("In operator is only compatible for right values are iterable, currently is [$r].")
                 }
             }
-            else -> throw RuntimeException("Unsupported expression[$expression].")
+            else -> throw RuntimeException("Unsupported expression operator[${expression.operator}].")
         }
     }
 
@@ -108,7 +108,7 @@ class ConditionWorker(
         return when (joint.jointType) {
             ParameterJointType.and -> joint.filters.all { this.computeCondition(it) }
             ParameterJointType.or -> joint.filters.any { this.computeCondition(it) }
-            else -> throw RuntimeException("Unsupported joint[$joint].")
+            else -> throw RuntimeException("Unsupported joint type[${joint.jointType}].")
         }
     }
 }

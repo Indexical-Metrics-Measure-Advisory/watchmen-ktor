@@ -2,6 +2,7 @@ package com.imma.model.compute
 
 interface ParameterCondition
 
+@Suppress("EnumEntryName")
 enum class ParameterExpressionOperator(val operator: String) {
     empty("empty"),
     `not-empty`("not-empty"),
@@ -18,9 +19,10 @@ enum class ParameterExpressionOperator(val operator: String) {
 data class ParameterExpression(
     var left: Parameter = ConstantParameter(),
     var operator: ParameterExpressionOperator = ParameterExpressionOperator.equals,
-    var right: Parameter = ConstantParameter()
+    var right: Parameter? = null
 ) : ParameterCondition
 
+@Suppress("EnumEntryName")
 enum class ParameterJointType(val joint: String) {
     and("and"),
     or("or");
@@ -34,55 +36,89 @@ data class ParameterJoint(
 
 typealias ParameterJointDelegate = MutableMap<String, Any>
 
-private fun takeOrThrow(map: Map<String, Any>): ParameterCondition {
-    var condition: ParameterCondition? = takeIfIsExpression(map)
-    if (condition != null) {
-        return condition
-    }
-    condition = takeIfIsJoint(map)
-    if (condition != null) {
-        return condition
-    }
-    throw RuntimeException("Parameter Condition[jointType=${map["jointType"]}, operator=${map["operator"]}] cannot be determined.")
+private fun takeOrThrow(map: Map<*, *>): ParameterCondition {
+    return takeIfIsExpression(map)
+        ?: takeIfIsJoint(map)
+        ?: throw RuntimeException("Unsupported condition with[jointType=${map["jointType"]}, operator=${map["operator"]}].")
 }
 
-private fun takeIfIsExpression(map: Map<String, Any>): ParameterExpression? {
-    val operator = map["operator"] as String?
-    if (operator.isNullOrEmpty()) {
-        return null
-    } else {
-        return ParameterExpression(
-            @Suppress("UNCHECKED_CAST")
-            (map["left"] as ParameterDelegate).takeAsParameterOrThrow(),
+private fun ignoreRightPart(operator: ParameterExpressionOperator): Boolean {
+    return ParameterExpressionOperator.empty === operator
+            || ParameterExpressionOperator.`not-empty` === operator
+}
+
+private fun asOperator(operator: String): ParameterExpressionOperator? {
+    return ParameterExpressionOperator.values().find { it.operator == operator }
+}
+
+/**
+ * return expression object if it is, or return null if it isn't.
+ * throw exception when it is and data incorrect
+ */
+private fun takeIfIsExpression(map: Map<*, *>): ParameterExpression? {
+    val operator = map["operator"]?.toString()
+    val op = operator?.run { asOperator(this) }
+    val left = map["left"]
+    val right = map["right"]
+    return when {
+        // not an expression, return null
+        operator.isNullOrEmpty() -> null
+        op == null -> throw RuntimeException("Unsupported expression operator[$operator] of expression.")
+        left !is Map<*, *> -> throw RuntimeException("Left part of expression should be a map, but is [$left] now.")
+        ignoreRightPart(op) -> ParameterExpression(
+            takeAsParameterOrThrow(left),
+            ParameterExpressionOperator.valueOf(operator)
+        )
+        right !is Map<*, *> -> throw RuntimeException("Right part of expression should be a map, but is [$left] now.")
+        else -> ParameterExpression(
+            takeAsParameterOrThrow(left),
             ParameterExpressionOperator.valueOf(operator),
-            @Suppress("UNCHECKED_CAST")
-            (map["right"] as ParameterDelegate).takeAsParameterOrThrow(),
+            takeAsParameterOrThrow(right)
         )
     }
 }
 
-private fun takeIfIsJoint(map: Map<String, Any>): ParameterJoint? {
-    val joint = map["jointType"] as String?
-    if (joint.isNullOrEmpty()) {
-        return null
-    } else {
-        return ParameterJoint(
-            ParameterJointType.valueOf(joint),
-            @Suppress("UNCHECKED_CAST")
-            (map["filters"] as List<Map<String, Any>>?)?.map { takeOrThrow(it) }?.toMutableList() ?: mutableListOf(),
-        )
+private fun takeAsFilters(filters: Collection<*>): MutableList<ParameterCondition> {
+    return when {
+        filters.isEmpty() -> throw RuntimeException("Sub filters of joint cannot be empty.")
+        filters.any { sub -> sub !is Map<*, *> } -> throw RuntimeException("Every sub filter of joint should be a map.")
+        else -> filters.map { takeOrThrow(it as Map<*, *>) }.toMutableList()
     }
 }
 
-fun Map<*, *>.takeAsParameterJointOrThrow(): ParameterJoint {
-    val jointType = this["jointType"]?.toString()
+private fun takeAsFilters(filters: Any?): MutableList<ParameterCondition> {
+    return when (filters) {
+        null -> throw RuntimeException("Sub filters of joint cannot be null.")
+        is List<*> -> takeAsFilters(filters)
+        is Array<*> -> takeAsFilters(filters.asList())
+        else -> throw RuntimeException("Sub filters of joint should be a list or an array, but is [$filters] now.")
+    }
+}
+
+private fun asJointType(type: String): ParameterJointType? {
+    return ParameterJointType.values().find { it.joint == type }
+}
+
+private fun takeIfIsJoint(map: Map<*, *>): ParameterJoint? {
+    val jointType = map["jointType"]?.toString()
+    val jt = jointType?.run { asJointType(jointType) }
+
+    return when {
+        // not a joint, return null
+        jointType.isNullOrEmpty() -> null
+        jt == null -> throw RuntimeException("Unsupported joint type[$jointType] of joint.")
+        else -> ParameterJoint(jt, takeAsFilters(map["filters"]))
+    }
+}
+
+fun takeAsParameterJointOrThrow(map: Map<*, *>): ParameterJoint {
+    val jointType = map["jointType"]?.toString()
     val joint: ParameterJointType = if (jointType.isNullOrEmpty()) {
+        // use and when joint type is not defined
         ParameterJointType.and
     } else {
-        ParameterJointType.valueOf(jointType)
+        asJointType(jointType) ?: throw RuntimeException("Unsupported joint type[$jointType] of joint.")
     }
 
-    @Suppress("UNCHECKED_CAST")
-    val filters = (this["filters"] as List<Map<String, Any>>?)?.map { takeOrThrow(it) }?.toMutableList()
-    return ParameterJoint(joint, filters ?: mutableListOf())
+    return ParameterJoint(joint, takeAsFilters(map["filters"]))
 }

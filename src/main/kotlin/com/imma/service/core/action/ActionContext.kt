@@ -31,7 +31,7 @@ class ActionContext(private val unitContext: UnitContext, val action: PipelineSt
         get() {
             return unitContext.sourceData
         }
-    val variables: MutableMap<String, Any>
+    val variables: MutableMap<String, Any?>
         get() {
             return unitContext.variables
         }

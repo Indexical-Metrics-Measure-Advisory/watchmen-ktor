@@ -14,7 +14,7 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
                 !conditional.toString().toBoolean() -> true
                 on == null -> true
                 on !is Map<*, *> -> throw RuntimeException("Unsupported condition found in alarm action.")
-                else -> ConditionWorker(topics, sourceData, variables).computeJoint(on.takeAsParameterJointOrThrow())
+                else -> ConditionWorker(topics, sourceData, variables).computeJoint(takeAsParameterJointOrThrow(on))
             }
         }
     }

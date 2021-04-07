@@ -30,7 +30,7 @@ class UnitContext(private val stageContext: StageContext, val unit: PipelineStag
         get() {
             return stageContext.sourceData
         }
-    val variables: MutableMap<String, Any>
+    val variables: MutableMap<String, Any?>
         get() {
             return stageContext.variables
         }

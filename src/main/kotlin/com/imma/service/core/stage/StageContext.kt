@@ -25,7 +25,7 @@ class StageContext(
         get() {
             return pipelineContext.topics
         }
-    val variables: MutableMap<String, Any> by lazy { mutableMapOf() }
+    val variables: MutableMap<String, Any?> by lazy { mutableMapOf() }
 
     val services: Services
         get() {

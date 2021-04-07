@@ -2,9 +2,9 @@ package com.imma.service.core.unit
 
 import com.imma.model.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.EngineWorker
-import com.imma.service.core.log.RunType
 import com.imma.service.core.action.ActionContext
 import com.imma.service.core.action.ActionWorker
+import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ConditionWorker
 
 class UnitWorker(private val context: UnitContext) : EngineWorker() {
@@ -17,7 +17,7 @@ class UnitWorker(private val context: UnitContext) : EngineWorker() {
                 return true
             }
 
-            val joint = unit.on.takeAsParameterJointOrThrow()
+            val joint = takeAsParameterJointOrThrow(unit.on)
             ConditionWorker(topics, sourceData, mutableMapOf()).computeJoint(joint)
         }
     }

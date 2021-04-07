@@ -17,7 +17,7 @@ class StageWorker(private val context: StageContext) : EngineWorker() {
                 return true
             }
 
-            val joint = stage.on.takeAsParameterJointOrThrow()
+            val joint = takeAsParameterJointOrThrow(stage.on)
             ConditionWorker(topics, sourceData, mutableMapOf()).computeJoint(joint)
         }
     }
