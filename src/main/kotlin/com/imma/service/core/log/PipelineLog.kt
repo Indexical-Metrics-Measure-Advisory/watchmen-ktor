@@ -1,123 +1,84 @@
-package com.imma.service.core
+package com.imma.service.core.log
 
 import com.imma.model.CollectionNames
 import com.imma.model.core.PipelineStageUnitActionType
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset
 import java.util.*
 
-@Suppress("EnumEntryName")
-enum class PipelineRunType(val type: String) {
-    invalidate("invalidate"),
-    disable("disable"),
-    ignore("ignore"),
-    fail("fail"),
-
-    start("start"),
-    end("end"),
-
-    `not-defined`("not-defined")
-}
-
-@Suppress("EnumEntryName")
-enum class PipelineRunStatus(val type: String) {
-    done("done"),
-    error("error")
-}
-
-data class RunLog(
-    var logId: String? = null,
-    var instanceId: String? = null,
-    var pipelineId: String? = null,
-    var type: PipelineRunType = PipelineRunType.`not-defined`,
-    var status: PipelineRunStatus = PipelineRunStatus.done,
-    var stageId: String? = null,
-    var unitId: String? = null,
-    var actionId: String? = null,
-    var message: String? = null,
-    var error: String? = null,
-    var oldValue: Map<String, Any>? = null,
-    var newValue: Map<String, Any>? = null,
-    var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time,
-    var completeTime: Double? = null,
-    var insertCount: Int? = null,
-    var updateCount: Int? = null
-)
-
-interface MonitorLogAction {
+interface MonitorActionLog {
     val uid: String
     val type: PipelineStageUnitActionType
-    val status: PipelineRunStatus
+    val status: RunStatus
     val completeTime: String
     val error: String?
     val insertCount: Int
     val updateCount: Int
 }
 
-data class AlarmAction(
+data class AlarmActionLog(
     override val uid: String,
     override val type: PipelineStageUnitActionType = PipelineStageUnitActionType.alarm,
     val conditionResult: Boolean,
     val value: String?,
-    override val status: PipelineRunStatus,
+    override val status: RunStatus,
     override val completeTime: String,
     override val error: String?,
     override val insertCount: Int = 0,
     override val updateCount: Int = 0
-) : MonitorLogAction
+) : MonitorActionLog
 
-data class ReadAction(
+data class ReadActionLog(
     override val uid: String,
     override val type: PipelineStageUnitActionType,
     val value: String?,
     val by: Any,
-    override val status: PipelineRunStatus,
+    override val status: RunStatus,
     override val completeTime: String,
     override val error: String?,
     override val insertCount: Int = 0,
     override val updateCount: Int = 0
-) : MonitorLogAction
+) : MonitorActionLog
 
-data class WriteAction(
+data class WriteActionLog(
     override val uid: String,
     override val type: PipelineStageUnitActionType,
     val value: String?,
     val by: Any,
-    override val status: PipelineRunStatus,
+    override val status: RunStatus,
     override val completeTime: String,
     override val error: String?,
     override val insertCount: Int,
     override val updateCount: Int
-) : MonitorLogAction
+) : MonitorActionLog
 
-data class CopyToMemoryAction(
+data class CopyToMemoryActionLog(
     override val uid: String,
     override val type: PipelineStageUnitActionType = PipelineStageUnitActionType.`copy-to-memory`,
     val value: String?,
-    override val status: PipelineRunStatus,
+    override val status: RunStatus,
     override val completeTime: String,
     override val error: String?,
     override val insertCount: Int = 0,
     override val updateCount: Int = 0
-) : MonitorLogAction
+) : MonitorActionLog
 
-data class MonitorLogUnit(
+data class MonitorUnitLog(
     val uid: String,
     val conditionResult: Boolean,
-    val actions: List<MonitorLogAction>,
+    val actions: List<MonitorActionLog>,
     val error: String?
 )
 
-data class MonitorLogStage(
+data class MonitorStageLog(
     val uid: String,
     val conditionResult: Boolean,
-    val units: List<MonitorLogUnit>,
+    val units: List<MonitorUnitLog>,
     val error: String?
 )
 
-@Document(collection = CollectionNames.RUN_LOG)
-data class MonitorLogs(
+@Document(collection = CollectionNames.PIPELINE_LOG)
+data class PipelineLog(
     @Field("uid")
     var uid: String,
     @Field("pipeline_id")
@@ -125,7 +86,7 @@ data class MonitorLogs(
     @Field("topic_id")
     var topicId: String,
     @Field("status")
-    val status: PipelineRunStatus = PipelineRunStatus.done,
+    val status: RunStatus = RunStatus.done,
     @Field("start_time")
     val startTime: Date,
     @Field("complete_time")
@@ -137,7 +98,7 @@ data class MonitorLogs(
     @Field("condition_result")
     val conditionResult: Boolean,
     @Field("stages_log")
-    val stages: List<MonitorLogStage>,
+    val stages: List<MonitorStageLog>,
     @Field("error")
     val error: String?
 )

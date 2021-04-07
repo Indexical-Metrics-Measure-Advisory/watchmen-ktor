@@ -72,15 +72,16 @@ fun ParameterDelegate.takeAsParameterOrThrow(): Parameter {
 }
 
 private fun ParameterDelegate.takeIfConditional(): Pair<Boolean, ParameterJoint?> {
-    val conditional = (this["conditional"] as String?).toBoolean()
-    val on: ParameterJoint?
-    if (conditional) {
-        @Suppress("UNCHECKED_CAST")
-        on = (this["on"] as ParameterJointDelegate?)?.takeAsParameterJointOrThrow()
-    } else {
-        on = null
+    val conditional = this["conditional"]
+    val on = this["on"]
+    return when {
+        conditional == false -> Pair(false, null)
+        conditional != null && !conditional.toString().toBoolean() -> Pair(false, null)
+        // ignore when condition not defined
+        on == null -> Pair(false, null)
+        on !is Map<*, *> -> throw RuntimeException("Unsupported condition[$on].")
+        else -> Pair(true, on.takeAsParameterJointOrThrow())
     }
-    return Pair(conditional, on)
 }
 
 private fun ParameterDelegate.takeIfIsTopicFactor(): TopicFactorParameter? {
@@ -117,6 +118,7 @@ private fun ParameterDelegate.takeIfIsCompute(): ComputedParameter? {
     if (kind == ParameterKind.computed.kind) {
         val (conditional, on: ParameterJoint?) = takeIfConditional()
         val type = ParameterComputeType.valueOf(this["type"] as String)
+
         @Suppress("UNCHECKED_CAST")
         val parameters = (this["parameters"] as List<ParameterDelegate>?)?.map {
             it.takeAsParameterOrThrow()

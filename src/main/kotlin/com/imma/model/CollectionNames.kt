@@ -20,5 +20,5 @@ object CollectionNames {
     const val PIPELINE: String = "pipelines"
     const val PIPELINE_GRAPHICS: String = "pipeline_graphics"
 
-    const val RUN_LOG: String = "run_logs"
+    const val PIPELINE_LOG: String = "pipeline_logs"
 }

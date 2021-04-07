@@ -74,13 +74,12 @@ private fun takeIfIsJoint(map: Map<String, Any>): ParameterJoint? {
     }
 }
 
-fun ParameterJointDelegate.takeAsParameterJointOrThrow(): ParameterJoint {
-    val jointType = this["jointType"] as String?
-    val joint: ParameterJointType
-    if (jointType.isNullOrEmpty()) {
-        joint = ParameterJointType.and
+fun Map<*, *>.takeAsParameterJointOrThrow(): ParameterJoint {
+    val jointType = this["jointType"]?.toString()
+    val joint: ParameterJointType = if (jointType.isNullOrEmpty()) {
+        ParameterJointType.and
     } else {
-        joint = ParameterJointType.valueOf(jointType)
+        ParameterJointType.valueOf(jointType)
     }
 
     @Suppress("UNCHECKED_CAST")

@@ -1,4 +1,4 @@
-package com.imma.service.core
+package com.imma.service.core.parameter
 
 import com.imma.model.compute.Parameter
 import com.imma.model.compute.ParameterKind

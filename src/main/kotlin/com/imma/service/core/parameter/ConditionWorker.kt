@@ -1,4 +1,4 @@
-package com.imma.service.core
+package com.imma.service.core.parameter
 
 import com.imma.model.compute.*
 import com.imma.model.core.Topic
