@@ -21,4 +21,16 @@ object EnvConstants {
     const val SNOWFLAKE_DATA_CENTER: String = "ktor.snowflake.dataCenter"
 
     const val CONTENT_DATE_FORMAT: String = "ktor.content.date.format"
+
+    const val ALARM_MAIL_ENABLED = "ktor.alarm.mail.enabled"
+    const val ALARM_MAIL_HOST = "ktor.alarm.mail.host"
+    const val ALARM_MAIL_PORT = "ktor.alarm.mail.port"
+    const val ALARM_MAIL_PROTOCOL = "ktor.alarm.mail.protocol"
+    const val ALARM_MAIL_AUTH = "ktor.alarm.mail.auth"
+    const val ALARM_MAIL_USERNAME = "ktor.alarm.mail.username"
+    const val ALARM_MAIL_PASSWORD = "ktor.alarm.mail.password"
+    const val ALARM_MAIL_TLS_ENABLE = "ktor.alarm.mail.tls.enable"
+    const val ALARM_MAIL_TLS_REQUIRED = "ktor.alarm.mail.tls.required"
+    const val ALARM_MAIL_FROM = "ktor.alarm.mail.from"
+    const val ALARM_MAIL_TO = "ktor.alarm.mail.to"
 }

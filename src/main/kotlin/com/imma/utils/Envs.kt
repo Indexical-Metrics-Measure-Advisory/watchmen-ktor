@@ -39,16 +39,32 @@ class Envs {
             return stringOrNull(key) ?: defaultValue
         }
 
+        fun list(key: String): List<String> {
+            return env().config.property(key).getList()
+        }
+
         fun long(key: String): Long {
             return string(key).toLong()
         }
 
         fun longOrNull(key: String): Long? {
-            return env().config.propertyOrNull(key)?.getString()?.toLong()
+            return stringOrNull(key)?.toLong()
         }
 
         fun long(key: String, defaultValue: Long): Long {
             return longOrNull(key) ?: defaultValue
+        }
+
+        fun int(key: String): Int {
+            return string(key).toInt()
+        }
+
+        fun intOrNull(key: String): Int? {
+            return stringOrNull(key)?.toInt()
+        }
+
+        fun int(key: String, defaultValue: Int): Int {
+            return intOrNull(key) ?: defaultValue
         }
 
         fun booleanOrNull(key: String): Boolean? {
