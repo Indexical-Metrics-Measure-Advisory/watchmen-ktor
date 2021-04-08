@@ -4,6 +4,7 @@ import com.imma.persist.PersistKit
 import com.imma.persist.PersistKits
 import com.imma.service.admin.*
 import com.imma.service.console.*
+import com.imma.service.dynamic.DynamicTopicService
 import com.imma.service.login.LoginService
 import java.io.Closeable
 
@@ -83,5 +84,9 @@ class Services : Closeable {
 
     fun <T> topic(block: TopicService.() -> T): T {
         return TopicService(this).block()
+    }
+
+    fun <T> dynamicTopic(block: DynamicTopicService.() -> T): T {
+        return DynamicTopicService(this).block()
     }
 }

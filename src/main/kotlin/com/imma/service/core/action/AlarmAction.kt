@@ -49,17 +49,17 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
         if (shouldRun()) {
             val value = with(context) {
                 val param = ConstantParameter(action["message"]?.toString(), false)
-                val computed =
-                    ParameterWorker(topics, sourceData, variables).computeParameter(param)?.toString() ?: "No Message"
+                val computed = ParameterWorker(topics, sourceData, variables).computeParameter(param)?.toString()
+                    ?: "No Message"
                 val severity = AlarmActionSeverity.values().find {
                     it.severity == action["severity"]?.toString()
                 } ?: AlarmActionSeverity.medium
                 CONSUMERS.parallelStream().forEach { it.alarm(severity, computed) }
                 computed
             }
-            logger.log(mutableMapOf("value" to value), RunType.process)
+            logger.log(mutableMapOf("value" to value, "conditionResult" to true), RunType.process)
         } else {
-            logger.ignore("Alarm action ignored because of condition not reached.")
+            logger.log(mutableMapOf("conditionResult" to false), RunType.process)
         }
     }
 }

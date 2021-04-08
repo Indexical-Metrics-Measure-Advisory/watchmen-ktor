@@ -14,8 +14,7 @@ class ActionWorker(private val context: ActionContext) : EngineWorker() {
             when (context.action.type) {
                 PipelineStageUnitActionType.alarm -> AlarmAction(context, logger).run()
                 PipelineStageUnitActionType.`copy-to-memory` -> CopyToMemoryAction(context, logger).run()
-                PipelineStageUnitActionType.exists -> {
-                }
+                PipelineStageUnitActionType.exists -> ExistsAction(context, logger).run()
                 PipelineStageUnitActionType.`read-factor` -> {
                 }
                 PipelineStageUnitActionType.`read-row` -> {

@@ -48,14 +48,16 @@ open class Segments : Expression {
 
 interface Where
 
-open class And : Segments(), Where {
+abstract class Joint : Segments(), Where
+
+open class And : Joint() {
     fun or(block: Or.() -> Unit): And {
         parts.add(Criteria.or(block))
         return this
     }
 }
 
-class Or : Segments(), Where {
+class Or : Joint() {
     fun and(block: And.() -> Unit): Or {
         parts.add(Criteria.and(block))
         return this

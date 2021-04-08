@@ -11,6 +11,7 @@ class ActionLogger(private val context: ActionContext) : EngineLoggerDelegate(co
             log.stageId = stage.stageId
             log.unitId = unit.unitId
             log.actionId = action.actionId
+            log.actionType = action.type
         }
     }
 }

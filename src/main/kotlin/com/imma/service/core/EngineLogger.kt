@@ -38,7 +38,7 @@ abstract class EngineLoggerDelegate(protected val logger: EngineLogger) {
         }
     }
 
-    fun log(map: Map<String, Any>, runType: RunType) {
+    fun log(map: Map<String, Any?>, runType: RunType) {
         logger.append {
             fillIds(this)
             data = map
