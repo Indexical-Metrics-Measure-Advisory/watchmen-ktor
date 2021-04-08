@@ -5,6 +5,8 @@ import com.imma.service.core.action.AlarmActionSeverity
 import com.imma.service.core.action.AlarmConsumer
 import com.imma.utils.EnvConstants
 import com.imma.utils.Envs
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
@@ -44,15 +46,23 @@ fun alarmByMail() {
 }
 
 class AlarmMailSender(private val sender: JavaMailSender) : AlarmConsumer {
+    private val logger: Logger by lazy {
+        LoggerFactory.getLogger(this::class.java)
+    }
+
     private val mailFrom: String by lazy { Envs.string(EnvConstants.ALARM_MAIL_FROM) }
     private val mailTo: List<String> by lazy { Envs.list(EnvConstants.ALARM_MAIL_TO) }
 
     override fun alarm(severity: AlarmActionSeverity, message: String) {
-        SimpleMailMessage().apply {
-            from = mailFrom
-            setTo(*mailTo.toTypedArray())
-            subject = "[${severity.severity}] Alarm from pipeline."
-            text = message
-        }.run { sender.send(this) }
+        try {
+            SimpleMailMessage().apply {
+                from = mailFrom
+                setTo(*mailTo.toTypedArray())
+                subject = "[${severity.severity}] Alarm from pipeline."
+                text = message
+            }.run { sender.send(this) }
+        } catch (t: Throwable) {
+            logger.error("Failed to send mail for alarm[severity=$severity, message=$message]", t)
+        }
     }
 }
