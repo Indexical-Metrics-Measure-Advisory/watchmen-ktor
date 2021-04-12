@@ -3,7 +3,6 @@ package com.imma.service.admin
 import com.imma.model.CollectionNames
 import com.imma.model.admin.UserCredential
 import com.imma.model.assignDateTimePair
-import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Service
 import com.imma.service.Services
@@ -14,21 +13,7 @@ class UserCredentialService(services: Services) : Service(services) {
         // crypt password
         credential.credential = BCrypt.hashpw(credential.credential, BCrypt.gensalt())
         assignDateTimePair(credential)
-        services.persist().upsert(
-            where {
-                column("userId") eq credential.userId
-            },
-            update {
-                set("userId") to credential.userId
-                set("name") to credential.name
-                set("credential") to credential.credential
-                set("createTime") to credential.createTime
-                set("lastModifyTime") to credential.lastModifyTime
-                set("lastModified") to credential.lastModified
-            },
-            UserCredential::class.java,
-            CollectionNames.USER_CREDENTIAL
-        )
+        services.persist().upsertOne(credential, UserCredential::class.java, CollectionNames.USER_CREDENTIAL)
     }
 
     fun findUserCredentialById(userId: String): UserCredential? {
@@ -38,7 +23,7 @@ class UserCredentialService(services: Services) : Service(services) {
     fun findCredentialByName(username: String): UserCredential? {
         return services.persist().findOne(
             where {
-                column("name") eq username
+                factor("name") eq { value(username) }
             },
             UserCredential::class.java,
             CollectionNames.USER_CREDENTIAL

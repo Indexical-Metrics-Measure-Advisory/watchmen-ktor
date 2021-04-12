@@ -1,15 +1,18 @@
 package com.imma.model.admin
 
 import com.imma.model.CollectionNames
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 
 /**
  * DONOT use this entity to save user group, it is created for load user group list for holder
  */
-@Document(collection = CollectionNames.USER_GROUP)
+@Entity(CollectionNames.USER_GROUP)
 class UserGroupForHolder {
-    @Id
+    @Id("_id")
     var userGroupId: String? = null
+
+    @Field("name")
     var name: String? = null
 }

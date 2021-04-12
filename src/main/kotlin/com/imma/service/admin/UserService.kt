@@ -13,8 +13,6 @@ import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
-import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import kotlin.contracts.ExperimentalContracts
 
 class UserService(services: Services) : TupleService(services) {
@@ -55,7 +53,7 @@ class UserService(services: Services) : TupleService(services) {
     fun findUserByName(username: String): User? {
         return services.persist().findOne(
             where {
-                column("name") eq username
+                factor("name") eq { value(username) }
             },
             User::class.java, CollectionNames.USER
         )
@@ -67,7 +65,7 @@ class UserService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 pageable,
                 User::class.java, CollectionNames.USER
@@ -79,19 +77,19 @@ class UserService(services: Services) : TupleService(services) {
         return if (name.isNullOrEmpty()) {
             persist().listAll(
                 select {
-                    column("userId")
-                    column("name")
+                    factor("userId")
+                    factor("name")
                 },
                 UserForHolder::class.java, CollectionNames.USER
             )
         } else {
             persist().list(
                 select {
-                    column("userId")
-                    column("name")
+                    factor("userId")
+                    factor("name")
                 },
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 UserForHolder::class.java, CollectionNames.USER
             )
@@ -101,11 +99,11 @@ class UserService(services: Services) : TupleService(services) {
     fun findUsersByIdsForHolder(userIds: List<String>): List<UserForHolder> {
         return persist().list(
             select {
-                column("userId")
-                column("name")
+                factor("userId")
+                factor("name")
             },
             where {
-                column("userId") `in` userIds
+                factor("userId") existsIn { value(userIds) }
             },
             UserForHolder::class.java, CollectionNames.USER
         )
@@ -114,12 +112,10 @@ class UserService(services: Services) : TupleService(services) {
     fun unassignUserGroup(userGroupId: String) {
         persist().update(
             where {
-                column("groupIds") include userGroupId
+                factor("groupIds") contains { value(userGroupId) }
             },
             update {
                 pull(userGroupId) from "groupIds"
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
             },
             User::class.java, CollectionNames.USER
         )
@@ -128,12 +124,10 @@ class UserService(services: Services) : TupleService(services) {
     fun assignUserGroup(userIds: List<String>, userGroupId: String) {
         persist().update(
             where {
-                column("userId") `in` userIds
+                factor("userId") existsIn { value(userIds) }
             },
             update {
                 push(userGroupId) into "groupIds"
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
             },
             User::class.java, CollectionNames.USER
         )
@@ -142,8 +136,8 @@ class UserService(services: Services) : TupleService(services) {
     fun isActive(userId: String): Boolean {
         return persist().exists(
             where {
-                column("userId") eq userId
-                column("active") eq true
+                factor("userId") eq { value(userId) }
+                factor("active") eq { value(true) }
             },
             User::class.java, CollectionNames.USER
         )
@@ -152,8 +146,8 @@ class UserService(services: Services) : TupleService(services) {
     fun isAdmin(userId: String): Boolean {
         return persist().exists(
             where {
-                column("userId") eq userId
-                column("role") eq Roles.ADMIN.ROLE
+                factor("userId") eq { value(userId) }
+                factor("role") eq { value { Roles.ADMIN.ROLE } }
             },
             User::class.java, CollectionNames.USER
         )

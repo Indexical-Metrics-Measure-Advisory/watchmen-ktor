@@ -1,7 +1,6 @@
 package com.imma.service
 
 import com.imma.persist.PersistKit
-import org.springframework.data.mongodb.core.MongoTemplate
 
 /**
  * thread unsafe

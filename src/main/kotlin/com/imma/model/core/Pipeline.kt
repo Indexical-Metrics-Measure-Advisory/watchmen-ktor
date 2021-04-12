@@ -3,13 +3,10 @@ package com.imma.model.core
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
 import com.imma.model.compute.ParameterJointDelegate
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset
+import com.imma.persist.annotation.*
 import java.util.*
 
+@Suppress("EnumEntryName")
 enum class PipelineStageUnitActionType(val type: String) {
     alarm("alarm"),
     `copy-to-memory`("copy-to-memory"),
@@ -42,6 +39,7 @@ data class PipelineStage(
     var units: List<PipelineStageUnit> = mutableListOf(),
 ) : Conditional
 
+@Suppress("EnumEntryName")
 enum class PipelineTriggerType(val type: String) {
     insert("insert"),
     merge("merge"),
@@ -51,9 +49,9 @@ enum class PipelineTriggerType(val type: String) {
     delete("delete");
 }
 
-@Document(collection = CollectionNames.PIPELINE)
+@Entity(CollectionNames.PIPELINE)
 data class Pipeline(
-    @Id
+    @Id("_id")
     var pipelineId: String? = null,
     @Field("topic_id")
     var topicId: String? = null,
@@ -71,11 +69,8 @@ data class Pipeline(
     var enabled: Boolean = false,
     @Field("validated")
     var validated: Boolean = false,
-    @Field("create_time")
-    override var createTime: String? = null,
-    @Field("last_modify_time")
-    override var lastModifyTime: String? = null,
-    @LastModifiedDate
-    @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
+    @CreatedAt("create_time")
+    override var createTime: Date? = null,
+    @LastModifiedAt("last_modify_time")
+    override var lastModifyTime: Date? = null,
 ) : Tuple(), Conditional

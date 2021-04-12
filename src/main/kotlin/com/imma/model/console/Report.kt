@@ -3,13 +3,10 @@ package com.imma.model.console
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
 import com.imma.model.chart.Chart
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset
+import com.imma.persist.annotation.*
 import java.util.*
 
+@Suppress("EnumEntryName")
 enum class ReportIndicatorArithmetic(val arithmetic: String) {
     none("none"),
     count("count"),
@@ -37,9 +34,9 @@ data class ReportRect(
     var height: Float = 0f
 )
 
-@Document(collection = CollectionNames.REPORT)
+@Entity(CollectionNames.REPORT)
 data class Report(
-    @Id
+    @Id("_id")
     var reportId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -61,11 +58,8 @@ data class Report(
     var chart: Chart = Chart(),
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @Field("create_time")
-    override var createTime: String? = null,
-    @Field("last_modify_time")
-    override var lastModifyTime: String? = null,
-    @LastModifiedDate
-    @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
+    @CreatedAt("create_time")
+    override var createTime: Date? = null,
+    @LastModifiedAt("last_modify_time")
+    override var lastModifyTime: Date? = null,
 ) : Tuple()

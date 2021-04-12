@@ -1,15 +1,18 @@
 package com.imma.model.core
 
 import com.imma.model.CollectionNames
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 
 /**
  * DONOT use this entity to save enumeration, it is created for load enumeration list for holder
  */
-@Document(collection = CollectionNames.ENUM)
+@Entity(CollectionNames.ENUM)
 class EnumForHolder {
-    @Id
-    var topicId: String? = null
+    @Id("_id")
+    var enumId: String? = null
+
+    @Field("name")
     var name: String? = null
 }

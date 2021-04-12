@@ -4,6 +4,7 @@ import com.imma.auth.AdminReserved
 import com.imma.model.admin.User
 import com.imma.service.Service
 import com.imma.service.Services
+import com.imma.utils.getCurrentDateTime
 import com.imma.utils.getCurrentDateTimeAsString
 import org.mindrot.jbcrypt.BCrypt
 
@@ -19,7 +20,7 @@ class LoginService(services: Services) : Service(services) {
         ) {
             // successfully login when admin enabled and username/password matched
             return User().apply {
-                val now = getCurrentDateTimeAsString()
+                val now = getCurrentDateTime()
                 userId = username
                 name = username
                 nickName = username

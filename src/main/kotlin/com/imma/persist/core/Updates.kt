@@ -1,12 +1,14 @@
 package com.imma.persist.core
 
-enum class ColumnUpdateType {
+import com.imma.persist.core.build.ElementBuilder
+
+enum class FactorUpdateType {
     SET,
     PULL,
     PUSH
 }
 
-class ColumnUpdate(val column: Column, val type: ColumnUpdateType) {
+class FactorUpdate(val factor: FactorElement, val type: FactorUpdateType) {
     var value: Any? = NotSet
 
     infix fun to(value: Any?) {
@@ -15,26 +17,26 @@ class ColumnUpdate(val column: Column, val type: ColumnUpdateType) {
 }
 
 class PullFromArray(private val updates: Updates, private val value: Any) {
-    infix fun from(name: String) {
-        val change = ColumnUpdate(Column(name), ColumnUpdateType.PULL)
+    infix fun from(factorName: String) {
+        val change = FactorUpdate(ElementBuilder.SINGLETON.factor(factorName), FactorUpdateType.PULL)
         change.value = value
         updates.parts.add(change)
     }
 }
 
 class PushIntoArray(private val updates: Updates, private val value: Any) {
-    infix fun into(name: String) {
-        val change = ColumnUpdate(Column(name), ColumnUpdateType.PUSH)
+    infix fun into(factorName: String) {
+        val change = FactorUpdate(ElementBuilder.SINGLETON.factor(factorName), FactorUpdateType.PUSH)
         change.value = value
         updates.parts.add(change)
     }
 }
 
 class Updates {
-    val parts: MutableList<ColumnUpdate> = mutableListOf()
+    val parts: MutableList<FactorUpdate> = mutableListOf()
 
-    fun set(name: String): ColumnUpdate {
-        val change = ColumnUpdate(Column(name), ColumnUpdateType.SET)
+    fun set(factorName: String): FactorUpdate {
+        val change = FactorUpdate(ElementBuilder.SINGLETON.factor(factorName), FactorUpdateType.SET)
         parts.add(change)
         return change
     }
@@ -49,7 +51,5 @@ class Updates {
 }
 
 fun update(block: Updates.() -> Unit): Updates {
-    val changes = Updates()
-    changes.block()
-    return changes
+    return Updates().apply(block)
 }

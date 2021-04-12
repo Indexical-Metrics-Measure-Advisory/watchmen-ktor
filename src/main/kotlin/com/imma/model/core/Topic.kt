@@ -2,13 +2,10 @@ package com.imma.model.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset
+import com.imma.persist.annotation.*
 import java.util.*
 
+@Suppress("EnumEntryName")
 enum class FactorType(val type: String) {
     sequence("sequence"),
 
@@ -49,11 +46,11 @@ enum class FactorType(val type: String) {
     month("month"),                         // 1 - 12
     `half-month`("half-month"),             // 1: first half, 2: second half
     `ten-days`("ten-days"),                 // 1, 2, 3
-    `week-of-year`("week-of-year"),         // 1 - 53
-    `week-of-month`("week-of-month"),       // 1 - 6
+    `week-of-year`("week-of-year"),         // 0 (the partial week that precedes the first Sunday of the year) - 53 (leap year)
+    `week-of-month`("week-of-month"),       // 0 (the partial week that precedes the first Sunday of the year) - 5
     `half-week`("half-week"),               // 1: first half, 2: second half
     `day-of-month`("day-of-month"),         // 1 - 31, according to month/year
-    `day-of-week`("day-of-week"),           // 1 - 7
+    `day-of-week`("day-of-week"),           // 1 (Sunday) - 7 (Saturday)
     `day-kind`("day-kind"),                 // 1: workday, 2: weekend, 3: holiday
     hour("hour"),                           // 0 - 23
     `hour-kind`("hour-kind"),               // 1: work time, 2: off hours, 3: sleeping time
@@ -94,11 +91,13 @@ data class Factor(
     var description: String? = null,
 )
 
+@Suppress("EnumEntryName")
 enum class TopicKind(val kind: String) {
     system("system"),
     business("business")
 }
 
+@Suppress("EnumEntryName")
 enum class TopicType(val type: String) {
     raw("raw"),
     distinct("distinct"),
@@ -107,9 +106,9 @@ enum class TopicType(val type: String) {
     ratio("ratio");
 }
 
-@Document(collection = CollectionNames.TOPIC)
+@Entity(CollectionNames.TOPIC)
 data class Topic(
-    @Id
+    @Id("_id")
     var topicId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -121,11 +120,8 @@ data class Topic(
     var description: String? = null,
     @Field("factors")
     var factors: MutableList<Factor> = mutableListOf(),
-    @Field("create_time")
-    override var createTime: String? = null,
-    @Field("last_modify_time")
-    override var lastModifyTime: String? = null,
-    @LastModifiedDate
-    @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
+    @CreatedAt("create_time")
+    override var createTime: Date? = null,
+    @LastModifiedAt("last_modify_time")
+    override var lastModifyTime: Date? = null,
 ) : Tuple()

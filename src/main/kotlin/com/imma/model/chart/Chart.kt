@@ -1,5 +1,6 @@
 package com.imma.model.chart
 
+@Suppress("EnumEntryName")
 enum class ChartType(val type: String) {
     count("count"),
     bar("bar"),

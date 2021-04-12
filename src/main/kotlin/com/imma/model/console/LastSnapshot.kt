@@ -1,16 +1,18 @@
 package com.imma.model.console
 
 import com.imma.model.CollectionNames
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 
-@Document(collection = CollectionNames.LAST_SNAPSHOT)
+@Entity(CollectionNames.LAST_SNAPSHOT)
 class LastSnapshot(
-    @Id
+    @Id("_id")
     var userId: String? = null,
     @Field("language")
     var language: String? = null,
+    @Field("theme")
+    var theme: String? = null,
     @Field("last_dashboard_id")
     var lastDashboardId: String? = null,
     @Field("admin_dashboard_id")

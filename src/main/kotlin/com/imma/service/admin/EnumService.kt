@@ -25,6 +25,7 @@ class EnumService(services: Services) : TupleService(services) {
         // save collection name separately
         val name = enumeration.name?.replace(' ', '_')?.replace('-', '_')
         val collectionName = "e_${name}"
+        // TODO determine collection existing, create it when not exists
         persist().deleteAll(EnumItem::class.java, collectionName)
         if (enumeration.items.isNotEmpty()) {
             persist().insertAll(enumeration.items, EnumItem::class.java, collectionName)
@@ -38,8 +39,8 @@ class EnumService(services: Services) : TupleService(services) {
     fun findEnumsForHolder(): List<EnumForHolder> {
         return persist().listAll(
             select {
-                column("enumId")
-                column("name")
+                factor("enumId")
+                factor("name")
             },
             EnumForHolder::class.java, CollectionNames.ENUM
         )

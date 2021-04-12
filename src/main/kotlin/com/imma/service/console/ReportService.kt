@@ -9,8 +9,6 @@ import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
-import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import kotlin.contracts.ExperimentalContracts
 
 class ReportService(services: Services) : TupleService(services) {
@@ -33,25 +31,14 @@ class ReportService(services: Services) : TupleService(services) {
 
     fun renameReport(reportId: String, name: String?) {
         persist().updateOne(
-            where {
-                column("reportId") eq reportId
-            },
-            update {
-                set("name") to name
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
-            },
+            where { factor("reportId") eq { value(reportId) } },
+            update { set("name") to name },
             Report::class.java, CollectionNames.REPORT
         )
     }
 
     fun deleteReport(reportId: String) {
-        persist().delete(
-            where {
-                column("reportId") eq reportId
-            },
-            Report::class.java, CollectionNames.REPORT
-        )
+        persist().deleteById(reportId, Report::class.java, CollectionNames.REPORT)
     }
 
     @ExperimentalContracts
@@ -62,7 +49,7 @@ class ReportService(services: Services) : TupleService(services) {
     fun listReportsByConnectedSpaces(connectedSpaceIds: List<String>): List<Report> {
         return persist().list(
             where {
-                column("connectId") `in` connectedSpaceIds
+                factor("connectId") existsIn { value(connectedSpaceIds) }
             },
             Report::class.java, CollectionNames.REPORT
         )
@@ -71,7 +58,7 @@ class ReportService(services: Services) : TupleService(services) {
     fun deleteReportsByConnectedSpace(connectId: String) {
         persist().delete(
             where {
-                column("connectId") eq connectId
+                factor("connectId") eq { value(connectId) }
             },
             Report::class.java, CollectionNames.REPORT
         )
@@ -80,7 +67,7 @@ class ReportService(services: Services) : TupleService(services) {
     fun deleteReportsBySubject(subjectId: String) {
         persist().delete(
             where {
-                column("subjectId") eq subjectId
+                factor("subjectId") eq { value(subjectId) }
             },
             Report::class.java, CollectionNames.REPORT
         )
@@ -89,8 +76,8 @@ class ReportService(services: Services) : TupleService(services) {
     fun isReportBelongsTo(reportId: String, userId: String): Boolean {
         return persist().exists(
             where {
-                column("reportId") eq reportId
-                column("userId") eq userId
+                factor("reportId") eq { value(reportId) }
+                factor("userId") eq { value(userId) }
             },
             Report::class.java, CollectionNames.REPORT
         )
@@ -104,7 +91,7 @@ class ReportService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 pageable,
                 Report::class.java, CollectionNames.REPORT

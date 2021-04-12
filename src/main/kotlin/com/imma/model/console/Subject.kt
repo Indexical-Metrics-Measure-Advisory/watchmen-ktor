@@ -4,12 +4,7 @@ import com.imma.model.CollectionNames
 import com.imma.model.Tuple
 import com.imma.model.compute.ParameterDelegate
 import com.imma.model.compute.ParameterJointDelegate
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.annotation.Transient
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset
+import com.imma.persist.annotation.*
 import java.util.*
 
 data class SubjectDataSetColumn(
@@ -18,6 +13,7 @@ data class SubjectDataSetColumn(
     var alias: String = ""
 )
 
+@Suppress("EnumEntryName")
 enum class TopicJoinType(val type: String) {
     left("left"),
     right("right"),
@@ -38,9 +34,9 @@ data class SubjectDataSet(
     var joins: List<SubjectDataSetJoin> = mutableListOf()
 )
 
-@Document(collection = CollectionNames.SUBJECT)
+@Entity(CollectionNames.SUBJECT)
 data class Subject(
-    @Id
+    @Id("_id")
     var subjectId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -54,13 +50,10 @@ data class Subject(
     var dataset: SubjectDataSet = SubjectDataSet(),
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @Field("create_time")
-    override var createTime: String? = null,
-    @Field("last_modify_time")
-    override var lastModifyTime: String? = null,
-    @LastModifiedDate
-    @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
+    @CreatedAt("create_time")
+    override var createTime: Date? = null,
+    @LastModifiedAt("last_modify_time")
+    override var lastModifyTime: Date? = null,
 ) : Tuple() {
     @Transient
     var reports: MutableList<Report> = mutableListOf()
