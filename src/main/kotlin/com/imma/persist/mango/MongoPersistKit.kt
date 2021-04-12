@@ -33,7 +33,7 @@ fun mongo() {
 /**
  * thread unsafe
  */
-class MongoPersistKit() : AbstractPersistKit() {
+class MongoPersistKit : AbstractPersistKit() {
     private val mongoClient: MongoClient by lazy {
         createMongoClient()
     }
@@ -67,39 +67,24 @@ class MongoPersistKit() : AbstractPersistKit() {
         return mongoTemplate.save(one)
     }
 
-    override fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): T? {
+    override fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String) {
         mongoTemplate.updateFirst(buildQuery(where), buildUpdate(updates), entityClass, entityName)
-
-        // TODO retrieve changed data, both old and new values
-        return null
     }
 
-    override fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): Changed? {
+    override fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String) {
         mongoTemplate.upsert(buildQuery(where), buildUpdate(updates), entityClass, entityName)
-
-        // TODO retrieve changed data, both old and new values
-        return null
     }
 
-    override fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): List<Changed> {
+    override fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String) {
         mongoTemplate.updateMulti(buildQuery(where), buildUpdate(updates), entityClass, entityName)
-
-        // TODO retrieve changed data, both old and new values
-        return listOf()
     }
 
-    override fun <T> delete(where: Where, entityClass: Class<T>, entityName: String): List<T> {
+    override fun <T> delete(where: Where, entityClass: Class<T>, entityName: String) {
         mongoTemplate.remove(buildQuery(where), entityClass, entityName)
-
-        // TODO retrieve deleted data
-        return listOf()
     }
 
-    override fun <T> deleteAll(entityClass: Class<T>, entityName: String): List<T> {
+    override fun <T> deleteAll(entityClass: Class<T>, entityName: String) {
         mongoTemplate.remove(Query(), entityName)
-
-        // TODO retrieve deleted data
-        return listOf()
     }
 
     override fun <T> findById(id: String, entityClass: Class<T>, entityName: String): T? {

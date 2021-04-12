@@ -2,7 +2,6 @@ package com.imma.persist
 
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
-import com.imma.persist.core.Changed
 import com.imma.persist.core.Select
 import com.imma.persist.core.Updates
 import com.imma.persist.core.Where
@@ -20,15 +19,15 @@ interface PersistKit : Closeable {
 
     fun <T> updateOne(one: T, entityClass: Class<T>, entityName: String): T
 
-    fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): T?
+    fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String)
 
-    fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): Changed?
+    fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String)
 
-    fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String): List<Changed>
+    fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String)
 
-    fun <T> delete(where: Where, entityClass: Class<T>, entityName: String): List<T>
+    fun <T> delete(where: Where, entityClass: Class<T>, entityName: String)
 
-    fun <T> deleteAll(entityClass: Class<T>, entityName: String): List<T>
+    fun <T> deleteAll(entityClass: Class<T>, entityName: String)
 
     fun <T> findById(id: String, entityClass: Class<T>, entityName: String): T?
 

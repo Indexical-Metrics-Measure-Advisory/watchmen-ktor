@@ -1,6 +1,7 @@
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
+val jackson_version: String by project
 val spring_version: String by project
 val spring_data_mango_version: String by project
 val mongo_driver_version: String by project
@@ -52,6 +53,7 @@ dependencies {
     implementation("io.ktor:ktor-metrics:$ktor_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jackson_version")
     implementation("org.springframework.data:spring-data-mongodb:$spring_data_mango_version")
     implementation("org.mongodb:mongodb-driver-sync:$mongo_driver_version")
     implementation("org.springframework:spring-context-support:$spring_version")
