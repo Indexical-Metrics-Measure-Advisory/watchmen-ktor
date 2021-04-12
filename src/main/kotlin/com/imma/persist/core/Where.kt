@@ -1,85 +1,58 @@
 package com.imma.persist.core
 
-interface Expression
+import com.imma.persist.core.build.JointBuilder
 
-enum class ColumnExpressionOperator {
-    EQUALS,
-    IN,
-    INCLUDE,    // array value includes given value
-    REGEXP,     // ignore case
-
-    NOT_SET
+@Suppress("EnumEntryName")
+enum class JointType {
+    and, or
 }
 
-class ColumnExpression(val column: Column) : Expression {
-    var operator: ColumnExpressionOperator? = ColumnExpressionOperator.NOT_SET
-    var value: Any? = NotSet
+interface Condition
 
-    infix fun eq(value: Any?) {
-        this.operator = ColumnExpressionOperator.EQUALS
-        this.value = value
-    }
-
-    infix fun `in`(values: List<Any>) {
-        this.operator = ColumnExpressionOperator.IN
-        this.value = values
-    }
-
-    infix fun include(value: Any) {
-        this.operator = ColumnExpressionOperator.INCLUDE
-        this.value = value
-    }
-
-    infix fun regex(pattern: String) {
-        this.operator = ColumnExpressionOperator.REGEXP
-        this.value = pattern
-    }
+@Suppress("EnumEntryName")
+enum class ExpressionOperator {
+    empty,
+    `not-empty`,
+    equals,
+    `not-equals`,
+    less,
+    `less-equals`,
+    more,
+    `more-equals`,
+    `in`,
+    `not-in`,
+    regex,
+    contains;
 }
 
-open class Segments : Expression {
-    val parts: MutableList<Expression> = mutableListOf()
-
-    fun column(name: String): ColumnExpression {
-        val expression = ColumnExpression(Column(name))
-        parts.add(expression)
-        return expression
+class Expression : Condition {
+    var left: Element? = null
+    var operator: ExpressionOperator? = null
+    var right: Element? = null
+    override fun toString(): String {
+        return "Expression(left=$left, operator=$operator, right=$right)"
     }
 }
 
-interface Where
-
-abstract class Joint : Segments(), Where
-
-open class And : Joint() {
-    fun or(block: Or.() -> Unit): And {
-        parts.add(Criteria.or(block))
-        return this
+abstract class Joint(val type: JointType) : Condition {
+    val parts: MutableList<Condition> = mutableListOf()
+    override fun toString(): String {
+        return "Joint(type=$type, parts=$parts)"
     }
 }
 
-class Or : Joint() {
-    fun and(block: And.() -> Unit): Or {
-        parts.add(Criteria.and(block))
-        return this
-    }
+class And : Joint(JointType.and)
+class Or : Joint(JointType.or)
+
+fun where(block: JointBuilder.() -> Unit): Joint {
+    return where(JointType.and, block)
 }
 
-class Criteria {
-    companion object {
-        fun and(block: And.() -> Unit): And {
-            val where = And()
-            where.block()
-            return where
-        }
-
-        fun or(block: Or.() -> Unit): Or {
-            val where = Or()
-            where.block()
-            return where
-        }
-    }
+fun where(type: JointType, block: JointBuilder.() -> Unit): Joint {
+    val joint = if (type === JointType.and) And() else Or()
+    val builder = JointBuilder(joint)
+    builder.block()
+    return joint
 }
 
-fun where(block: And.() -> Unit): And {
-    return Criteria.and(block)
-}
+typealias Where = Joint

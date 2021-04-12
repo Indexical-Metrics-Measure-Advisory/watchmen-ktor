@@ -7,8 +7,6 @@ import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
-import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import kotlin.contracts.ExperimentalContracts
 
 class PipelineService(services: Services) : TupleService(services) {
@@ -26,28 +24,16 @@ class PipelineService(services: Services) : TupleService(services) {
 
     fun renamePipeline(pipelineId: String, name: String?) {
         persist().updateOne(
-            where {
-                column("pipelineId") eq pipelineId
-            },
-            update {
-                set("name") to name
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
-            },
+            where { factor("pipelineId") eq { value(pipelineId) } },
+            update { set("name") to name },
             Pipeline::class.java, CollectionNames.PIPELINE
         )
     }
 
     fun togglePipelineEnablement(pipelineId: String, enablement: Boolean) {
         persist().updateOne(
-            where {
-                column("pipelineId") eq pipelineId
-            },
-            update {
-                set("enabled") to enablement
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
-            },
+            where { factor("pipelineId") eq { value(pipelineId) } },
+            update { set("enabled") to enablement },
             Pipeline::class.java, CollectionNames.PIPELINE
         )
     }

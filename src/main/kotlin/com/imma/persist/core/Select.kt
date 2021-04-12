@@ -1,15 +1,27 @@
 package com.imma.persist.core
 
-class Select {
-    val parts: MutableList<String> = mutableListOf()
+import com.imma.persist.core.build.SelectBuilder
 
-    fun column(name: String) {
-        parts.add(name)
-    }
+enum class SelectColumnArithmetic {
+    COUNT,
+    SUM,
+    AVG,
+    MAX,
+    MIN,
 }
 
-fun select(block: Select.() -> Unit): Select {
-    val fields = Select()
-    fields.block()
-    return fields
+class SelectColumn(val element: Element) {
+    var alias: String? = null
+    var arithmetic: SelectColumnArithmetic? = null
+}
+
+class Select {
+    val columns: MutableList<SelectColumn> = mutableListOf()
+}
+
+fun select(block: SelectBuilder.() -> Unit): Select {
+    val select = Select()
+    val builder = SelectBuilder(select)
+    builder.block()
+    return select
 }

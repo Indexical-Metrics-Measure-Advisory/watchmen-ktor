@@ -1,24 +1,26 @@
 package com.imma.persist.mango
 
+import com.imma.model.CollectionNames
+import com.imma.model.admin.UserGroup
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.AbstractPersistKit
 import com.imma.persist.PersistKit
 import com.imma.persist.PersistKitProvider
 import com.imma.persist.PersistKits
-import com.imma.persist.core.*
+import com.imma.persist.core.Select
+import com.imma.persist.core.Updates
+import com.imma.persist.core.Where
 import com.imma.utils.EnvConstants
 import com.imma.utils.Envs
-import com.imma.utils.findPageData
-import com.imma.utils.toDataPage
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
-import org.springframework.data.domain.PageRequest
+import com.mongodb.client.MongoCollection
+import com.mongodb.client.MongoDatabase
+import org.bson.Document
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory
-import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 
 class MongoPersistKitProvider(name: String) : PersistKitProvider(name) {
     override fun createKit(): PersistKit {
@@ -40,6 +42,9 @@ class MongoPersistKit : AbstractPersistKit() {
     private val mongoTemplate: MongoTemplate by lazy {
         createMongoTemplate()
     }
+    private val mongoDatabase: MongoDatabase by lazy {
+        doGetMongoDatabase()
+    }
 
     private fun createMongoClient(): MongoClient {
         val host = Envs.string(EnvConstants.MONGO_HOST)
@@ -54,154 +59,135 @@ class MongoPersistKit : AbstractPersistKit() {
         return MongoTemplate(SimpleMongoClientDatabaseFactory(mongoClient, name))
     }
 
-    override fun <T> insertOne(one: T, entityClass: Class<T>, entityName: String): T {
-        return mongoTemplate.insert(one)
+    private fun doGetMongoDatabase(): MongoDatabase {
+        val name = Envs.string(EnvConstants.MONGO_NAME)
+
+        return mongoClient.getDatabase(name)
     }
 
-    override fun <T> insertAll(list: List<T>, entityClass: Class<T>, entityName: String): List<T> {
-        mongoTemplate.insert(list, entityName)
+    private fun getMongoCollection(name: String): MongoCollection<Document> {
+        return mongoDatabase.getCollection(name)
+    }
+
+    override fun <T : Any> insertOne(one: T, entityClass: Class<*>, entityName: String): T {
+        val material = MapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
+        getMongoCollection(entityName).insertOne(material.toDocument { nextSnowflakeIdStr() })
+        return one
+    }
+
+    override fun <T : Any> insertAll(list: List<T>, entityClass: Class<*>, entityName: String): List<T> {
+        getMongoCollection(entityName).insertMany(list.map { entity ->
+            val material = MapperMaterialBuilder.create(entity).type(entityClass).name(entityName).build()
+            material.toDocument { nextSnowflakeIdStr() }
+        })
         return list
     }
 
-    override fun <T> updateOne(one: T, entityClass: Class<T>, entityName: String): T {
-        return mongoTemplate.save(one)
+    override fun <T : Any> updateOne(one: T, entityClass: Class<*>, entityName: String): T {
+        val material = MapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
+        getMongoCollection(entityName).replaceOne(
+            material.generateIdFilter(),
+            material.toDocument()
+        )
+        return one
     }
 
-    override fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String) {
-        mongoTemplate.updateFirst(buildQuery(where), buildUpdate(updates), entityClass, entityName)
+    override fun updateOne(where: Where, updates: Updates, entityClass: Class<*>, entityName: String) {
+        val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
+        getMongoCollection(entityName).findOneAndUpdate(material.toFilter(where), material.toUpdates(updates))
     }
 
-    override fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String) {
-        mongoTemplate.upsert(buildQuery(where), buildUpdate(updates), entityClass, entityName)
+    override fun upsert(where: Where, updates: Updates, entityClass: Class<*>, entityName: String) {
+//        mongoTemplate.upsert(buildQuery(where), buildUpdate(updates), entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String) {
-        mongoTemplate.updateMulti(buildQuery(where), buildUpdate(updates), entityClass, entityName)
+    override fun update(where: Where, updates: Updates, entityClass: Class<*>, entityName: String) {
+//        mongoTemplate.updateMulti(buildQuery(where), buildUpdate(updates), entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> delete(where: Where, entityClass: Class<T>, entityName: String) {
-        mongoTemplate.remove(buildQuery(where), entityClass, entityName)
+    override fun delete(where: Where, entityClass: Class<*>, entityName: String) {
+//        mongoTemplate.remove(buildQuery(where), entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> deleteAll(entityClass: Class<T>, entityName: String) {
+    override fun deleteAll(entityClass: Class<*>, entityName: String) {
         mongoTemplate.remove(Query(), entityName)
     }
 
-    override fun <T> findById(id: String, entityClass: Class<T>, entityName: String): T? {
-        return mongoTemplate.findById(id, entityClass, entityName)
+    override fun <T> findById(id: String, entityClass: Class<*>, entityName: String): T? {
+//        return mongoTemplate.findById(id, entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> findOne(where: Where, entityClass: Class<T>, entityName: String): T? {
-        return mongoTemplate.findOne(buildQuery(where), entityClass, entityName)
+    override fun <T> findOne(where: Where, entityClass: Class<*>, entityName: String): T? {
+//        return mongoTemplate.findOne(buildQuery(where), entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> exists(where: Where, entityClass: Class<T>, entityName: String): Boolean {
-        return mongoTemplate.exists(buildQuery(where), entityClass, entityName)
+    override fun exists(where: Where, entityClass: Class<*>, entityName: String): Boolean {
+//        return mongoTemplate.exists(buildQuery(where), entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> listAll(entityClass: Class<T>, entityName: String): List<T> {
-        return mongoTemplate.findAll(entityClass, entityName)
+    override fun <T> listAll(entityClass: Class<*>, entityName: String): List<T> {
+//        return mongoTemplate.findAll(entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> listAll(select: Select, entityClass: Class<T>, entityName: String): List<T> {
-        val query = Query()
-        query.fields().include(*select.parts.toTypedArray())
-        return mongoTemplate.find(query, entityClass, entityName)
+    override fun <T> listAll(select: Select, entityClass: Class<*>, entityName: String): List<T> {
+//        val query = Query()
+//        query.fields().include(*select.columns.toTypedArray())
+//        return mongoTemplate.find(query, entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> list(where: Where, entityClass: Class<T>, entityName: String): List<T> {
-        return mongoTemplate.find(buildQuery(where), entityClass, entityName)
+    override fun <T> list(where: Where, entityClass: Class<*>, entityName: String): List<T> {
+//        return mongoTemplate.find(buildQuery(where), entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> list(select: Select, where: Where, entityClass: Class<T>, entityName: String): List<T> {
-        val query = buildQuery(where)
-        query.fields().include(*select.parts.toTypedArray())
-        return mongoTemplate.find(query, entityClass, entityName)
+    override fun <T> list(select: Select, where: Where, entityClass: Class<*>, entityName: String): List<T> {
+//        val query = buildQuery(where)
+//        query.fields().include(*select.columns.toTypedArray())
+//        return mongoTemplate.find(query, entityClass, entityName)
+        TODO()
     }
 
-    override fun <T> page(pageable: Pageable, entityClass: Class<T>, entityName: String): DataPage<T> {
+    override fun <T> page(pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T> {
         // page in PageRequest is zero-based
-        val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
-        val query = Query().with(pageRequest)
-        val count = mongoTemplate.count(query, entityClass, entityName)
-        val items: List<T> = findPageData(count) { mongoTemplate.find(query, entityClass, entityName) }
-        return toDataPage(items, count, pageable)
+//        val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
+//        val query = Query().with(pageRequest)
+//        val count = mongoTemplate.count(query, entityClass, entityName)
+//        val items: List<T> = findPageData(count) { mongoTemplate.find(query, entityClass, entityName) }
+//        return toDataPage(items, count, pageable)
+        TODO()
     }
 
     override fun <T> page(
         where: Where,
         pageable: Pageable,
-        entityClass: Class<T>,
+        entityClass: Class<*>,
         entityName: String
     ): DataPage<T> {
         // page in PageRequest is zero-based
-        val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
-        val query = buildQuery(where).with(pageRequest)
-        val count = mongoTemplate.count(query, entityClass, entityName)
-        val items: List<T> = findPageData(count) { mongoTemplate.find(query, entityClass, entityName) }
-        return toDataPage(items, count, pageable)
+//        val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
+//        val query = buildQuery(where).with(pageRequest)
+//        val count = mongoTemplate.count(query, entityClass, entityName)
+//        val items: List<T> = findPageData(count) { mongoTemplate.find(query, entityClass, entityName) }
+//        return toDataPage(items, count, pageable)
+        TODO()
     }
 
     override fun close() {
         mongoClient.close()
     }
+}
 
-    private fun buildQuery(where: Where): Query {
-        val criteria = when (where) {
-            is And -> buildAnd(where)
-            is Or -> buildOr(where)
-            else -> throw RuntimeException("Unsupported where[${where}].")
-        }
-        return Query(criteria)
-    }
-
-    private fun buildAnd(and: And): Criteria {
-        val criteria = and.parts.map { exp ->
-            when (exp) {
-                is And -> buildAnd(exp)
-                is Or -> buildOr(exp)
-                is ColumnExpression -> buildColumnExpression(exp)
-                else -> throw RuntimeException("Unsupported criteria expression[$exp].")
-            }
-        }
-        return Criteria().andOperator(*criteria.toTypedArray())
-    }
-
-    private fun buildOr(or: Or): Criteria {
-        val criteria = or.parts.map { exp ->
-            when (exp) {
-                is And -> buildAnd(exp)
-                is Or -> buildOr(exp)
-                is ColumnExpression -> buildColumnExpression(exp)
-                else -> throw RuntimeException("Unsupported criteria expression[$exp].")
-            }
-        }
-        return Criteria().orOperator(*criteria.toTypedArray())
-    }
-
-    private fun buildColumnExpression(exp: ColumnExpression): Criteria {
-        return when (exp.operator) {
-            ColumnExpressionOperator.EQUALS -> Criteria.where(exp.column.name).`is`(exp.value)
-            ColumnExpressionOperator.IN -> Criteria.where(exp.column.name).`in`(exp.value)
-            ColumnExpressionOperator.INCLUDE -> Criteria.where(exp.column.name).`is`(exp.value)
-            ColumnExpressionOperator.REGEXP -> Criteria.where(exp.column.name).regex(exp.value as String, "i")
-            ColumnExpressionOperator.NOT_SET -> throw RuntimeException("Unsupported criteria expression operator[${exp.operator}].")
-            else -> throw RuntimeException("Unsupported criteria expression operator[${exp.operator}].")
-        }
-    }
-
-    private fun buildUpdate(updates: Updates): Update {
-        return Update().apply {
-            val update = this
-            updates.parts.forEach {
-                @Suppress("REDUNDANT_ELSE_IN_WHEN")
-                when (it.type) {
-                    ColumnUpdateType.SET -> update.set(it.column.name, it.value)
-                    ColumnUpdateType.PULL -> update.pull(it.column.name, it.value)
-                    ColumnUpdateType.PUSH -> update.push(it.column.name, it.value)
-                    else -> throw RuntimeException("Unsupported column update[type=${it.type}].")
-                }
-            }
-        }
+fun testMongo() {
+    MongoPersistKit().use {
+        val ug = UserGroup(userGroupId = "831505165864538112", name = "x")
+        it.updateOne(ug, UserGroup::class.java, CollectionNames.USER_GROUP)
     }
 }

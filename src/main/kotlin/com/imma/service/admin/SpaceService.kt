@@ -43,7 +43,7 @@ class SpaceService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 pageable,
                 Space::class.java, CollectionNames.SPACE
@@ -55,19 +55,19 @@ class SpaceService(services: Services) : TupleService(services) {
         return if (name.isNullOrEmpty()) {
             persist().listAll(
                 select {
-                    column("spaceId")
-                    column("name")
+                    factor("spaceId")
+                    factor("name")
                 },
                 SpaceForHolder::class.java, CollectionNames.SPACE
             )
         } else {
             persist().list(
                 select {
-                    column("spaceId")
-                    column("name")
+                    factor("spaceId")
+                    factor("name")
                 },
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 SpaceForHolder::class.java, CollectionNames.SPACE
             )
@@ -77,11 +77,11 @@ class SpaceService(services: Services) : TupleService(services) {
     fun findSpacesByIdsForHolder(spaceIds: List<String>): List<SpaceForHolder> {
         return persist().list(
             select {
-                column("spaceId")
-                column("name")
+                factor("spaceId")
+                factor("name")
             },
             where {
-                column("spaceId") `in` spaceIds
+                factor("spaceId") existsIn { value(spaceIds) }
             },
             SpaceForHolder::class.java, CollectionNames.SPACE
         )
@@ -105,13 +105,13 @@ class SpaceService(services: Services) : TupleService(services) {
 
         return persist().list(
             select {
-                column("spaceId")
-                column("name")
-                column("topicIds")
-                column("description")
+                factor("spaceId")
+                factor("name")
+                factor("topicIds")
+                factor("description")
             },
             where {
-                column("spaceId") `in` spaceIds
+                factor("spaceId") existsIn { value(spaceIds) }
             },
             AvailableSpace::class.java, CollectionNames.SPACE
         )

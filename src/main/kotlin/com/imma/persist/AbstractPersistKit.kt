@@ -31,4 +31,8 @@ abstract class AbstractPersistKit : PersistKit {
         }
         return snowflakeWorker!!.nextId()
     }
+
+    protected fun nextSnowflakeIdStr(): String {
+        return this.nextSnowflakeId().toString()
+    }
 }

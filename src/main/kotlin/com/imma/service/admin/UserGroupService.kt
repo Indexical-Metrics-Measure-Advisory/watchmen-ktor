@@ -11,8 +11,6 @@ import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
-import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import kotlin.contracts.ExperimentalContracts
 
 class UserGroupService(services: Services) : TupleService(services) {
@@ -48,7 +46,7 @@ class UserGroupService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 pageable,
                 UserGroup::class.java, CollectionNames.USER_GROUP
@@ -60,19 +58,19 @@ class UserGroupService(services: Services) : TupleService(services) {
         return if (name.isNullOrEmpty()) {
             persist().listAll(
                 select {
-                    column("userGroupId")
-                    column("name")
+                    factor("userGroupId")
+                    factor("name")
                 },
                 UserGroupForHolder::class.java, CollectionNames.USER_GROUP
             )
         } else {
             persist().list(
                 select {
-                    column("userGroupId")
-                    column("name")
+                    factor("userGroupId")
+                    factor("name")
                 },
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 UserGroupForHolder::class.java, CollectionNames.USER_GROUP
             )
@@ -82,7 +80,7 @@ class UserGroupService(services: Services) : TupleService(services) {
     fun findUserGroupsByIds(userGroupIds: List<String>): List<UserGroup> {
         return persist().list(
             where {
-                column("userGroupId") `in` userGroupIds
+                factor("userGroupId") existsIn { value(userGroupIds) }
             },
             UserGroup::class.java, CollectionNames.USER_GROUP
         )
@@ -91,11 +89,11 @@ class UserGroupService(services: Services) : TupleService(services) {
     fun findUserGroupsByIdsForHolder(userGroupIds: List<String>): List<UserGroupForHolder> {
         return persist().list(
             select {
-                column("userGroupId")
-                column("name")
+                factor("userGroupId")
+                factor("name")
             },
             where {
-                column("userGroupId") `in` userGroupIds
+                factor("userGroupId") existsIn { value(userGroupIds) }
             },
             UserGroupForHolder::class.java, CollectionNames.USER_GROUP
         )
@@ -104,12 +102,10 @@ class UserGroupService(services: Services) : TupleService(services) {
     fun unassignSpace(spaceId: String) {
         persist().update(
             where {
-                column("spaceIds") eq spaceId
+                factor("spaceIds") eq { value(spaceId) }
             },
             update {
                 pull(spaceId) from "spaceIds"
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
             },
             UserGroup::class.java, CollectionNames.USER_GROUP
         )
@@ -118,12 +114,10 @@ class UserGroupService(services: Services) : TupleService(services) {
     fun assignSpace(userGroupIds: List<String>, spaceId: String) {
         persist().update(
             where {
-                column("userGroupId") `in` userGroupIds
+                factor("userGroupId") existsIn { value(userGroupIds) }
             },
             update {
                 push(spaceId) into "spaceIds"
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
             },
             UserGroup::class.java, CollectionNames.USER_GROUP
         )

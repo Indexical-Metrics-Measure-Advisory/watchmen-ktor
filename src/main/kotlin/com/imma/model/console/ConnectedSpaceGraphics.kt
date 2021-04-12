@@ -1,9 +1,9 @@
 package com.imma.model.console
 
 import com.imma.model.CollectionNames
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 
 data class BlockCoordinate(
     var x: Float = 0f,
@@ -43,9 +43,9 @@ data class ReportGraphics(
     var rect: ConnectedSpaceBlockGraphicsRect = ConnectedSpaceBlockGraphicsRect()
 )
 
-@Document(collection = CollectionNames.CONNECTED_SPACE_GRAPHICS)
+@Entity(CollectionNames.CONNECTED_SPACE_GRAPHICS)
 data class ConnectedSpaceGraphics(
-    @Id
+    @Id("_id")
     var connectId: String? = null,
     @Field("user_id")
     var userId: String? = null,

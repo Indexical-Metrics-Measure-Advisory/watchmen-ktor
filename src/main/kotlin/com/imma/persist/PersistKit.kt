@@ -13,37 +13,37 @@ import java.io.Closeable
 interface PersistKit : Closeable {
     fun nextSnowflakeId(): Long
 
-    fun <T> insertOne(one: T, entityClass: Class<T>, entityName: String): T
+    fun <T : Any> insertOne(one: T, entityClass: Class<*>, entityName: String): T
 
-    fun <T> insertAll(list: List<T>, entityClass: Class<T>, entityName: String): List<T>
+    fun <T : Any> insertAll(list: List<T>, entityClass: Class<*>, entityName: String): List<T>
 
-    fun <T> updateOne(one: T, entityClass: Class<T>, entityName: String): T
+    fun <T : Any> updateOne(one: T, entityClass: Class<*>, entityName: String): T
 
-    fun <T> updateOne(where: Where, updates: Updates, entityClass: Class<T>, entityName: String)
+    fun updateOne(where: Where, updates: Updates, entityClass: Class<*>, entityName: String)
 
-    fun <T> upsert(where: Where, updates: Updates, entityClass: Class<T>, entityName: String)
+    fun upsert(where: Where, updates: Updates, entityClass: Class<*>, entityName: String)
 
-    fun <T> update(where: Where, updates: Updates, entityClass: Class<T>, entityName: String)
+    fun update(where: Where, updates: Updates, entityClass: Class<*>, entityName: String)
 
-    fun <T> delete(where: Where, entityClass: Class<T>, entityName: String)
+    fun delete(where: Where, entityClass: Class<*>, entityName: String)
 
-    fun <T> deleteAll(entityClass: Class<T>, entityName: String)
+    fun deleteAll(entityClass: Class<*>, entityName: String)
 
-    fun <T> findById(id: String, entityClass: Class<T>, entityName: String): T?
+    fun <T> findById(id: String, entityClass: Class<*>, entityName: String): T?
 
-    fun <T> findOne(where: Where, entityClass: Class<T>, entityName: String): T?
+    fun <T> findOne(where: Where, entityClass: Class<*>, entityName: String): T?
 
-    fun <T> exists(where: Where, entityClass: Class<T>, entityName: String): Boolean
+    fun exists(where: Where, entityClass: Class<*>, entityName: String): Boolean
 
-    fun <T> listAll(entityClass: Class<T>, entityName: String): List<T>
+    fun <T> listAll(entityClass: Class<*>, entityName: String): List<T>
 
-    fun <T> listAll(select: Select, entityClass: Class<T>, entityName: String): List<T>
+    fun <T> listAll(select: Select, entityClass: Class<*>, entityName: String): List<T>
 
-    fun <T> list(where: Where, entityClass: Class<T>, entityName: String): List<T>
+    fun <T> list(where: Where, entityClass: Class<*>, entityName: String): List<T>
 
-    fun <T> list(select: Select, where: Where, entityClass: Class<T>, entityName: String): List<T>
+    fun <T> list(select: Select, where: Where, entityClass: Class<*>, entityName: String): List<T>
 
-    fun <T> page(pageable: Pageable, entityClass: Class<T>, entityName: String): DataPage<T>
+    fun <T> page(pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T>
 
-    fun <T> page(where: Where, pageable: Pageable, entityClass: Class<T>, entityName: String): DataPage<T>
+    fun <T> page(where: Where, pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T>
 }

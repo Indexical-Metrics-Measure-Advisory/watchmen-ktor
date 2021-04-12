@@ -1,9 +1,9 @@
 package com.imma.model.core
 
 import com.imma.model.CollectionNames
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 
 data class BlockCoordinate(
     var x: Float = 0f,
@@ -33,9 +33,9 @@ data class TopicGraphics(
     var rect: PipelineBlockGraphicsRect = PipelineBlockGraphicsRect()
 )
 
-@Document(collection = CollectionNames.PIPELINE_GRAPHICS)
+@Entity(CollectionNames.PIPELINE_GRAPHICS)
 data class PipelineGraphics(
-    @Id
+    @Id("_id")
     var userId: String? = null,
     @Field("topics")
     var topics: List<TopicGraphics> = mutableListOf()

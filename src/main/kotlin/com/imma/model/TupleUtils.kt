@@ -1,7 +1,6 @@
 package com.imma.model
 
 import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import com.imma.utils.isFakeOrNull
 import java.util.*
 import kotlin.contracts.ExperimentalContracts
@@ -19,29 +18,24 @@ fun determineFakeOrNullId(getId: () -> String?, replace: Boolean = true, setId: 
     return isFakeOrNull
 }
 
-private fun assignCreateTime(tuple: Tuple, force: Boolean, datetime: String = getCurrentDateTimeAsString()) {
+private fun assignCreateTime(tuple: Tuple, force: Boolean, datetime: Date? = getCurrentDateTime()) {
     if (force) {
         tuple.createTime = datetime
-    } else if (tuple.createTime == null || tuple.createTime?.trim()?.length == 0) {
+    } else if (tuple.createTime == null) {
         tuple.createTime = datetime
     }
 }
 
-private fun forceAssignCreateTime(tuple: Tuple, datetime: String = getCurrentDateTimeAsString()) {
+private fun forceAssignCreateTime(tuple: Tuple, datetime: Date? = getCurrentDateTime()) {
     assignCreateTime(tuple, true, datetime)
 }
 
-private fun assignLastModifyTime(tuple: Tuple, datetimeStr: String, datetime: Date) {
-    tuple.lastModifyTime = datetimeStr
-    tuple.lastModified = datetime
+private fun assignLastModifyTime(tuple: Tuple, datetime: Date? = getCurrentDateTime()) {
+    tuple.lastModifyTime = datetime
 }
 
-private fun forceAssignModifyTime(
-    tuple: Tuple,
-    datetimeStr: String = getCurrentDateTimeAsString(),
-    datetime: Date = getCurrentDateTime()
-) {
-    assignLastModifyTime(tuple, datetimeStr, datetime)
+private fun forceAssignModifyTime(tuple: Tuple, datetime: Date? = getCurrentDateTime()) {
+    assignLastModifyTime(tuple, datetime)
 }
 
 /**

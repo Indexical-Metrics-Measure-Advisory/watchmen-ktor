@@ -34,7 +34,7 @@ class TopicService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 pageable,
                 Topic::class.java, CollectionNames.TOPIC
@@ -48,7 +48,7 @@ class TopicService(services: Services) : TupleService(services) {
         } else {
             persist().list(
                 where {
-                    column("name") regex name
+                    factor("name") regex { value(name) }
                 },
                 TopicForHolder::class.java, CollectionNames.TOPIC
             )
@@ -58,11 +58,11 @@ class TopicService(services: Services) : TupleService(services) {
     fun findTopicsByIdsForHolder(topicIds: List<String>): List<TopicForHolder> {
         return persist().list(
             select {
-                column("topicId")
-                column("name")
+                factor("topicId")
+                factor("name")
             },
             where {
-                column("topicId") `in` topicIds
+                factor("topicId") existsIn { value(topicIds) }
             },
             TopicForHolder::class.java, CollectionNames.TOPIC
         )

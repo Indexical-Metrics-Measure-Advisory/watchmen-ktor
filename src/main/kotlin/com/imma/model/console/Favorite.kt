@@ -1,13 +1,13 @@
 package com.imma.model.console
 
 import com.imma.model.CollectionNames
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 
-@Document(collection = CollectionNames.FAVORITE)
+@Entity(CollectionNames.FAVORITE)
 class Favorite(
-    @Id
+    @Id("_id")
     var userId: String? = null,
     @Field("connected_space_ids")
     var connectedSpaceIds: List<String>? = mutableListOf(),

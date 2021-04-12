@@ -16,7 +16,7 @@ class UserCredentialService(services: Services) : Service(services) {
         assignDateTimePair(credential)
         services.persist().upsert(
             where {
-                column("userId") eq credential.userId
+                factor("userId") eq { value(credential.userId) }
             },
             update {
                 set("userId") to credential.userId
@@ -24,7 +24,6 @@ class UserCredentialService(services: Services) : Service(services) {
                 set("credential") to credential.credential
                 set("createTime") to credential.createTime
                 set("lastModifyTime") to credential.lastModifyTime
-                set("lastModified") to credential.lastModified
             },
             UserCredential::class.java,
             CollectionNames.USER_CREDENTIAL
@@ -38,7 +37,7 @@ class UserCredentialService(services: Services) : Service(services) {
     fun findCredentialByName(username: String): UserCredential? {
         return services.persist().findOne(
             where {
-                column("name") eq username
+                factor("name") eq { value(username) }
             },
             UserCredential::class.java,
             CollectionNames.USER_CREDENTIAL

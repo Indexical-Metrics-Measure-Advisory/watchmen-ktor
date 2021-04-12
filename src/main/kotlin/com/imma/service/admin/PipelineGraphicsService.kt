@@ -15,7 +15,7 @@ class PipelineGraphicsService(services: Services) : Service(services) {
     fun savePipelineGraphicsByUser(graphics: PipelineGraphics) {
         persist().upsert(
             where {
-                column("userId") eq graphics.userId
+                factor("userId") eq { value(graphics.userId) }
             },
             update {
                 set("userId") to graphics.userId

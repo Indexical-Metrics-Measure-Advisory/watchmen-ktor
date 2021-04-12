@@ -7,8 +7,6 @@ import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
-import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import kotlin.contracts.ExperimentalContracts
 
 class DashboardService(services: Services) : TupleService(services) {
@@ -27,14 +25,8 @@ class DashboardService(services: Services) : TupleService(services) {
 
     fun renameDashboard(dashboardId: String, name: String?) {
         persist().updateOne(
-            where {
-                column("dashboardId") eq dashboardId
-            },
-            update {
-                set("name") to name
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
-            },
+            where { factor("dashboardId") eq { value(dashboardId) } },
+            update { set("name") to name },
             Dashboard::class.java, CollectionNames.DASHBOARD
         )
     }
@@ -43,7 +35,7 @@ class DashboardService(services: Services) : TupleService(services) {
         // delete dashboard
         persist().delete(
             where {
-                column("dashboardId") eq dashboardId
+                factor("dashboardId") eq { value(dashboardId) }
             },
             Dashboard::class.java, CollectionNames.DASHBOARD
         )
@@ -52,7 +44,7 @@ class DashboardService(services: Services) : TupleService(services) {
     fun listDashboardByUser(userId: String): List<Dashboard> {
         return persist().list(
             where {
-                column("userId") eq userId
+                factor("userId") eq { value(userId) }
             },
             Dashboard::class.java, CollectionNames.DASHBOARD
         )
@@ -61,8 +53,8 @@ class DashboardService(services: Services) : TupleService(services) {
     fun isDashboardBelongsTo(dashboardId: String, userId: String): Boolean {
         return persist().exists(
             where {
-                column("dashboardId") eq dashboardId
-                column("userId") eq userId
+                factor("dashboardId") eq { value(dashboardId) }
+                factor("userId") eq { value(userId) }
             },
             Dashboard::class.java, CollectionNames.DASHBOARD
         )

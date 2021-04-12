@@ -11,7 +11,7 @@ class ConnectedSpaceGraphicsService(services: Services) : Service(services) {
     fun saveConnectedSpaceGraphics(graphics: ConnectedSpaceGraphics) {
         persist().upsert(
             where {
-                column("connectId") eq graphics.connectId
+                factor("connectId") eq { value(graphics.connectId) }
             },
             update {
                 set("connectId") to graphics.connectId
@@ -27,7 +27,7 @@ class ConnectedSpaceGraphicsService(services: Services) : Service(services) {
     fun listConnectedSpaceGraphicsByUser(userId: String): List<ConnectedSpaceGraphics> {
         return persist().list(
             where {
-                column("userId") eq userId
+                factor("userId") eq { value(userId) }
             },
             ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS
         )
@@ -36,7 +36,7 @@ class ConnectedSpaceGraphicsService(services: Services) : Service(services) {
     fun deleteConnectedSpaceGraphics(connectId: String) {
         persist().delete(
             where {
-                column("connectId") eq connectId
+                factor("connectId") eq { value(connectId) }
             },
             ConnectedSpaceGraphics::class.java, CollectionNames.CONNECTED_SPACE_GRAPHICS
         )

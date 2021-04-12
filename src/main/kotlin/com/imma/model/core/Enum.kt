@@ -2,23 +2,24 @@ package com.imma.model.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset
+import com.imma.persist.annotation.*
 import java.util.*
 
+@Entity
 data class EnumItem(
+    @Field("code")
     var code: String? = null,
+    @Field("label")
     var label: String? = null,
+    @Field("replace_code")
     var replaceCode: String? = null,
+    @Field("parent_code")
     var parentCode: String? = null
 )
 
-@Document(collection = CollectionNames.ENUM)
+@Entity(CollectionNames.ENUM)
 data class Enum(
-    @Id
+    @Id("_id")
     var enumId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -28,11 +29,8 @@ data class Enum(
     var parentEnumId: String? = null,
     @Transient
     var items: MutableList<EnumItem> = mutableListOf(),
-    @Field("create_time")
-    override var createTime: String? = null,
-    @Field("last_modify_time")
-    override var lastModifyTime: String? = null,
-    @LastModifiedDate
-    @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time
+    @CreatedAt("create_time")
+    override var createTime: Date? = null,
+    @LastModifiedAt("last_modify_time")
+    override var lastModifyTime: Date? = null,
 ) : Tuple()

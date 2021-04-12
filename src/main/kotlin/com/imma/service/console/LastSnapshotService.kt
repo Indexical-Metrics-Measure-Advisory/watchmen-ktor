@@ -15,11 +15,12 @@ class LastSnapshotService(services: Services) : Service(services) {
     fun saveLastSnapshot(lastSnapshot: LastSnapshot) {
         persist().upsert(
             where {
-                column("userId") eq lastSnapshot.userId
+                factor("userId") eq { value(lastSnapshot.userId) }
             },
             update {
                 set("userId") to lastSnapshot.userId
                 set("language") to lastSnapshot.language
+                set("theme") to lastSnapshot.theme
                 set("lastDashboardId") to lastSnapshot.lastDashboardId
                 set("adminDashboardId") to lastSnapshot.adminDashboardId
                 set("favoritePin") to lastSnapshot.favoritePin

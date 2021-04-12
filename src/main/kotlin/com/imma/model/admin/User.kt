@@ -2,20 +2,13 @@ package com.imma.model.admin
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.annotation.Transient
-import org.springframework.data.mongodb.core.index.Indexed
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-import java.time.ZoneOffset.UTC
+import com.imma.persist.annotation.*
 import java.util.*
 
-@Document(collection = CollectionNames.USER)
+@Entity(CollectionNames.USER)
 data class User(
-    @Id
+    @Id("_id")
     var userId: String? = null,
-    @Indexed(unique = true)
     @Field("name")
     var name: String? = null,
     @Field("nick_name")
@@ -26,13 +19,10 @@ data class User(
     var role: String = "",
     @Field("group_ids")
     var groupIds: List<String>? = mutableListOf(),
-    @Field("create_time")
-    override var createTime: String? = null,
-    @Field("last_modify_time")
-    override var lastModifyTime: String? = null,
-    @LastModifiedDate
-    @Field("last_modified")
-    override var lastModified: Date = Calendar.getInstance(TimeZone.getTimeZone(UTC)).time
+    @CreatedAt("create_time")
+    override var createTime: Date? = null,
+    @LastModifiedAt("last_modify_time")
+    override var lastModifyTime: Date? = null,
 ) : Tuple() {
     // transient fields here for avoid construct exception by spring data using kotlin data class
     @Transient

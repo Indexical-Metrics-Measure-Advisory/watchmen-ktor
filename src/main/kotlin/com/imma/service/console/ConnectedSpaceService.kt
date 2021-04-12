@@ -7,8 +7,6 @@ import com.imma.persist.core.update
 import com.imma.persist.core.where
 import com.imma.service.Services
 import com.imma.service.TupleService
-import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import kotlin.contracts.ExperimentalContracts
 
 class ConnectedSpaceService(services: Services) : TupleService(services) {
@@ -34,14 +32,8 @@ class ConnectedSpaceService(services: Services) : TupleService(services) {
 
     fun renameConnectedSpace(connectId: String, name: String?) {
         persist().updateOne(
-            where {
-                column("connectId") eq connectId
-            },
-            update {
-                set("name") to name
-                set("lastModifyTime") to getCurrentDateTimeAsString()
-                set("lastModified") to getCurrentDateTime()
-            },
+            where { factor("connectId") eq { value(connectId) } },
+            update { set("name") to name },
             ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
         )
     }
@@ -56,7 +48,7 @@ class ConnectedSpaceService(services: Services) : TupleService(services) {
         // delete connected space
         persist().delete(
             where {
-                column("connectId") eq connectId
+                factor("connectId") eq { value(connectId) }
             },
             ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
         )
@@ -65,7 +57,7 @@ class ConnectedSpaceService(services: Services) : TupleService(services) {
     fun listConnectedSpaceByUser(userId: String): List<ConnectedSpace> {
         val connectedSpaces = persist().list(
             where {
-                column("userId") eq userId
+                factor("userId") eq { value(userId) }
             },
             ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
         )
@@ -87,8 +79,8 @@ class ConnectedSpaceService(services: Services) : TupleService(services) {
     fun isConnectedSpaceBelongsTo(connectId: String, userId: String): Boolean {
         return persist().exists(
             where {
-                column("connectId") eq connectId
-                column("userId") eq userId
+                factor("connectId") eq { value(connectId) }
+                factor("userId") eq { value(userId) }
             },
             ConnectedSpace::class.java, CollectionNames.CONNECTED_SPACE
         )

@@ -2,8 +2,9 @@ package com.imma.service.core.log
 
 import com.imma.model.CollectionNames
 import com.imma.model.core.PipelineStageUnitActionType
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
+import com.imma.persist.annotation.Entity
+import com.imma.persist.annotation.Field
+import com.imma.persist.annotation.Id
 import java.util.*
 
 interface MonitorActionLog {
@@ -77,9 +78,9 @@ data class MonitorStageLog(
     val error: String?
 )
 
-@Document(collection = CollectionNames.PIPELINE_LOG)
+@Entity(CollectionNames.PIPELINE_LOG)
 data class PipelineLog(
-    @Field("uid")
+    @Id("_id")
     var uid: String,
     @Field("pipeline_id")
     var pipelineId: String,

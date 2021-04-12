@@ -15,7 +15,7 @@ class FavoriteService(services: Services) : Service(services) {
     fun saveFavorite(favorite: Favorite) {
         persist().upsert(
             where {
-                column("userId") eq favorite.userId
+                factor("userId") eq { value(favorite.userId) }
             },
             update {
                 set("userId") to favorite.userId
