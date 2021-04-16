@@ -1,7 +1,5 @@
 package com.imma.persist.mango
 
-import com.imma.model.CollectionNames
-import com.imma.model.admin.UserGroup
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.AbstractPersistKit
@@ -38,9 +36,6 @@ fun mongo() {
 class MongoPersistKit : AbstractPersistKit() {
     private val mongoClient: MongoClient by lazy {
         createMongoClient()
-    }
-    private val mongoDatabase: MongoDatabase by lazy {
-        doGetMongoDatabase()
     }
     private val mongoDatabase: MongoDatabase by lazy {
         doGetMongoDatabase()
@@ -189,7 +184,6 @@ class MongoPersistKit : AbstractPersistKit() {
             material.fromDocument(doc) as T
         }.toMutableList()
     }
-}
 
     private fun computeSkipCount(pageable: Pageable): Int {
         return (pageable.pageNumber - 1) * pageable.pageSize
@@ -246,23 +240,5 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun close() {
         mongoClient.close()
-    }
-}
-
-fun testMongo() {
-    MongoPersistKit().use {
-//        val ug = UserGroup(userGroupId = "831505165864538112", name = "x")
-//        it.updateOne(ug, UserGroup::class.java, CollectionNames.USER_GROUP)
-//        val ret: Any? = it.findById("831505165864538112", UserGroup::class.java, CollectionNames.USER_GROUP)
-//        println(ret)
-//        val exists = it.exists(where {
-//            factor("userGroupId") eq { value("831505165864538112") }
-//        }, UserGroup::class.java, CollectionNames.USER_GROUP)
-//        println(exists)
-        val list = it.page<UserGroup>(Pageable().apply {
-            pageNumber = 3
-            pageSize = 1
-        }, UserGroup::class.java, CollectionNames.USER_GROUP)
-        println(list)
     }
 }
