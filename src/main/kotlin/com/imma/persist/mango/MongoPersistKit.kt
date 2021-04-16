@@ -42,6 +42,9 @@ class MongoPersistKit : AbstractPersistKit() {
     private val mongoDatabase: MongoDatabase by lazy {
         doGetMongoDatabase()
     }
+    private val mongoDatabase: MongoDatabase by lazy {
+        doGetMongoDatabase()
+    }
 
     private fun createMongoClient(): MongoClient {
         val host = Envs.string(EnvConstants.MONGO_HOST)
@@ -186,6 +189,7 @@ class MongoPersistKit : AbstractPersistKit() {
             material.fromDocument(doc) as T
         }.toMutableList()
     }
+}
 
     private fun computeSkipCount(pageable: Pageable): Int {
         return (pageable.pageNumber - 1) * pageable.pageSize
