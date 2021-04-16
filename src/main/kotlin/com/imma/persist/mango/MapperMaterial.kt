@@ -68,6 +68,7 @@ data class MapperMaterial(
         return select.columns.map { column ->
             when (column.element) {
                 is FactorElement -> fromFactorElement(column.element, false)
+                // TODO not supported yet
                 else -> TODO()
             }
         }.keysToMap { BsonInt32(1) }
