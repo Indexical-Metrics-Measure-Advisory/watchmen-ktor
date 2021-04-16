@@ -100,6 +100,18 @@ data class MapperMaterial(
         return Document("\$match", toFilter(where))
     }
 
+    fun toMatch(filter: Document): Document {
+        return Document("\$match", filter)
+    }
+
+    fun toSkip(skipCount: Int): Document {
+        return Document("\$skip", skipCount)
+    }
+
+    fun toLimit(limitCount: Int): Document {
+        return Document("\$limit", limitCount)
+    }
+
     private fun fromJoint(joint: Joint): Map<String, Any?> {
         val parts = joint.parts
         if (parts.isNullOrEmpty()) {

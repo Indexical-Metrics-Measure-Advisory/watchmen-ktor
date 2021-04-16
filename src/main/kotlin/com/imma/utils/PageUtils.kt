@@ -14,11 +14,12 @@ fun <T> findPageData(count: Long, find: () -> List<T>): List<T> {
 }
 
 private fun computePageCount(count: Long, pageSize: Int): Int {
-    return (count / pageSize).toInt() + 1
+    val offset: Int = if ((count % pageSize).toInt() == 0) 0 else 1
+    return (count / pageSize).toInt() + offset
 }
 
 fun <T> toDataPage(data: List<T>, count: Long, pageable: Pageable): DataPage<T> {
     val pageCount = computePageCount(count, pageable.pageSize)
 
-    return DataPage<T>(data, count.toInt(), pageable.pageNumber, pageable.pageSize, pageCount)
+    return DataPage(data, count.toInt(), pageable.pageNumber, pageable.pageSize, pageCount)
 }

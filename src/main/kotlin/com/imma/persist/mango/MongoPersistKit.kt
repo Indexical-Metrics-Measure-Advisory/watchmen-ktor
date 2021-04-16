@@ -8,9 +8,13 @@ import com.imma.persist.AbstractPersistKit
 import com.imma.persist.PersistKit
 import com.imma.persist.PersistKitProvider
 import com.imma.persist.PersistKits
-import com.imma.persist.core.*
+import com.imma.persist.core.Select
+import com.imma.persist.core.Updates
+import com.imma.persist.core.Where
+import com.imma.persist.core.where
 import com.imma.utils.EnvConstants
 import com.imma.utils.Envs
+import com.imma.utils.toDataPage
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
@@ -183,14 +187,29 @@ class MongoPersistKit : AbstractPersistKit() {
         }.toMutableList()
     }
 
+    private fun computeSkipCount(pageable: Pageable): Int {
+        return (pageable.pageNumber - 1) * pageable.pageSize
+    }
+
     override fun <T> page(pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T> {
-        // page in PageRequest is zero-based
-//        val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
-//        val query = Query().with(pageRequest)
-//        val count = mongoTemplate.count(query, entityClass, entityName)
-//        val items: List<T> = findPageData(count) { mongoTemplate.find(query, entityClass, entityName) }
-//        return toDataPage(items, count, pageable)
-        TODO()
+        val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
+        val count = getMongoCollection(entityName).countDocuments()
+        val skipCount = computeSkipCount(pageable)
+        return if (count <= skipCount) {
+            toDataPage(mutableListOf(), count, pageable)
+        } else {
+            val docs = getMongoCollection(entityName).aggregate(
+                listOf(
+                    material.toSkip(skipCount),
+                    material.toLimit(pageable.pageSize)
+                )
+            )
+            val items = docs.map { doc ->
+                @Suppress("UNCHECKED_CAST")
+                material.fromDocument(doc) as T
+            }.toMutableList()
+            toDataPage(items, count, pageable)
+        }
     }
 
     override fun <T> page(
@@ -199,13 +218,26 @@ class MongoPersistKit : AbstractPersistKit() {
         entityClass: Class<*>,
         entityName: String
     ): DataPage<T> {
-        // page in PageRequest is zero-based
-//        val pageRequest: PageRequest = PageRequest.of(pageable.pageNumber - 1, pageable.pageSize)
-//        val query = buildQuery(where).with(pageRequest)
-//        val count = mongoTemplate.count(query, entityClass, entityName)
-//        val items: List<T> = findPageData(count) { mongoTemplate.find(query, entityClass, entityName) }
-//        return toDataPage(items, count, pageable)
-        TODO()
+        val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
+        val filter = material.toFilter(where)
+        val count = getMongoCollection(entityName).countDocuments(filter)
+        val skipCount = computeSkipCount(pageable)
+        return if (count <= skipCount) {
+            toDataPage(mutableListOf(), count, pageable)
+        } else {
+            val docs = getMongoCollection(entityName).aggregate(
+                listOf(
+                    material.toMatch(filter),
+                    material.toSkip(skipCount),
+                    material.toLimit(pageable.pageSize)
+                )
+            )
+            val items = docs.map { doc ->
+                @Suppress("UNCHECKED_CAST")
+                material.fromDocument(doc) as T
+            }.toMutableList()
+            toDataPage(items, count, pageable)
+        }
     }
 
     override fun close() {
@@ -223,13 +255,10 @@ fun testMongo() {
 //            factor("userGroupId") eq { value("831505165864538112") }
 //        }, UserGroup::class.java, CollectionNames.USER_GROUP)
 //        println(exists)
-        val list = it.listAll<UserGroup>(select {
-            factor("userGroupId")
-            factor("name")
-//        }, where {
-//            factor("userGroupId") eq { value("831505165864538112") }
+        val list = it.page<UserGroup>(Pageable().apply {
+            pageNumber = 3
+            pageSize = 1
         }, UserGroup::class.java, CollectionNames.USER_GROUP)
-        println(list.size)
         println(list)
     }
 }
