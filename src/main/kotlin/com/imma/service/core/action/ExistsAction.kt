@@ -29,9 +29,9 @@ class ExistsAction(private val context: ActionContext, private val logger: Actio
             // put into memory
             topics[topicId] = topic
 
-            val value = services.dynamicTopic { exists(topic, ConditionBuilder.build(joint)) }
-            variables[variableName] = value
-            value
+            services.dynamicTopic { exists(topic, ConditionBuilder.build(joint)) }.also {
+                variables[variableName] = it
+            }
         }
         logger.log(mutableMapOf("value" to value), RunType.process)
     }
