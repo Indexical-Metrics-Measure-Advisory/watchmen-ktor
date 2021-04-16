@@ -18,7 +18,7 @@ class UnitWorker(private val context: UnitContext) : EngineWorker() {
             }
 
             val joint = takeAsParameterJointOrThrow(unit.on)
-            ConditionWorker(topics, sourceData, mutableMapOf()).computeJoint(joint)
+            ConditionWorker(pipeline, topics, sourceData, mutableMapOf()).computeJoint(joint)
         }
     }
 

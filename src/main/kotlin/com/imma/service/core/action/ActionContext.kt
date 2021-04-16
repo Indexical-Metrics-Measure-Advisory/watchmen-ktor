@@ -3,9 +3,10 @@ package com.imma.service.core.action
 import com.imma.model.core.*
 import com.imma.service.Services
 import com.imma.service.core.EngineLogger
+import com.imma.service.core.RunContext
 import com.imma.service.core.unit.UnitContext
 
-class ActionContext(private val unitContext: UnitContext, val action: PipelineStageUnitAction) {
+class ActionContext(private val unitContext: UnitContext, val action: PipelineStageUnitAction) : RunContext {
     val instanceId: String
         get() {
             return unitContext.instanceId
@@ -44,4 +45,8 @@ class ActionContext(private val unitContext: UnitContext, val action: PipelineSt
         get() {
             return unitContext.logger
         }
+
+    override fun isSourceTopic(topicId: String): Boolean {
+        return topicId == pipeline.topicId
+    }
 }

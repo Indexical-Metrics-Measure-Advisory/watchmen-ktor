@@ -4,9 +4,10 @@ import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
 import com.imma.service.Services
 import com.imma.service.core.EngineLogger
+import com.imma.service.core.RunContext
 import java.io.Closeable
 
-class PipelineContext(val pipeline: Pipeline) : Closeable {
+class PipelineContext(val pipeline: Pipeline) : RunContext, Closeable {
     val services: Services by lazy { Services() }
 
     /** logger use independent services */
@@ -22,6 +23,10 @@ class PipelineContext(val pipeline: Pipeline) : Closeable {
         } ?: throw RuntimeException("Source topic of pipeline not found.")
 
         mutableMapOf(topicId to topic)
+    }
+
+    override fun isSourceTopic(topicId: String): Boolean {
+        return topicId == pipeline.topicId
     }
 
     override fun close() {

@@ -6,9 +6,10 @@ import com.imma.model.core.PipelineStageUnit
 import com.imma.model.core.Topic
 import com.imma.service.Services
 import com.imma.service.core.EngineLogger
+import com.imma.service.core.RunContext
 import com.imma.service.core.stage.StageContext
 
-class UnitContext(private val stageContext: StageContext, val unit: PipelineStageUnit) {
+class UnitContext(private val stageContext: StageContext, val unit: PipelineStageUnit) : RunContext {
     val instanceId: String
         get() {
             return stageContext.instanceId
@@ -43,4 +44,8 @@ class UnitContext(private val stageContext: StageContext, val unit: PipelineStag
         get() {
             return stageContext.logger
         }
+
+    override fun isSourceTopic(topicId: String): Boolean {
+        return topicId == pipeline.topicId
+    }
 }

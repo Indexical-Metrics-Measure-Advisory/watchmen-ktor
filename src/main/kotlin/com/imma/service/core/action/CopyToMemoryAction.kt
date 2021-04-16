@@ -18,7 +18,7 @@ class CopyToMemoryAction(private val context: ActionContext, private val logger:
                 throw RuntimeException("Source of copy to memory action should be a map, but is [$source] now.")
             }
 
-            val worker = ParameterWorker(topics, sourceData, variables)
+            val worker = ParameterWorker(pipeline, topics, sourceData, variables)
             val value = worker.computeParameter(takeAsParameterOrThrow(source))
             variables[variableName] = value
             value

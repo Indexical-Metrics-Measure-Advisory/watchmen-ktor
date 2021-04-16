@@ -4,6 +4,7 @@ import com.imma.model.compute.ParameterExpression
 import com.imma.model.compute.ParameterExpressionOperator
 import com.imma.model.compute.ParameterJoint
 import com.imma.model.compute.ParameterJointType
+import com.imma.model.core.Topic
 import com.imma.persist.core.*
 
 private fun toExpressionOperator(operator: ParameterExpressionOperator?): ExpressionOperator? {
@@ -22,28 +23,36 @@ private fun toExpressionOperator(operator: ParameterExpressionOperator?): Expres
     }
 }
 
-private fun Where.build(joint: ParameterJoint): Where {
-    this.parts += joint.filters.map { filter ->
-        when (filter) {
-            is ParameterJoint -> ConditionBuilder.build(joint)
-            is ParameterExpression -> Expression().apply {
-                left = ParameterBuilder.build(filter.left)
-                operator = toExpressionOperator(filter.operator)
-                right = filter.right?.let { ParameterBuilder.build(it) }
-            }
-            else -> throw RuntimeException("Unsupported filter[$filter].")
-        }
-    }
-    return this
-}
+/**
+ * condition builder for workout a where
+ * which means:
+ * 1. topic/factor which should be kept must be given kept topic
+ * 2. any topic in topic/factor parameter, if not (1), then must be source topic.
+ * 3. any variable in constant parameter must be source topic or can be found from variables
+ */
+class ConditionBuilder(keptTopic: Topic) {
+    private val parameterBuilder: ParameterBuilder = ParameterBuilder(keptTopic)
 
-class ConditionBuilder {
-    companion object {
-        fun build(joint: ParameterJoint): Where {
-            return if (joint.jointType === ParameterJointType.or)
-                Or().build(joint)
-            else
-                And().build(joint)
+    private fun createWhere(jointType: ParameterJointType): Where {
+        return if (jointType == ParameterJointType.or) Or() else And()
+    }
+
+    fun build(joint: ParameterJoint): Where {
+        return this.build(createWhere(joint.jointType), joint)
+    }
+
+    fun build(where: Where, joint: ParameterJoint): Where {
+        where.parts += joint.filters.map { filter ->
+            when (filter) {
+                is ParameterJoint -> this.build(joint)
+                is ParameterExpression -> Expression().apply {
+                    left = parameterBuilder.build(filter.left)
+                    operator = toExpressionOperator(filter.operator)
+                    right = filter.right?.let { parameterBuilder.build(it) }
+                }
+                else -> throw RuntimeException("Unsupported filter[$filter].")
+            }
         }
+        return where
     }
 }

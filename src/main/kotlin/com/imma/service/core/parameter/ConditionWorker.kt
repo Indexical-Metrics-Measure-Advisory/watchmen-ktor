@@ -1,17 +1,32 @@
 package com.imma.service.core.parameter
 
 import com.imma.model.compute.*
+import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
+import com.imma.service.core.RunContext
 import java.time.chrono.ChronoLocalDate
 import java.time.chrono.ChronoLocalDateTime
 import java.util.*
 
+/**
+ * condition worker for workout a boolean value.
+ * which means:
+ * 1. any topic in topic/factor parameter must be source topic.
+ * 2. any variable in constant parameter must be source topic or can be found from variables
+ *
+ * @see ParameterWorker
+ */
 class ConditionWorker(
+    private val pipeline: Pipeline,
     private val topics: MutableMap<String, Topic>,
     private val sourceData: Map<String, Any>,
     private val variables: MutableMap<String, Any?> = mutableMapOf()
-) {
-    private val parameterWorker: ParameterWorker by lazy { ParameterWorker(topics, sourceData, variables) }
+) : RunContext {
+    private val parameterWorker: ParameterWorker by lazy { ParameterWorker(pipeline, topics, sourceData, variables) }
+
+    override fun isSourceTopic(topicId: String): Boolean {
+        return topicId == pipeline.topicId
+    }
 
     private fun empty(value: Any?): Boolean {
         return value == null || (value is String && value.isEmpty())
