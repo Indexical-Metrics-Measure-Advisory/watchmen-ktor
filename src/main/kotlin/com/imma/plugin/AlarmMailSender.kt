@@ -38,10 +38,12 @@ private fun createJavaMailSender(): JavaMailSender {
     }
 }
 
-fun alarmByMail() {
-    val mailEnabled = Envs.boolean(EnvConstants.ALARM_MAIL_ENABLED, false)
-    if (mailEnabled) {
-        AlarmAction.register(AlarmMailSender(createJavaMailSender()))
+class AlarmMailSenderInitializer : PluginInitializer {
+    override fun register() {
+        val mailEnabled = Envs.boolean(EnvConstants.ALARM_MAIL_ENABLED, false)
+        if (mailEnabled) {
+            AlarmAction.register(AlarmMailSender(createJavaMailSender()))
+        }
     }
 }
 
