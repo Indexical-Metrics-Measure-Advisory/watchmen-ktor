@@ -8,12 +8,12 @@ enum class EntityFieldType {
     ID, CREATED_AT, LAST_MODIFIED_AT, REGULAR
 }
 
-abstract class EntityFieldDef(val name: String, val type: EntityFieldType) {
+abstract class EntityFieldDef(val key: String, val type: EntityFieldType) {
     abstract fun read(entity: Any): Any?
     abstract fun write(entity: Any, value: Any?)
 }
 
-abstract class EntityDef(val name: String, val fields: List<EntityFieldDef>) {
+abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
     init {
         fields.filter { it.type == EntityFieldType.ID }.size.let {
             when {
@@ -41,9 +41,9 @@ abstract class EntityDef(val name: String, val fields: List<EntityFieldDef>) {
 
     protected fun removeEmptyId(map: MutableMap<String, Any?>) {
         id.let { id ->
-            val value = map[id.name]
+            val value = map[id.key]
             if (value == null || (value is String && value.isBlank())) {
-                map -= id.name
+                map -= id.key
             }
         }
     }
@@ -55,9 +55,9 @@ abstract class EntityDef(val name: String, val fields: List<EntityFieldDef>) {
     protected fun tryToHandleCreatedAt(map: MutableMap<String, Any?>) {
         val now = getCurrentDateTime()
         createdAt?.let { created ->
-            val value = map[created.name]
+            val value = map[created.key]
             if (value == null) {
-                map[created.name] = now
+                map[created.key] = now
             }
         }
     }
@@ -68,7 +68,7 @@ abstract class EntityDef(val name: String, val fields: List<EntityFieldDef>) {
     protected fun handleLastModifiedAt(map: MutableMap<String, Any?>) {
         val now = getCurrentDateTime()
         lastModifiedAt?.let { lastModified ->
-            map[lastModified.name] = now
+            map[lastModified.key] = now
         }
     }
 
@@ -112,7 +112,7 @@ abstract class EntityDef(val name: String, val fields: List<EntityFieldDef>) {
         return when {
             value == null -> throw RuntimeException("Cannot generate id filter when value of id is null.")
             value is String && value.isBlank() -> throw RuntimeException("Cannot generate id filter when value of id is blank.")
-            else -> Document(id.name, value)
+            else -> Document(id.key, value)
         }
     }
 

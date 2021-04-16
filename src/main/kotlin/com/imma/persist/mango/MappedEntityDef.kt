@@ -26,7 +26,7 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
     EntityDef(name, fields) {
     override fun toDocument(entity: Any): Document {
         val map = fields.map { field ->
-            val name = field.name
+            val name = field.key
             val value = field.read(entity)
             name to value
         }.toMap().toMutableMap()
@@ -43,7 +43,7 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
 
     override fun fromDocument(doc: Document): Any {
         return this.createEntity().let { entity ->
-            fields.forEach { field -> field.write(entity, doc[field.name]) }
+            fields.forEach { field -> field.write(entity, doc[field.key]) }
             entity
         }
     }
@@ -51,8 +51,8 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
     override fun toFieldName(propertyOrFactorName: String): String {
         return fields.find {
             val field = it as MappedEntityFieldDef
-            field.getPropertyName() == propertyOrFactorName || field.name == propertyOrFactorName
-        }?.name ?: propertyOrFactorName
+            field.getPropertyName() == propertyOrFactorName || field.key == propertyOrFactorName
+        }?.key ?: propertyOrFactorName
     }
 
     override fun isMultipleTopicsSupported(): Boolean {
@@ -60,7 +60,7 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
     }
 
     override fun isTopicSupported(entityOrTopicName: String): Boolean {
-        return entityOrTopicName == name
+        return entityOrTopicName == key
     }
 }
 

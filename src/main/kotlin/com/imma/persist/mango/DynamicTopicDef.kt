@@ -1,8 +1,10 @@
 package com.imma.persist.mango
 
+import com.imma.model.core.Factor
+import com.imma.model.core.Topic
 import org.bson.Document
 
-class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(name, type) {
+class DynamicFactorDef(val factor: Factor, type: EntityFieldType) : EntityFieldDef(factor.name!!, type) {
     override fun read(entity: Any): Any? {
         if (Map::class.java.isAssignableFrom(entity.javaClass)) {
             return (entity as Map<*, *>)[key]
@@ -21,12 +23,28 @@ class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(na
     }
 }
 
-private val id = MapEntityFieldDef("_id", EntityFieldType.ID)
-private val createdAt = MapEntityFieldDef("create_time", EntityFieldType.CREATED_AT)
-private val lastModifiedAt = MapEntityFieldDef("last_modify_time", EntityFieldType.LAST_MODIFIED_AT)
+private val id = DynamicFactorDef(Factor(factorId = "_id", name = "_id"), EntityFieldType.ID)
+private val createdAt = DynamicFactorDef(
+    Factor(factorId = "create_time", name = "create_time"),
+    EntityFieldType.CREATED_AT
+)
+private val lastModifiedAt = DynamicFactorDef(
+    Factor(factorId = "last_modify_time", name = "last_modify_time"),
+    EntityFieldType.LAST_MODIFIED_AT
+)
 
-class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastModifiedAt)) {
+class DynamicTopicDef(val topic: Topic) :
+    EntityDef(
+        topic.name!!,
+        listOf(id) + topic.factors.map { factor ->
+            DynamicFactorDef(
+                factor,
+                EntityFieldType.REGULAR
+            )
+        } + listOf(createdAt, lastModifiedAt)
+    ) {
     override fun toDocument(entity: Any): Document {
+        @Suppress("DuplicatedCode")
         if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
             throw RuntimeException("Only map is supported, but is [$entity] now.")
         }
@@ -43,21 +61,28 @@ class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastMod
     }
 
     /**
-     * @return parameter itself
+     * @param propertyOrFactorName might be factor id
      */
     override fun toFieldName(propertyOrFactorName: String): String {
-        return propertyOrFactorName
+        return fields.find {
+            val field = it as DynamicFactorDef
+            val factor = field.factor
+            factor.factorId == propertyOrFactorName || factor.name == propertyOrFactorName
+        }?.key ?: propertyOrFactorName
     }
 
     override fun isMultipleTopicsSupported(): Boolean {
         return false
     }
 
+    /**
+     * @param entityOrTopicName might be topic id
+     */
     override fun isTopicSupported(entityOrTopicName: String): Boolean {
-        return entityOrTopicName == key
+        return entityOrTopicName == key || entityOrTopicName == topic.topicId
     }
 }
 
-fun createMapEntityDef(entityName: String): MapEntityDef {
-    return MapEntityDef(entityName)
+fun createDynamicTopicDef(topic: Topic): DynamicTopicDef {
+    return DynamicTopicDef(topic)
 }

@@ -53,12 +53,12 @@ data class MapperMaterial(
     }
 
     fun getIdFieldName(): String {
-        return def.id.name
+        return def.id.key
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun getIdValue(): Any? {
-        return entity?.let { id.read(entity) }
+        return entity?.let { def.id.read(entity) }
     }
 
     /**
