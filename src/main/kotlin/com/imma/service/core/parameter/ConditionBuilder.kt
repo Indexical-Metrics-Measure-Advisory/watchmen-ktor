@@ -7,22 +7,6 @@ import com.imma.model.compute.ParameterJointType
 import com.imma.model.core.Topic
 import com.imma.persist.core.*
 
-private fun toExpressionOperator(operator: ParameterExpressionOperator?): ExpressionOperator? {
-    return when (operator) {
-        ParameterExpressionOperator.empty -> ExpressionOperator.empty
-        ParameterExpressionOperator.`not-empty` -> ExpressionOperator.`not-empty`
-        ParameterExpressionOperator.equals -> ExpressionOperator.equals
-        ParameterExpressionOperator.`not-equals` -> ExpressionOperator.`not-equals`
-        ParameterExpressionOperator.less -> ExpressionOperator.less
-        ParameterExpressionOperator.`less-equals` -> ExpressionOperator.`less-equals`
-        ParameterExpressionOperator.more -> ExpressionOperator.more
-        ParameterExpressionOperator.`more-equals` -> ExpressionOperator.`more-equals`
-        ParameterExpressionOperator.`in` -> ExpressionOperator.`in`
-        ParameterExpressionOperator.`not-in` -> ExpressionOperator.`not-in`
-        else -> null
-    }
-}
-
 /**
  * condition builder for workout a where
  * which means:
@@ -39,6 +23,22 @@ class ConditionBuilder(keptTopic: Topic) {
 
     fun build(joint: ParameterJoint): Where {
         return this.build(createWhere(joint.jointType), joint)
+    }
+
+    fun toExpressionOperator(operator: ParameterExpressionOperator?): ExpressionOperator? {
+        return when (operator) {
+            ParameterExpressionOperator.empty -> ExpressionOperator.empty
+            ParameterExpressionOperator.`not-empty` -> ExpressionOperator.`not-empty`
+            ParameterExpressionOperator.equals -> ExpressionOperator.equals
+            ParameterExpressionOperator.`not-equals` -> ExpressionOperator.`not-equals`
+            ParameterExpressionOperator.less -> ExpressionOperator.less
+            ParameterExpressionOperator.`less-equals` -> ExpressionOperator.`less-equals`
+            ParameterExpressionOperator.more -> ExpressionOperator.more
+            ParameterExpressionOperator.`more-equals` -> ExpressionOperator.`more-equals`
+            ParameterExpressionOperator.`in` -> ExpressionOperator.`in`
+            ParameterExpressionOperator.`not-in` -> ExpressionOperator.`not-in`
+            else -> null
+        }
     }
 
     fun build(where: Where, joint: ParameterJoint): Where {
