@@ -1,27 +1,8 @@
 package com.imma.service.core.action
 
-import com.imma.model.compute.ParameterJoint
-import com.imma.model.compute.ParameterJointType
 import com.imma.model.compute.takeAsParameterJointOrThrow
-import com.imma.persist.core.And
-import com.imma.persist.core.Or
-import com.imma.persist.core.Where
 import com.imma.service.core.log.RunType
-
-private fun Or.build(joint: ParameterJoint): Or {
-    return this
-}
-
-private fun And.build(joint: ParameterJoint): And {
-    return this
-}
-
-private fun ParameterJoint.build(): Where {
-    return if (jointType === ParameterJointType.and)
-        And().build(this)
-    else
-        Or().build(this)
-}
+import com.imma.service.core.parameter.ConditionBuilder
 
 class ExistsAction(private val context: ActionContext, private val logger: ActionLogger) {
     fun run() {
@@ -48,7 +29,7 @@ class ExistsAction(private val context: ActionContext, private val logger: Actio
             // put into memory
             topics[topicId] = topic
 
-            val value = services.dynamicTopic { exists(topic, joint.build()) }
+            val value = services.dynamicTopic { exists(topic, ConditionBuilder.build(joint)) }
             variables[variableName] = value
             value
         }
