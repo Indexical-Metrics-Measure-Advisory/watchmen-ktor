@@ -5,6 +5,8 @@ import com.imma.model.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ConditionWorker
 import com.imma.service.core.parameter.ParameterWorker
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 @Suppress("EnumEntryName")
 enum class AlarmActionSeverity(val severity: String) {
@@ -19,6 +21,8 @@ interface AlarmConsumer {
 }
 
 class AlarmAction(private val context: ActionContext, private val logger: ActionLogger) {
+    private val systemLogger: Logger = LoggerFactory.getLogger(this.javaClass)
+
     companion object {
         internal val CONSUMERS: MutableList<AlarmConsumer> = mutableListOf()
 
@@ -51,14 +55,21 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
         if (shouldRun()) {
             val value = with(context) {
                 val param = ConstantParameter(action["message"]?.toString(), false)
-                val computed = ParameterWorker(pipeline, topics, sourceData, variables)
-                    .computeParameter(param)?.toString()
-                    ?: "No Message"
                 val severity = AlarmActionSeverity.values().find {
                     it.severity == action["severity"]?.toString()
                 } ?: AlarmActionSeverity.medium
-                CONSUMERS.parallelStream().forEach { it.alarm(severity, computed) }
-                computed
+                ParameterWorker(pipeline, topics, sourceData, variables)
+                    .computeParameter(param)?.toString() ?: "No Message"
+                    .also { message ->
+                        CONSUMERS.forEach { consumer ->
+                            try {
+                                consumer.alarm(severity, message)
+                            } catch (t: Throwable) {
+                                // ignore and write throwable to system log
+                                systemLogger.error("Error occurred on alarm consumer[${consumer.javaClass}]", t)
+                            }
+                        }
+                    }
             }
             logger.log(mutableMapOf("value" to value, "conditionResult" to true), RunType.process)
         } else {

@@ -19,9 +19,9 @@ class CopyToMemoryAction(private val context: ActionContext, private val logger:
             }
 
             val worker = ParameterWorker(pipeline, topics, sourceData, variables)
-            val value = worker.computeParameter(takeAsParameterOrThrow(source))
-            variables[variableName] = value
-            value
+            worker.computeParameter(takeAsParameterOrThrow(source)).also {
+                variables[variableName] = it
+            }
         }
         logger.log(mutableMapOf("value" to value), RunType.process)
     }
