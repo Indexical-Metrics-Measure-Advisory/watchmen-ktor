@@ -3,9 +3,6 @@ package com.imma.service.core.parameter
 import com.imma.model.compute.*
 import com.imma.model.core.Pipeline
 import com.imma.service.core.*
-import java.time.chrono.ChronoLocalDate
-import java.time.chrono.ChronoLocalDateTime
-import java.util.*
 
 /**
  * condition worker for workout a boolean value.
@@ -35,9 +32,11 @@ class ConditionWorker(
         return when {
             value1 == null -> value2 == null
             value2 == null -> false
-            value1 is Number && value2 is Number -> value1.toDouble() == value2.toDouble()
             value1 == value2 -> true
-            else -> value1.toString() == value2.toString()
+            value1.toString() == value2.toString() -> true
+            else -> {
+                TODO()
+            }
         }
     }
 
@@ -47,11 +46,14 @@ class ConditionWorker(
             value1 == null -> value2 != null
             // not null value always not less than null value
             value2 == null -> false
-            value1 is Number && value2 is Number -> value1.toDouble() < value2.toDouble()
-            value1 is Date && value2 is Date -> value1 < value2
-            value1 is ChronoLocalDate && value2 is ChronoLocalDate -> value1 < value2
-            value1 is ChronoLocalDateTime<*> && value2 is ChronoLocalDateTime<*> -> value1 < value2
-            else -> throw RuntimeException("Less than operator is only compatible for numeric or null values, currently are [$value1] and [$value2].")
+//            value1 is Number && value2 is Number -> value1.toDouble() < value2.toDouble()
+//            value1 is Date && value2 is Date -> value1 < value2
+//            value1 is ChronoLocalDate && value2 is ChronoLocalDate -> value1 < value2
+//            value1 is ChronoLocalDateTime<*> && value2 is ChronoLocalDateTime<*> -> value1 < value2
+            else -> {
+                // TODO
+                throw RuntimeException("Less than operator is only compatible for numeric or null values, currently are [$value1] and [$value2].")
+            }
         }
     }
 
@@ -61,46 +63,59 @@ class ConditionWorker(
             value2 == null -> value1 != null
             // not null value always not less than null value
             value1 == null -> false
-            value1 is Number && value2 is Number -> value1.toDouble() > value2.toDouble()
-            value1 is Date && value2 is Date -> value1 > value2
-            value1 is ChronoLocalDate && value2 is ChronoLocalDate -> value1 > value2
-            value1 is ChronoLocalDateTime<*> && value2 is ChronoLocalDateTime<*> -> value1 > value2
-            else -> throw RuntimeException("More than operator is only compatible for numeric or null values, currently are [$value1] and [$value2].")
+//            value1 is Number && value2 is Number -> value1.toDouble() > value2.toDouble()
+//            value1 is Date && value2 is Date -> value1 > value2
+//            value1 is ChronoLocalDate && value2 is ChronoLocalDate -> value1 > value2
+//            value1 is ChronoLocalDateTime<*> && value2 is ChronoLocalDateTime<*> -> value1 > value2
+            else -> {
+                // TODO
+                throw RuntimeException("More than operator is only compatible for numeric or null values, currently are [$value1] and [$value2].")
+            }
         }
     }
 
     private fun computeExpression(expression: ParameterExpression): Boolean {
-        val left = parameterWorker.computeParameter(expression.left)
+        val left = { shouldBe: ParameterShouldBe ->
+            parameterWorker.computeParameter(expression.left, shouldBe)
+        }
         // lazy compute
-        val right = { expression.right.takeIf { it != null }?.run { parameterWorker.computeParameter(this) } }
+        val right = { shouldBe: ParameterShouldBe ->
+            expression.right.takeIf { it != null }?.run {
+                parameterWorker.computeParameter(this, shouldBe)
+            }
+        }
         @Suppress("REDUNDANT_ELSE_IN_WHEN")
         return when (expression.operator) {
-            ParameterExpressionOperator.equals -> eq(left, right())
-            ParameterExpressionOperator.`not-equals` -> !eq(left, right())
-            ParameterExpressionOperator.empty -> this.empty(left)
-            ParameterExpressionOperator.`not-empty` -> !this.empty(left)
-            ParameterExpressionOperator.less -> this.less(left, right())
+            ParameterExpressionOperator.equals -> eq(left(ParameterShouldBe.any), right(ParameterShouldBe.any))
+            ParameterExpressionOperator.`not-equals` -> !eq(left(ParameterShouldBe.any), right(ParameterShouldBe.any))
+            ParameterExpressionOperator.empty -> this.empty(left(ParameterShouldBe.any))
+            ParameterExpressionOperator.`not-empty` -> !this.empty(left(ParameterShouldBe.any))
+            ParameterExpressionOperator.less -> this.less(left, right(ParameterShouldBe.any))
             ParameterExpressionOperator.`less-equals` -> {
-                val r = right()
-                left == r || this.less(left, r)
+                val l = left(ParameterShouldBe.any)
+                val r = right(ParameterShouldBe.any)
+                l == r || this.less(l, r)
             }
-            ParameterExpressionOperator.more -> this.more(left, right())
+            ParameterExpressionOperator.more -> this.more(left(ParameterShouldBe.any), right(ParameterShouldBe.any))
             ParameterExpressionOperator.`more-equals` -> {
-                val r = right()
-                left == r || this.more(left, r)
+                val l = left(ParameterShouldBe.any)
+                val r = right(ParameterShouldBe.any)
+                l == r || this.more(l, r)
             }
             ParameterExpressionOperator.`in` -> {
-                val r = right()
+                val l = left(ParameterShouldBe.any)
+                val r = right(ParameterShouldBe.collection)
                 if (r is Iterable<*>) {
-                    r.any { eq(left, right()) }
+                    r.any { eq(l, it) }
                 } else {
                     throw throw RuntimeException("In operator is only compatible for right values are iterable, currently is [$r].")
                 }
             }
             ParameterExpressionOperator.`not-in` -> {
-                val r = right()
+                val l = left(ParameterShouldBe.any)
+                val r = right(ParameterShouldBe.collection)
                 if (r is Iterable<*>) {
-                    r.all { !eq(left, right()) }
+                    r.all { !eq(l, it) }
                 } else {
                     throw throw RuntimeException("In operator is only compatible for right values are iterable, currently is [$r].")
                 }

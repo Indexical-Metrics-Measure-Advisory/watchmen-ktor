@@ -23,8 +23,8 @@ class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(na
 }
 
 private val id = MapEntityFieldDef("_id", EntityFieldType.ID)
-private val createdAt = MapEntityFieldDef("create_time", EntityFieldType.CREATED_AT)
-private val lastModifiedAt = MapEntityFieldDef("last_modify_time", EntityFieldType.LAST_MODIFIED_AT)
+private val createdAt = MapEntityFieldDef("_create_time", EntityFieldType.CREATED_AT)
+private val lastModifiedAt = MapEntityFieldDef("_last_modify_time", EntityFieldType.LAST_MODIFIED_AT)
 
 class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastModifiedAt)) {
     private val collectionName = DynamicTopicUtils.toCollectionName(name)

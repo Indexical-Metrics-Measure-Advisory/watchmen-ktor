@@ -15,9 +15,9 @@ data class Space(
     var description: String? = null,
     @Field("topic_ids")
     var topicIds: List<String>? = mutableListOf(),
-    @CreatedAt("create_time")
+    @CreatedAt("_create_time")
     override var createTime: Date? = null,
-    @LastModifiedAt("last_modify_time")
+    @LastModifiedAt("_last_modify_time")
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     // transient fields here for avoid construct exception by spring data using kotlin data class

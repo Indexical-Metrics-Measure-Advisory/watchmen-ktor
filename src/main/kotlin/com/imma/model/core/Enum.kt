@@ -29,8 +29,8 @@ data class Enum(
     var parentEnumId: String? = null,
     @Transient
     var items: MutableList<EnumItem> = mutableListOf(),
-    @CreatedAt("create_time")
+    @CreatedAt("_create_time")
     override var createTime: Date? = null,
-    @LastModifiedAt("last_modify_time")
+    @LastModifiedAt("_last_modify_time")
     override var lastModifyTime: Date? = null,
 ) : Tuple()

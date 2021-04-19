@@ -17,9 +17,9 @@ data class ConnectedSpace(
     var userId: String? = null,
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @CreatedAt("create_time")
+    @CreatedAt("_create_time")
     override var createTime: Date? = null,
-    @LastModifiedAt("last_modify_time")
+    @LastModifiedAt("_last_modify_time")
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     @Transient

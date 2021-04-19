@@ -131,8 +131,8 @@ data class Topic(
     var description: String? = null,
     @Field("factors")
     var factors: MutableList<Factor> = mutableListOf(),
-    @CreatedAt("create_time")
+    @CreatedAt("_create_time")
     override var createTime: Date? = null,
-    @LastModifiedAt("last_modify_time")
+    @LastModifiedAt("_last_modify_time")
     override var lastModifyTime: Date? = null,
 ) : Tuple()

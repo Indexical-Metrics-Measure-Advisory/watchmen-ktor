@@ -48,7 +48,9 @@ class ParameterWorker(
     }
 
     private fun removeIrrelevantCharsFromDateString(date: String): String {
-        return date.split("").filter { it != " " && it != "-" && it != "/" }.joinToString(separator = "")
+        return date.split("").filter {
+            it != " " && it != "-" && it != "/" && it != ":"
+        }.joinToString(separator = "")
     }
 
     private fun computeToDate(date: String, pattern: String, removeIrrelevantChars: Boolean = false): LocalDate {
@@ -62,9 +64,14 @@ class ParameterWorker(
     private fun computeToDate(date: String?, parameter: Parameter): LocalDate? {
         return when {
             date.isNullOrBlank() -> null
+            // format is yyyyMMdd
             date.length == 8 -> computeToDate(date, "yyyyMMdd")
+            // format is yyyy/MM/dd, yyyy-MM-dd
             date.length == 10 -> computeToDate(date, "yyyyMMdd", true)
+            // format is yyyyMMddHHmmss
             date.length == 14 -> computeToDate(date.substring(0, 8), "yyyyMMddHHmmss")
+            // date format is yyyy/MM/dd, yyyy-MM-dd
+            // time format is HH:mm:ss
             date.length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMddHHmmss", true)
             else -> throw RuntimeException("Cannot cast given value[$date] to date, which is computed by parameter[$parameter].")
         }
@@ -78,6 +85,16 @@ class ParameterWorker(
             is LocalDateTime -> date.toLocalDate()
             is String -> computeToDate(date, parameter)
             else -> throw RuntimeException("Cannot cast given value to date[$date], which is computed by parameter[$parameter].")
+        }
+    }
+
+    private fun computeToCollection(value: Any?, parameter: Parameter): List<Any?> {
+        return when {
+            value == null -> listOf()
+            value is List<*> -> value
+            value is Array<*> -> value.toList()
+            value is String -> value.split(",")
+            else -> throw RuntimeException("Cannot cast given value to list[$value], which is computed by parameter[$parameter].")
         }
     }
 
@@ -128,6 +145,7 @@ class ParameterWorker(
             ParameterShouldBe.any -> v
             ParameterShouldBe.numeric -> computeToNumeric(v, parameter)
             ParameterShouldBe.date -> computeToDate(v, parameter)
+            ParameterShouldBe.collection -> computeToCollection(v, parameter)
         }
     }
 
@@ -164,6 +182,7 @@ class ParameterWorker(
         val value = sourceData[factor.name!!]
         return when (shouldBe) {
             ParameterShouldBe.any -> value
+            ParameterShouldBe.collection -> computeToCollection(value, parameter)
             ParameterShouldBe.numeric -> computeToNumeric(value, parameter)
             ParameterShouldBe.date -> computeToDate(value, parameter)
         }
@@ -250,7 +269,7 @@ class ParameterWorker(
         }
     }
 
-    private fun computeParameter(param: Parameter, shouldBe: ParameterShouldBe): Any? {
+    fun computeParameter(param: Parameter, shouldBe: ParameterShouldBe): Any? {
         @Suppress("REDUNDANT_ELSE_IN_WHEN")
         return when (param.kind) {
             ParameterKind.topic -> computeTopicFactor(param as TopicFactorParameter, shouldBe)

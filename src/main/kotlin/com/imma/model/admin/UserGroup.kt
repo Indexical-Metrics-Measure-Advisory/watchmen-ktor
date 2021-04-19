@@ -15,9 +15,9 @@ data class UserGroup(
     var description: String? = null,
     @Field("space_ids")
     var spaceIds: List<String>? = mutableListOf(),
-    @CreatedAt("create_time")
+    @CreatedAt("_create_time")
     override var createTime: Date? = null,
-    @LastModifiedAt("last_modify_time")
+    @LastModifiedAt("_last_modify_time")
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     // transient fields here for avoid construct exception by spring data using kotlin data class

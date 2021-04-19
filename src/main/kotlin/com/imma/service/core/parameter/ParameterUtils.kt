@@ -8,7 +8,8 @@ import org.jetbrains.kotlin.utils.doNothing
 enum class ParameterShouldBe {
     any,
     numeric,
-    date
+    date,
+    collection
 }
 
 class ParameterUtils {
@@ -65,6 +66,8 @@ class ParameterUtils {
                 // cannot get date by computing except case-then
                 shouldBe == ParameterShouldBe.date -> throw RuntimeException("Cannot get date result on parameter[$parameter].")
                 shouldBe == ParameterShouldBe.numeric -> doNothing()
+                // cannot get collection by computing except case-then
+                shouldBe == ParameterShouldBe.collection -> throw RuntimeException("Cannot get collection result on parameter[$parameter].")
             }
         }
     }
