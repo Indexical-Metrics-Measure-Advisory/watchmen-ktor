@@ -2,7 +2,6 @@ package com.imma.service.core.parameter
 
 import com.imma.model.compute.*
 import com.imma.model.core.Pipeline
-import com.imma.model.core.Topic
 import com.imma.service.core.*
 import java.time.chrono.ChronoLocalDate
 import java.time.chrono.ChronoLocalDateTime
