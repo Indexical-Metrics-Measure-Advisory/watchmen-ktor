@@ -4,8 +4,13 @@ import com.imma.model.compute.ParameterExpression
 import com.imma.model.compute.ParameterExpressionOperator
 import com.imma.model.compute.ParameterJoint
 import com.imma.model.compute.ParameterJointType
+import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
 import com.imma.persist.core.*
+import com.imma.service.core.PipelineSourceData
+import com.imma.service.core.PipelineTopics
+import com.imma.service.core.PipelineVariables
+import com.imma.service.core.createPipelineVariables
 
 /**
  * condition builder for workout a where
@@ -14,8 +19,15 @@ import com.imma.persist.core.*
  * 2. any topic in topic/factor parameter, if not (1), then must be source topic.
  * 3. any variable in constant parameter must be source topic or can be found from variables
  */
-class ConditionBuilder(keptTopic: Topic) {
-    private val parameterBuilder: ParameterBuilder = ParameterBuilder(keptTopic)
+class ConditionBuilder(
+    keptTopic: Topic,
+    pipeline: Pipeline,
+    topics: PipelineTopics,
+    sourceData: PipelineSourceData,
+    variables: PipelineVariables = createPipelineVariables()
+) {
+    private val parameterBuilder: ParameterBuilder =
+        ParameterBuilder(keptTopic, pipeline, topics, sourceData, variables)
 
     private fun createWhere(jointType: ParameterJointType): Where {
         return if (jointType == ParameterJointType.or) Or() else And()

@@ -29,7 +29,9 @@ class ExistsAction(private val context: ActionContext, private val logger: Actio
             // put into memory
             topics[topicId] = topic
 
-            services.dynamicTopic { exists(topic, ConditionBuilder(topic).build(joint)) }.also {
+            services.dynamicTopic {
+                exists(topic, ConditionBuilder(topic, pipeline, topics, sourceData, variables).build(joint))
+            }.also {
                 variables[variableName] = it
             }
         }
