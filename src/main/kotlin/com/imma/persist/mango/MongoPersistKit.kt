@@ -58,23 +58,31 @@ class MongoPersistKit : AbstractPersistKit() {
         return mongoDatabase.getCollection(name)
     }
 
+    private fun getMongoCollection(material: MapperMaterial): MongoCollection<Document> {
+        return getMongoCollection(material.toCollectionName())
+    }
+
     override fun <T : Any> insertOne(one: T, entityClass: Class<*>, entityName: String): T {
         val material = MapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).insertOne(material.toDocument { nextSnowflakeIdStr() })
+        getMongoCollection(material).insertOne(material.toDocument { nextSnowflakeIdStr() })
         return one
     }
 
     override fun <T : Any> insertAll(list: List<T>, entityClass: Class<*>, entityName: String): List<T> {
-        getMongoCollection(entityName).insertMany(list.map { entity ->
-            val material = MapperMaterialBuilder.create(entity).type(entityClass).name(entityName).build()
-            material.toDocument { nextSnowflakeIdStr() }
-        })
+        if (list.isNotEmpty()) {
+            val material = MapperMaterialBuilder.create(list[0]).type(entityClass).name(entityName).build()
+            getMongoCollection(material).insertMany(list.map { entity ->
+                @Suppress("NAME_SHADOWING")
+                val material = MapperMaterialBuilder.create(entity).type(entityClass).name(entityName).build()
+                material.toDocument { nextSnowflakeIdStr() }
+            })
+        }
         return list
     }
 
     override fun <T : Any> updateOne(one: T, entityClass: Class<*>, entityName: String): T {
         val material = MapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).replaceOne(
+        getMongoCollection(material).replaceOne(
             material.generateIdFilter(),
             material.toDocument()
         )
@@ -83,12 +91,12 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun updateOne(where: Where, updates: Updates, entityClass: Class<*>, entityName: String) {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).findOneAndUpdate(material.toFilter(where), material.toUpdates(updates))
+        getMongoCollection(material).findOneAndUpdate(material.toFilter(where), material.toUpdates(updates))
     }
 
     override fun <T : Any> upsertOne(one: T, entityClass: Class<*>, entityName: String): T {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).findOneAndUpdate(
+        getMongoCollection(material).findOneAndUpdate(
             material.buildIdFilter(),
             material.toDocument { nextSnowflakeIdStr() },
             FindOneAndUpdateOptions().upsert(true)
@@ -99,29 +107,29 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun update(where: Where, updates: Updates, entityClass: Class<*>, entityName: String) {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).updateMany(material.toFilter(where), material.toUpdates(updates))
+        getMongoCollection(material).updateMany(material.toFilter(where), material.toUpdates(updates))
     }
 
     override fun deleteById(id: String, entityClass: Class<*>, entityName: String) {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).deleteOne(material.buildIdFilter(id))
+        getMongoCollection(material).deleteOne(material.buildIdFilter(id))
     }
 
     override fun delete(where: Where, entityClass: Class<*>, entityName: String) {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        getMongoCollection(entityName).deleteMany(material.toFilter(where))
+        getMongoCollection(material).deleteMany(material.toFilter(where))
     }
 
     override fun deleteAll(entityClass: Class<*>, entityName: String) {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
         // is not empty to match all
         val where = where { factor(material.getIdFieldName()).isNotEmpty() }
-        getMongoCollection(entityName).deleteMany(material.toFilter(where))
+        getMongoCollection(material).deleteMany(material.toFilter(where))
     }
 
     override fun <T> findById(id: String, entityClass: Class<*>, entityName: String): T? {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val docs = getMongoCollection(entityName).find(material.buildIdFilter(id))
+        val docs = getMongoCollection(material).find(material.buildIdFilter(id))
         val first: Document? = docs.first()
         return first?.let {
             @Suppress("UNCHECKED_CAST")
@@ -131,7 +139,7 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun <T> findOne(where: Where, entityClass: Class<*>, entityName: String): T? {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val docs = getMongoCollection(entityName).find(material.toFilter(where))
+        val docs = getMongoCollection(material).find(material.toFilter(where))
         val first: Document? = docs.first()
         return first?.let {
             @Suppress("UNCHECKED_CAST")
@@ -141,12 +149,12 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun exists(where: Where, entityClass: Class<*>, entityName: String): Boolean {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        return getMongoCollection(entityName).countDocuments(material.toFilter(where)) > 0
+        return getMongoCollection(material).countDocuments(material.toFilter(where)) > 0
     }
 
     override fun <T> listAll(entityClass: Class<*>, entityName: String): List<T> {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val docs = getMongoCollection(entityName).find()
+        val docs = getMongoCollection(material).find()
         return docs.map { doc ->
             @Suppress("UNCHECKED_CAST")
             material.fromDocument(doc) as T
@@ -155,7 +163,7 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun <T> listAll(select: Select, entityClass: Class<*>, entityName: String): List<T> {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val docs = getMongoCollection(entityName).aggregate(listOf(material.toProjection(select)))
+        val docs = getMongoCollection(material).aggregate(listOf(material.toProjection(select)))
         return docs.map { doc ->
             @Suppress("UNCHECKED_CAST")
             material.fromDocument(doc) as T
@@ -164,7 +172,7 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun <T> list(where: Where, entityClass: Class<*>, entityName: String): List<T> {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val docs = getMongoCollection(entityName).find(material.toFilter(where))
+        val docs = getMongoCollection(material).find(material.toFilter(where))
         return docs.map { doc ->
             @Suppress("UNCHECKED_CAST")
             material.fromDocument(doc) as T
@@ -173,7 +181,7 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun <T> list(select: Select, where: Where, entityClass: Class<*>, entityName: String): List<T> {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val docs = getMongoCollection(entityName).aggregate(
+        val docs = getMongoCollection(material).aggregate(
             listOf(
                 material.toProjection(select),
                 material.toMatch(where)
@@ -191,12 +199,12 @@ class MongoPersistKit : AbstractPersistKit() {
 
     override fun <T> page(pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T> {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-        val count = getMongoCollection(entityName).countDocuments()
+        val count = getMongoCollection(material).countDocuments()
         val skipCount = computeSkipCount(pageable)
         return if (count <= skipCount) {
             toDataPage(mutableListOf(), count, pageable)
         } else {
-            val docs = getMongoCollection(entityName).aggregate(
+            val docs = getMongoCollection(material).aggregate(
                 listOf(
                     material.toSkip(skipCount),
                     material.toLimit(pageable.pageSize)
@@ -218,12 +226,12 @@ class MongoPersistKit : AbstractPersistKit() {
     ): DataPage<T> {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
         val filter = material.toFilter(where)
-        val count = getMongoCollection(entityName).countDocuments(filter)
+        val count = getMongoCollection(material).countDocuments(filter)
         val skipCount = computeSkipCount(pageable)
         return if (count <= skipCount) {
             toDataPage(mutableListOf(), count, pageable)
         } else {
-            val docs = getMongoCollection(entityName).aggregate(
+            val docs = getMongoCollection(material).aggregate(
                 listOf(
                     material.toMatch(filter),
                     material.toSkip(skipCount),
