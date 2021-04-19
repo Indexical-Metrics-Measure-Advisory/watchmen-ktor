@@ -37,7 +37,7 @@ class StageWorker(private val context: StageContext) : EngineWorker() {
                 logger.success("End of run stage.", this.markEnd())
             } catch (t: Throwable) {
                 logger.fail("Failed to run stage.", t, this.markEnd())
-                // TODO throw to interrupt pipeline, 2021/04/07
+                // IMPORTANT throw to interrupt pipeline, 2021/04/07
                 throw t
             }
         } else {
