@@ -1,5 +1,6 @@
 package com.imma.persist.mango
 
+import com.imma.persist.DynamicTopicUtils
 import com.imma.persist.annotation.*
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -24,6 +25,8 @@ class MappedEntityFieldDef(name: String, type: EntityFieldType, private val desc
 
 class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: List<EntityFieldDef>) :
     EntityDef(name, fields) {
+    private val collectionName = DynamicTopicUtils.toCollectionName(name)
+
     override fun toDocument(entity: Any): Document {
         val map = fields.map { field ->
             val name = field.key
@@ -60,7 +63,11 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
     }
 
     override fun isTopicSupported(entityOrTopicName: String): Boolean {
-        return entityOrTopicName == key
+        return entityOrTopicName == key || entityOrTopicName == collectionName
+    }
+
+    override fun toCollectionName(): String {
+        return collectionName
     }
 }
 

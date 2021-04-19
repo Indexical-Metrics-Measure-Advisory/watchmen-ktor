@@ -48,4 +48,14 @@ interface PersistKit : Closeable {
     fun <T> page(pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T>
 
     fun <T> page(where: Where, pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T>
+
+    /**
+     * check entity existing, not data
+     */
+    fun entityExists(entityClass: Class<*>, entityName: String): Boolean
+
+    /**
+     * create entity, not data
+     */
+    fun createEntity(entityClass: Class<*>, entityName: String)
 }

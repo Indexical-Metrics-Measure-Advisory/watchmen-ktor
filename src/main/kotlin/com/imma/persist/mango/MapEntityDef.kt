@@ -1,5 +1,6 @@
 package com.imma.persist.mango
 
+import com.imma.persist.DynamicTopicUtils
 import org.bson.Document
 
 class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(name, type) {
@@ -26,6 +27,8 @@ private val createdAt = MapEntityFieldDef("create_time", EntityFieldType.CREATED
 private val lastModifiedAt = MapEntityFieldDef("last_modify_time", EntityFieldType.LAST_MODIFIED_AT)
 
 class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastModifiedAt)) {
+    private val collectionName = DynamicTopicUtils.toCollectionName(name)
+
     override fun toDocument(entity: Any): Document {
         if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
             throw RuntimeException("Only map is supported, but is [$entity] now.")
@@ -54,7 +57,11 @@ class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastMod
     }
 
     override fun isTopicSupported(entityOrTopicName: String): Boolean {
-        return entityOrTopicName == key
+        return entityOrTopicName == key || entityOrTopicName == collectionName
+    }
+
+    override fun toCollectionName(): String {
+        return collectionName
     }
 }
 

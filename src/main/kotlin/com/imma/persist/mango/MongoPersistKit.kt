@@ -238,6 +238,14 @@ class MongoPersistKit : AbstractPersistKit() {
         }
     }
 
+    override fun entityExists(entityClass: Class<*>, entityName: String): Boolean {
+        TODO("How to check a collection is existed in mongo database?")
+    }
+
+    override fun createEntity(entityClass: Class<*>, entityName: String) {
+        // create is unnecessary in mongo
+    }
+
     override fun close() {
         mongoClient.close()
     }

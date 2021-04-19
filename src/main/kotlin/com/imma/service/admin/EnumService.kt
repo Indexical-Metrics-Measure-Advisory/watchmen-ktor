@@ -26,7 +26,11 @@ class EnumService(services: Services) : TupleService(services) {
         val name = enumeration.name?.replace(' ', '_')?.replace('-', '_')
         val collectionName = "e_${name}"
         // TODO determine collection existing, create it when not exists
-        persist().deleteAll(EnumItem::class.java, collectionName)
+        if (persist().entityExists(EnumItem::class.java, collectionName)) {
+            persist().deleteAll(EnumItem::class.java, collectionName)
+        } else {
+            persist().createEntity(EnumItem::class.java, collectionName)
+        }
         if (enumeration.items.isNotEmpty()) {
             persist().insertAll(enumeration.items, EnumItem::class.java, collectionName)
         }

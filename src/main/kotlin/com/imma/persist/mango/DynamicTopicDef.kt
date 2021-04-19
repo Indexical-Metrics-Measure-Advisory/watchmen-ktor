@@ -46,7 +46,7 @@ class DynamicTopicDef(val topic: Topic) :
             )
         } + listOf(createdAt, lastModifiedAt)
     ) {
-
+    private val collectionName = DynamicTopicUtils.toCollectionName(key)
     private val fieldsMapByFactorName: Map<String, DynamicFactorDef> =
         fields.map { it.key to (it as DynamicFactorDef) }.toMap()
     private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
@@ -127,7 +127,13 @@ class DynamicTopicDef(val topic: Topic) :
      * @param entityOrTopicName might be topic id
      */
     override fun isTopicSupported(entityOrTopicName: String): Boolean {
-        return entityOrTopicName == key || entityOrTopicName == topic.topicId
+        return entityOrTopicName == key
+                || entityOrTopicName == topic.topicId
+                || entityOrTopicName == collectionName
+    }
+
+    override fun toCollectionName(): String {
+        return collectionName
     }
 }
 

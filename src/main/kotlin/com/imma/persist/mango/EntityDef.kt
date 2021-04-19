@@ -130,4 +130,6 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
      * check given entity or topic name is supported or not
      */
     abstract fun isTopicSupported(entityOrTopicName: String): Boolean
+
+    abstract fun toCollectionName(): String
 }

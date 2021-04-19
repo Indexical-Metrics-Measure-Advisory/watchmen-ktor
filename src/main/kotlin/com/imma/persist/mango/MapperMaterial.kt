@@ -13,6 +13,10 @@ data class MapperMaterial(
 ) {
     private val def: EntityDef = EntityMapper.getDef(this)
 
+    fun toCollectionName(): String {
+        return def.toCollectionName()
+    }
+
     fun toDocument(generateId: () -> Any): Document {
         return def.toDocument(entity!!, generateId)
     }
