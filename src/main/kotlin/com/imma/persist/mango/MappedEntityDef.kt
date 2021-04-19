@@ -1,6 +1,5 @@
 package com.imma.persist.mango
 
-import com.imma.persist.DynamicTopicUtils
 import com.imma.persist.annotation.*
 import org.bson.Document
 import org.bson.types.ObjectId
@@ -25,11 +24,10 @@ class MappedEntityFieldDef(name: String, type: EntityFieldType, private val desc
 
 class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: List<EntityFieldDef>) :
     EntityDef(name, fields) {
-    private val collectionName = DynamicTopicUtils.toCollectionName(name)
-
     override fun toDocument(entity: Any): Document {
-        val map = fields.map { field ->
-            val name = field.key
+        val map = fields.map { it ->
+            val field = it as MappedEntityFieldDef
+            val name = field.fieldName
             val value = field.read(entity)
             name to value
         }.toMap().toMutableMap()
@@ -45,17 +43,26 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
     }
 
     override fun fromDocument(doc: Document): Any {
-        return this.createEntity().let { entity ->
-            fields.forEach { field -> field.write(entity, doc[field.key]) }
-            entity
+        return this.createEntity().also {
+            fields.forEach {
+                val field = it as MappedEntityFieldDef
+                field.write(this, doc[field.fieldName])
+            }
         }
     }
 
     override fun toFieldName(propertyOrFactorName: String): String {
-        return fields.find {
+        val field = fields.find {
             val field = it as MappedEntityFieldDef
-            field.getPropertyName() == propertyOrFactorName || field.key == propertyOrFactorName
-        }?.key ?: propertyOrFactorName
+            field.getPropertyName() == propertyOrFactorName
+                    || field.key == propertyOrFactorName
+                    || field.fieldName == propertyOrFactorName
+        }
+        return if (field == null) {
+            propertyOrFactorName
+        } else {
+            (field as MappedEntityFieldDef).fieldName
+        }
     }
 
     override fun isMultipleTopicsSupported(): Boolean {

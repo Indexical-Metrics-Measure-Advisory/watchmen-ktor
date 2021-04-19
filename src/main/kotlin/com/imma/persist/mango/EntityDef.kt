@@ -1,5 +1,6 @@
 package com.imma.persist.mango
 
+import com.imma.persist.DynamicTopicUtils
 import com.imma.utils.getCurrentDateTime
 import org.bson.Document
 import org.jetbrains.kotlin.utils.doNothing
@@ -9,6 +10,7 @@ enum class EntityFieldType {
 }
 
 abstract class EntityFieldDef(val key: String, val type: EntityFieldType) {
+    val fieldName: String = DynamicTopicUtils.toFieldName(key)
     abstract fun read(entity: Any): Any?
     abstract fun write(entity: Any, value: Any?)
 }
@@ -34,6 +36,8 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
         }
     }
 
+    val collectionName = DynamicTopicUtils.toCollectionName(key)
+
     val id: EntityFieldDef = fields.find { def -> def.type == EntityFieldType.ID }
         ?: throw RuntimeException("Id field not defined.")
     val createdAt: EntityFieldDef? = fields.find { def -> def.type == EntityFieldType.CREATED_AT }
@@ -41,9 +45,9 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
 
     protected fun removeEmptyId(map: MutableMap<String, Any?>) {
         id.let { id ->
-            val value = map[id.key]
+            val value = map[id.fieldName]
             if (value == null || (value is String && value.isBlank())) {
-                map -= id.key
+                map -= id.fieldName
             }
         }
     }
@@ -55,9 +59,9 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
     protected fun tryToHandleCreatedAt(map: MutableMap<String, Any?>) {
         val now = getCurrentDateTime()
         createdAt?.let { created ->
-            val value = map[created.key]
+            val value = map[created.fieldName]
             if (value == null) {
-                map[created.key] = now
+                map[created.fieldName] = now
             }
         }
     }
@@ -68,7 +72,7 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
     protected fun handleLastModifiedAt(map: MutableMap<String, Any?>) {
         val now = getCurrentDateTime()
         lastModifiedAt?.let { lastModified ->
-            map[lastModified.key] = now
+            map[lastModified.fieldName] = now
         }
     }
 

@@ -18,6 +18,28 @@ private fun String.toSnakeCase(): String {
     return text
 }
 
+private fun String.beginWithLowerCase(): String {
+    return when (this.length) {
+        0 -> ""
+        1 -> this.toLowerCase()
+        else -> this[0].toLowerCase() + this.substring(1)
+    }
+}
+
+private fun String.beginWithUpperCase(): String {
+    return when (this.length) {
+        0 -> ""
+        1 -> this.toUpperCase()
+        else -> this[0].toUpperCase() + this.substring(1)
+    }
+}
+
+private fun String.toCamelCase(): String {
+    return this.split('_').joinToString("") {
+        it.beginWithUpperCase()
+    }.beginWithLowerCase()
+}
+
 class DynamicTopicUtils {
     companion object {
         /**
@@ -36,6 +58,10 @@ class DynamicTopicUtils {
             return factorName.trim {
                 it == ' ' || it == '-'
             }.replace(Regex("[\\s-]"), "_").toSnakeCase()
+        }
+
+        fun fromFieldName(fieldName: String): String {
+            return fieldName.toCamelCase()
         }
     }
 }

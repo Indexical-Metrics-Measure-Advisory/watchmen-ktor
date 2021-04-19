@@ -2,12 +2,9 @@ package com.imma.persist.mango
 
 import com.imma.model.core.Factor
 import com.imma.model.core.Topic
-import com.imma.persist.DynamicTopicUtils
 import org.bson.Document
 
 class DynamicFactorDef(val factor: Factor, type: EntityFieldType) : EntityFieldDef(factor.name!!, type) {
-    val fieldName: String = DynamicTopicUtils.toFieldName(factor.name!!)
-
     override fun read(entity: Any): Any? {
         if (Map::class.java.isAssignableFrom(entity.javaClass)) {
             return (entity as Map<*, *>)[key]
@@ -46,7 +43,6 @@ class DynamicTopicDef(val topic: Topic) :
             )
         } + listOf(createdAt, lastModifiedAt)
     ) {
-    private val collectionName = DynamicTopicUtils.toCollectionName(key)
     private val fieldsMapByFactorName: Map<String, DynamicFactorDef> =
         fields.map { it.key to (it as DynamicFactorDef) }.toMap()
     private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
@@ -109,7 +105,9 @@ class DynamicTopicDef(val topic: Topic) :
         val field = fields.find {
             val field = it as DynamicFactorDef
             val factor = field.factor
-            factor.factorId == propertyOrFactorName || factor.name == propertyOrFactorName
+            factor.factorId == propertyOrFactorName
+                    || factor.name == propertyOrFactorName
+                    || it.fieldName == propertyOrFactorName
         }
 
         return if (field == null) {

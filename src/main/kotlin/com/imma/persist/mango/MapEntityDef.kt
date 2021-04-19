@@ -27,8 +27,6 @@ private val createdAt = MapEntityFieldDef("_create_time", EntityFieldType.CREATE
 private val lastModifiedAt = MapEntityFieldDef("_last_modify_time", EntityFieldType.LAST_MODIFIED_AT)
 
 class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastModifiedAt)) {
-    private val collectionName = DynamicTopicUtils.toCollectionName(name)
-
     override fun toDocument(entity: Any): Document {
         if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
             throw RuntimeException("Only map is supported, but is [$entity] now.")
@@ -42,14 +40,13 @@ class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastMod
     }
 
     override fun fromDocument(doc: Document): Any {
-        return doc.toMutableMap()
+        return doc.map { (key, value) ->
+            DynamicTopicUtils.fromFieldName(key) to value
+        }.toMap().toMutableMap()
     }
 
-    /**
-     * @return parameter itself
-     */
     override fun toFieldName(propertyOrFactorName: String): String {
-        return propertyOrFactorName
+        return DynamicTopicUtils.toFieldName(propertyOrFactorName)
     }
 
     override fun isMultipleTopicsSupported(): Boolean {
