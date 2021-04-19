@@ -15,10 +15,8 @@ class ActionWorker(private val context: ActionContext) : EngineWorker() {
                 PipelineStageUnitActionType.alarm -> AlarmAction(context, logger).run()
                 PipelineStageUnitActionType.`copy-to-memory` -> CopyToMemoryAction(context, logger).run()
                 PipelineStageUnitActionType.exists -> ExistsAction(context, logger).run()
-                PipelineStageUnitActionType.`read-factor` -> {
-                }
-                PipelineStageUnitActionType.`read-row` -> {
-                }
+                PipelineStageUnitActionType.`read-factor` -> ReadFactorAction(context, logger).run()
+                PipelineStageUnitActionType.`read-row` -> ReadRowAction(context, logger).run()
                 PipelineStageUnitActionType.`write-factor` -> {
                 }
                 PipelineStageUnitActionType.`insert-row` -> {

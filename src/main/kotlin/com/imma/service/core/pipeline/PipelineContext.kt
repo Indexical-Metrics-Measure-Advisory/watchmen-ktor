@@ -22,6 +22,8 @@ class PipelineContext(val pipeline: Pipeline) : RunContext, Closeable {
         val topic = services.topic {
             findTopicById(topicId)
         } ?: throw RuntimeException("Source topic of pipeline not found.")
+        // register to persist
+        services.persist().registerDynamicTopic(topic)
 
         createPipelineTopics(topicId to topic)
     }

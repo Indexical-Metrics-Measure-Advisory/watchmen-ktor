@@ -1,5 +1,6 @@
 package com.imma.persist.mango
 
+import com.imma.model.core.Topic
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.AbstractPersistKit
@@ -39,6 +40,10 @@ class MongoPersistKit : AbstractPersistKit() {
     }
     private val mongoDatabase: MongoDatabase by lazy {
         doGetMongoDatabase()
+    }
+
+    override fun registerDynamicTopic(topic: Topic) {
+        EntityMapper.registerDynamicTopic(topic)
     }
 
     private fun createMongoClient(): MongoClient {
@@ -140,6 +145,22 @@ class MongoPersistKit : AbstractPersistKit() {
     override fun <T> findOne(where: Where, entityClass: Class<*>, entityName: String): T? {
         val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
         val docs = getMongoCollection(material).find(material.toFilter(where))
+        val first: Document? = docs.first()
+        return first?.let {
+            @Suppress("UNCHECKED_CAST")
+            material.fromDocument(first) as T
+        }
+    }
+
+    override fun <T> findOne(select: Select, where: Where, entityClass: Class<*>, entityName: String): T? {
+        val material = MapperMaterialBuilder.create().type(entityClass).name(entityName).build()
+        val docs = getMongoCollection(material).aggregate(
+            listOf(
+                material.toProjection(select),
+                material.toMatch(where),
+                material.toLimit(1)
+            )
+        )
         val first: Document? = docs.first()
         return first?.let {
             @Suppress("UNCHECKED_CAST")

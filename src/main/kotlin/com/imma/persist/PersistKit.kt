@@ -1,5 +1,6 @@
 package com.imma.persist
 
+import com.imma.model.core.Topic
 import com.imma.model.page.DataPage
 import com.imma.model.page.Pageable
 import com.imma.persist.core.Select
@@ -12,6 +13,8 @@ import java.io.Closeable
  */
 interface PersistKit : Closeable {
     fun nextSnowflakeId(): Long
+
+    fun registerDynamicTopic(topic: Topic)
 
     fun <T : Any> insertOne(one: T, entityClass: Class<*>, entityName: String): T
 
@@ -34,6 +37,8 @@ interface PersistKit : Closeable {
     fun <T> findById(id: String, entityClass: Class<*>, entityName: String): T?
 
     fun <T> findOne(where: Where, entityClass: Class<*>, entityName: String): T?
+
+    fun <T> findOne(select: Select, where: Where, entityClass: Class<*>, entityName: String): T?
 
     fun exists(where: Where, entityClass: Class<*>, entityName: String): Boolean
 
