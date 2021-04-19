@@ -6,16 +6,6 @@ import org.bson.BsonInt32
 import org.bson.Document
 import org.jetbrains.kotlin.utils.keysToMap
 
-// half year
-const val HALF_YEAR_FIRST: Int = 1
-const val HALF_YEAR_SECOND: Int = 2
-
-// quarter
-const val QUARTER_FIRST: Int = 1
-const val QUARTER_SECOND: Int = 2
-const val QUARTER_THIRD: Int = 3
-const val QUARTER_FOURTH: Int = 4
-
 data class MapperMaterial(
     val entity: Any?,
     val entityClass: Class<*>? = null,
@@ -68,8 +58,7 @@ data class MapperMaterial(
         return select.columns.map { column ->
             when (column.element) {
                 is FactorElement -> fromFactorElement(column.element, false)
-                // TODO not supported yet
-                else -> TODO()
+                else -> throw RuntimeException("Only plain factor column is supported in projection, but is [$column] now.")
             }
         }.keysToMap { BsonInt32(1) }
             .let { Document("\$project", it) }
@@ -263,6 +252,7 @@ data class MapperMaterial(
 
     private fun fromConstantElement(element: ConstantElement): String? {
         val value = element.value
+        // TODO variables in constant
         return value?.toString()
     }
 
@@ -279,10 +269,8 @@ data class MapperMaterial(
             throw RuntimeException("Unsupported topic of [$element].")
         }
 
-
         return if (def.isMultipleTopicsSupported()) {
-            // TODO not supported yet
-            TODO()
+            throw RuntimeException("Joins between multiple topics are not supported.")
         } else {
             val fieldName = toFieldName("$factorName")
             if (inExp) "\$$fieldName" else fieldName

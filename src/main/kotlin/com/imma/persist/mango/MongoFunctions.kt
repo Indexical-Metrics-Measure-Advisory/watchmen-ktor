@@ -1,5 +1,7 @@
 package com.imma.persist.mango
 
+import com.imma.model.core.*
+
 class MongoFunctions {
     @Suppress("MemberVisibilityCanBePrivate", "unused")
     companion object {

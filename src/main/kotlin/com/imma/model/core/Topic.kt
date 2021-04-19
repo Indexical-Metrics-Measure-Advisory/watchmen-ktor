@@ -80,6 +80,17 @@ enum class FactorType(val type: String) {
     array("array");
 }
 
+// half year
+const val HALF_YEAR_FIRST: Int = 1
+const val HALF_YEAR_SECOND: Int = 2
+
+// quarter
+const val QUARTER_FIRST: Int = 1
+const val QUARTER_SECOND: Int = 2
+const val QUARTER_THIRD: Int = 3
+const val QUARTER_FOURTH: Int = 4
+
+
 data class Factor(
     var factorId: String? = null,
     var name: String? = null,

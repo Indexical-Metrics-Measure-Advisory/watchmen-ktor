@@ -25,7 +25,7 @@ class ConditionBuilder(keptTopic: Topic) {
         return this.build(createWhere(joint.jointType), joint)
     }
 
-    fun toExpressionOperator(operator: ParameterExpressionOperator?): ExpressionOperator? {
+    private fun toExpressionOperator(operator: ParameterExpressionOperator?): ExpressionOperator? {
         return when (operator) {
             ParameterExpressionOperator.empty -> ExpressionOperator.empty
             ParameterExpressionOperator.`not-empty` -> ExpressionOperator.`not-empty`

@@ -2,16 +2,14 @@ package com.imma.service.core.stage
 
 import com.imma.model.core.Pipeline
 import com.imma.model.core.PipelineStage
-import com.imma.model.core.Topic
 import com.imma.service.Services
-import com.imma.service.core.EngineLogger
-import com.imma.service.core.RunContext
+import com.imma.service.core.*
 import com.imma.service.core.pipeline.PipelineContext
 
 class StageContext(
     private val pipelineContext: PipelineContext,
     val stage: PipelineStage,
-    val sourceData: Map<String, Any>
+    val sourceData: PipelineSourceData
 ) : RunContext {
     val instanceId: String
         get() {
@@ -22,11 +20,11 @@ class StageContext(
             return pipelineContext.pipeline
         }
 
-    val topics: MutableMap<String, Topic>
+    val topics: PipelineTopics
         get() {
             return pipelineContext.topics
         }
-    val variables: MutableMap<String, Any?> by lazy { mutableMapOf() }
+    val variables: PipelineVariables by lazy { createPipelineVariables() }
 
     val services: Services
         get() {

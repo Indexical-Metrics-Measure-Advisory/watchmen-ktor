@@ -2,6 +2,7 @@ package com.imma.service.core.stage
 
 import com.imma.model.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.EngineWorker
+import com.imma.service.core.createPipelineVariables
 import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ConditionWorker
 import com.imma.service.core.unit.UnitContext
@@ -18,7 +19,8 @@ class StageWorker(private val context: StageContext) : EngineWorker() {
             }
 
             val joint = takeAsParameterJointOrThrow(stage.on)
-            ConditionWorker(pipeline, topics, sourceData, mutableMapOf()).computeJoint(joint)
+            // variables is not shared between stages
+            ConditionWorker(pipeline, topics, sourceData, createPipelineVariables()).computeJoint(joint)
         }
     }
 

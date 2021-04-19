@@ -3,7 +3,7 @@ package com.imma.service.core.parameter
 import com.imma.model.compute.*
 import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
-import com.imma.service.core.RunContext
+import com.imma.service.core.*
 import java.time.chrono.ChronoLocalDate
 import java.time.chrono.ChronoLocalDateTime
 import java.util.*
@@ -18,9 +18,9 @@ import java.util.*
  */
 class ConditionWorker(
     private val pipeline: Pipeline,
-    private val topics: MutableMap<String, Topic>,
-    private val sourceData: Map<String, Any>,
-    private val variables: MutableMap<String, Any?> = mutableMapOf()
+    private val topics: PipelineTopics,
+    private val sourceData: PipelineSourceData,
+    private val variables: PipelineVariables = createPipelineVariables()
 ) : RunContext {
     private val parameterWorker: ParameterWorker by lazy { ParameterWorker(pipeline, topics, sourceData, variables) }
 

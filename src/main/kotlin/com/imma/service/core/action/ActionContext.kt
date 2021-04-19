@@ -2,8 +2,7 @@ package com.imma.service.core.action
 
 import com.imma.model.core.*
 import com.imma.service.Services
-import com.imma.service.core.EngineLogger
-import com.imma.service.core.RunContext
+import com.imma.service.core.*
 import com.imma.service.core.unit.UnitContext
 
 class ActionContext(private val unitContext: UnitContext, val action: PipelineStageUnitAction) : RunContext {
@@ -24,15 +23,15 @@ class ActionContext(private val unitContext: UnitContext, val action: PipelineSt
             return unitContext.unit
         }
 
-    val topics: MutableMap<String, Topic>
+    val topics: PipelineTopics
         get() {
             return unitContext.topics
         }
-    val sourceData: Map<String, Any>
+    val sourceData: PipelineSourceData
         get() {
             return unitContext.sourceData
         }
-    val variables: MutableMap<String, Any?>
+    val variables: PipelineVariables
         get() {
             return unitContext.variables
         }

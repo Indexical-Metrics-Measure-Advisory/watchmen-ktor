@@ -2,7 +2,9 @@ package com.imma.service.core.pipeline
 
 import com.imma.model.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.EngineWorker
+import com.imma.service.core.PipelineSourceData
 import com.imma.service.core.TriggerData
+import com.imma.service.core.createPipelineVariables
 import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ConditionWorker
 import com.imma.service.core.stage.StageContext
@@ -11,7 +13,7 @@ import com.imma.service.core.stage.StageWorker
 class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
     private val logger: PipelineLogger by lazy { PipelineLogger(context) }
 
-    private fun shouldRun(sourceData: Map<String, Any>): Boolean {
+    private fun shouldRun(sourceData: PipelineSourceData): Boolean {
         return context.run {
             if (!pipeline.conditional || pipeline.on.isNullOrEmpty()) {
                 // no condition, run it
@@ -19,7 +21,8 @@ class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
             }
 
             val joint = takeAsParameterJointOrThrow(pipeline.on)
-            ConditionWorker(pipeline, topics, sourceData, mutableMapOf()).computeJoint(joint)
+            // no variables in pipeline prerequisite
+            ConditionWorker(pipeline, topics, sourceData, createPipelineVariables()).computeJoint(joint)
         }
     }
 
@@ -47,6 +50,10 @@ class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
             try {
                 when {
                     !validated -> logger.ignore("Pipeline is invalidated.", RunType.invalidate)
+                    topicId.isNullOrBlank() -> logger.ignore(
+                        "Pipeline is invalidated because of source topic is not given.",
+                        RunType.invalidate
+                    )
                     !enabled -> logger.ignore("Pipeline is not enabled.", RunType.disable)
                     else -> doRun(data)
                 }
