@@ -2,8 +2,8 @@ package com.imma.persist.mango
 
 import com.imma.persist.DynamicTopicUtils
 import com.imma.utils.getCurrentDateTime
+import com.imma.utils.nothing
 import org.bson.Document
-import org.jetbrains.kotlin.utils.doNothing
 
 enum class EntityFieldType {
     ID, CREATED_AT, LAST_MODIFIED_AT, REGULAR
@@ -21,7 +21,7 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
             when {
                 it == 0 -> throw RuntimeException("Id field not defined.")
                 it > 1 -> throw RuntimeException("One and only one id field for an entity, current $it found.")
-                else -> doNothing()
+                else -> nothing()
             }
         }
         fields.filter { it.type == EntityFieldType.CREATED_AT }.size.let {

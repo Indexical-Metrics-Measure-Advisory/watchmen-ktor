@@ -4,7 +4,6 @@ import com.imma.persist.core.*
 import com.imma.utils.neverOccur
 import org.bson.BsonInt32
 import org.bson.Document
-import org.jetbrains.kotlin.utils.keysToMap
 
 data class MapperMaterial(
     val entity: Any?,
@@ -61,11 +60,14 @@ data class MapperMaterial(
     fun toProjection(select: Select): Document {
         return select.columns.map { column ->
             when (column.element) {
-                is FactorElement -> fromFactorElement(column.element, false)
+                is FactorElement -> fromFactorElement(column.element, ElementShouldBe.any, false)
                 else -> throw RuntimeException("Only plain factor column is supported in projection, but is [$column] now.")
             }
-        }.keysToMap { BsonInt32(1) }
-            .let { Document("\$project", it) }
+        }.map {
+            it to BsonInt32(1)
+        }.toMap().let {
+            Document("\$project", it)
+        }
     }
 
     fun toUpdates(updates: Updates): List<Document> {
@@ -138,8 +140,18 @@ data class MapperMaterial(
         val operator = exp.operator ?: throw RuntimeException("Operator of [$exp] cannot be null.")
 
         return when {
-            operator == ExpressionOperator.empty -> mapOf("\$eq" to listOf(fromElement(left), null))
-            operator == ExpressionOperator.`not-empty` -> mapOf("\$ne" to listOf(fromElement(left), null))
+            operator == ExpressionOperator.empty -> mapOf(
+                "\$eq" to listOf(
+                    fromElement(left, ElementShouldBe.any),
+                    null
+                )
+            )
+            operator == ExpressionOperator.`not-empty` -> mapOf(
+                "\$ne" to listOf(
+                    fromElement(left, ElementShouldBe.any),
+                    null
+                )
+            )
             exp.right == null -> throw RuntimeException("Right of [$exp] cannot be null when operator is neither empty nor not-empty.")
             else -> fromBalancedExpression(exp)
         }
@@ -169,11 +181,11 @@ data class MapperMaterial(
         return mapOf(sign to listOf(fromElement(exp.left!!), fromElement(exp.right!!)))
     }
 
-    private fun fromElement(element: Element): Any? {
+    private fun fromElement(element: Element, shouldBe: ElementShouldBe): Any? {
         return when (element) {
-            is FactorElement -> fromFactorElement(element)
-            is ConstantElement -> fromConstantElement(element)
-            is ComputedElement -> fromComputedElement(element)
+            is FactorElement -> fromFactorElement(element, shouldBe)
+            is ConstantElement -> fromConstantElement(element, shouldBe)
+            is ComputedElement -> fromComputedElement(element, shouldBe)
             else -> throw RuntimeException("Unsupported [$element] in balanced expression.")
         }
     }
@@ -219,7 +231,7 @@ data class MapperMaterial(
         }
     }
 
-    private fun fromComputedElement(element: ComputedElement): Any {
+    private fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): Any {
         val operator = element.operator ?: throw RuntimeException("Operator of [$element] cannot be null.")
         val elements = element.elements.also {
             if (it.size == 0) throw RuntimeException("Elements of [$element] cannot be null.")
@@ -227,43 +239,57 @@ data class MapperMaterial(
         this.checkElements(element)
 
         return when (operator) {
-            ElementComputeOperator.add -> MF.add(elements.map { fromElement(it) })
-            ElementComputeOperator.subtract -> MF.subtract(elements.map { fromElement(it) })
-            ElementComputeOperator.multiply -> MF.multiply(elements.map { fromElement(it) })
-            ElementComputeOperator.divide -> MF.divide(elements.map { fromElement(it) })
-            ElementComputeOperator.modulus -> MF.mod(fromElement(elements[0]), fromElement(elements[1]))
-            ElementComputeOperator.`year-of` -> MF.year(fromElement(elements[0]))
-            ElementComputeOperator.`half-year-of` -> MF.halfYear(elements[0])
-            ElementComputeOperator.`quarter-of` -> MF.quarter(elements[0])
-            ElementComputeOperator.`month-of` -> MF.month(fromElement(elements[0]))
-            ElementComputeOperator.`week-of-year` -> MF.weekOfYear(fromElement(elements[0]))
-            ElementComputeOperator.`week-of-month` -> MF.weekOfMonth(fromElement(elements[0]))
-            ElementComputeOperator.`day-of-month` -> MF.dayOfMonth(fromElement(elements[0]))
-            ElementComputeOperator.`day-of-week` -> MF.dayOfWeek(fromElement(elements[0]))
-            ElementComputeOperator.`case-then` -> toCaseThenMatcher(elements)
+            ElementComputeOperator.add -> MF.add(elements.map { fromElement(it, ElementShouldBe.numeric) })
+            ElementComputeOperator.subtract -> MF.subtract(elements.map { fromElement(it, ElementShouldBe.numeric) })
+            ElementComputeOperator.multiply -> MF.multiply(elements.map { fromElement(it, ElementShouldBe.numeric) })
+            ElementComputeOperator.divide -> MF.divide(elements.map { fromElement(it, ElementShouldBe.numeric) })
+            ElementComputeOperator.modulus -> MF.mod(
+                fromElement(elements[0], ElementShouldBe.numeric),
+                fromElement(elements[1], ElementShouldBe.numeric)
+            )
+            ElementComputeOperator.`year-of` -> MF.year(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`half-year-of` -> MF.halfYear(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`quarter-of` -> MF.quarter(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`month-of` -> MF.month(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`week-of-year` -> MF.weekOfYear(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`week-of-month` -> MF.weekOfMonth(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`day-of-month` -> MF.dayOfMonth(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`day-of-week` -> MF.dayOfWeek(fromElement(elements[0], ElementShouldBe.date))
+            ElementComputeOperator.`case-then` -> toCaseThenMatcher(elements, shouldBe)
         }
     }
 
-    private fun toCaseThenMatcher(elements: MutableList<Element>): Map<String, Map<String, Any?>> {
+    private fun toCaseThenMatcher(
+        elements: MutableList<Element>,
+        shouldBe: ElementShouldBe
+    ): Map<String, Map<String, Any?>> {
         val caseElements = elements.filter { it.joint != null }
-        val firstThen = MF.case(MF.equal(fromJoint(elements[0].joint!!), true)).then(fromElement(elements[0]))
+        val firstThen = MF.case(MF.equal(fromJoint(elements[0].joint!!), true)).then(fromElement(elements[0], shouldBe))
         val cases = caseElements.filterIndexed { index, _ -> index != 0 }.fold(firstThen) { previousThen, element ->
-            previousThen.case(MF.equal(fromJoint(element.joint!!), true)).then(fromElement(element))
+            previousThen.case(MF.equal(fromJoint(element.joint!!), true)).then(fromElement(element, shouldBe))
         }
         // append default() to $switch when anyway element exists, otherwise finish it by done()
-        return elements.find { it.joint == null }?.let { cases.default(fromElement(it)) } ?: cases.done()
+        return elements.find { it.joint == null }?.let { cases.default(fromElement(it, shouldBe)) } ?: cases.done()
     }
 
-    private fun fromConstantElement(element: ConstantElement): String? {
-        val value = element.value
-        // TODO variables in constant
-        return value?.toString()
+    private fun fromConstantElement(element: ConstantElement, shouldBe: ElementShouldBe): String? {
+        val value = element.value?.toString()
+
+        return when {
+            value == null -> null
+            value.isEmpty() && shouldBe == ElementShouldBe.any -> ""
+            value.isEmpty() -> null
+            value.isBlank() && shouldBe == ElementShouldBe.any -> value
+            value.isBlank() -> null
+            // TODO variables in constant
+//            else -> ParameterUtils.computeConstant(value, parameter, shouldBe) { computeVariable(it, parameter) }
+        }
     }
 
     /**
      * topic name must same as entity name, which means only single collection operation is supported
      */
-    private fun fromFactorElement(element: FactorElement, inExp: Boolean = true): String {
+    private fun fromFactorElement(element: FactorElement, shouldBe: ElementShouldBe, inExp: Boolean = true): String {
         val topicName = element.topicName
         val factorName = element.factorName
 

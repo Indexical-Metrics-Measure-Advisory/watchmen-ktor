@@ -1,7 +1,7 @@
 package com.imma.persist.mango
 
 import com.imma.model.core.Topic
-import org.jetbrains.kotlin.utils.doNothing
+import com.imma.utils.nothing
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
@@ -37,7 +37,7 @@ class EntityMapper {
                 // existing is before given, replace existing
                 existsDef.topic.lastModifyTime!!.before(topic.lastModifyTime) -> replace()
                 // existing is after given, keep it
-                else -> doNothing()
+                else -> nothing()
             }
 
             return existsDef

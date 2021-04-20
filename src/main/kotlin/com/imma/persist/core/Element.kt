@@ -47,3 +47,11 @@ class ComputedElement : Element() {
         return "ComputedElement(operator=$operator, elements=$elements) ${super.toString()}"
     }
 }
+
+@Suppress("EnumEntryName")
+enum class ElementShouldBe {
+    any,
+    numeric,
+    date,
+    collection
+}

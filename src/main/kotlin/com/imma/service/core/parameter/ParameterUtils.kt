@@ -4,7 +4,7 @@ import com.imma.model.compute.*
 import com.imma.model.core.Factor
 import com.imma.model.core.Topic
 import com.imma.service.core.PipelineTopics
-import org.jetbrains.kotlin.utils.doNothing
+import com.imma.utils.nothing
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -41,7 +41,7 @@ class ParameterUtils {
 
         fun checkSubParameters(parameter: ComputedParameter) {
             when (parameter.type) {
-                ParameterComputeType.none -> doNothing()
+                ParameterComputeType.none -> nothing()
                 ParameterComputeType.add -> checkMinSubParameterCount(parameter, 2)
                 ParameterComputeType.subtract -> checkMinSubParameterCount(parameter, 2)
                 ParameterComputeType.multiply -> checkMinSubParameterCount(parameter, 2)
@@ -71,12 +71,12 @@ class ParameterUtils {
             val type = parameter.type
 
             when {
-                type == ParameterComputeType.none -> doNothing()
-                type == ParameterComputeType.`case-then` -> doNothing()
-                shouldBe == ParameterShouldBe.any -> doNothing()
+                type == ParameterComputeType.none -> nothing()
+                type == ParameterComputeType.`case-then` -> nothing()
+                shouldBe == ParameterShouldBe.any -> nothing()
                 // cannot get date by computing except case-then
                 shouldBe == ParameterShouldBe.date -> throw RuntimeException("Cannot get date result on parameter[$parameter].")
-                shouldBe == ParameterShouldBe.numeric -> doNothing()
+                shouldBe == ParameterShouldBe.numeric -> nothing()
                 // cannot get collection by computing except case-then
                 shouldBe == ParameterShouldBe.collection -> throw RuntimeException("Cannot get collection result on parameter[$parameter].")
             }
