@@ -105,7 +105,7 @@ class ParameterUtils {
             return FoundFactor(topic, factor)
         }
 
-        private fun removeIrrelevantCharsFromDateString(date: String): String {
+        fun removeIrrelevantCharsFromDateString(date: String): String {
             return date.split("").filter {
                 it != " " && it != "-" && it != "/" && it != ":"
             }.joinToString(separator = "")
@@ -120,17 +120,20 @@ class ParameterUtils {
         }
 
         private fun computeToDate(date: String?, parameter: Parameter): LocalDate? {
+            val length = date?.length ?: 0
             return when {
                 date.isNullOrBlank() -> null
                 // format is yyyyMMdd
-                date.length == 8 -> computeToDate(date, "yyyyMMdd")
+                length == 8 -> computeToDate(date, "yyyyMMdd")
                 // format is yyyy/MM/dd, yyyy-MM-dd
-                date.length == 10 -> computeToDate(date, "yyyyMMdd", true)
+                length == 10 -> computeToDate(date, "yyyyMMdd", true)
                 // format is yyyyMMddHHmmss
-                date.length == 14 -> computeToDate(date.substring(0, 8), "yyyyMMddHHmmss")
+                length == 14 -> computeToDate(date.substring(0, 8), "yyyyMMddHHmmss")
+                // format is yyyyMMdd HHmmss
+                length == 15 -> computeToDate(date.substring(0, 8), "yyyyMMdd HHmmss")
                 // date format is yyyy/MM/dd, yyyy-MM-dd
                 // time format is HH:mm:ss
-                date.length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMddHHmmss", true)
+                length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMddHHmmss", true)
                 else -> throw RuntimeException("Cannot cast given value[$date] to date, which is computed by parameter[$parameter].")
             }
         }

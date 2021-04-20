@@ -3,6 +3,14 @@ package com.imma.service.core.parameter
 import com.imma.model.compute.*
 import com.imma.model.core.Pipeline
 import com.imma.service.core.*
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 /**
  * condition worker for workout a boolean value.
@@ -28,15 +36,79 @@ class ConditionWorker(
         return value == null || (value is String && value.isEmpty())
     }
 
+    private fun eqWhenOneNumberAtLeast(value1: Any, value2: Any): Boolean {
+        return when {
+            value1 is Number -> when (value2) {
+                is Number -> value1.toDouble() == value2.toDouble()
+                is BigDecimal -> value1.toDouble() == value2.toDouble()
+                is BigInteger -> value1.toDouble() == value2.toDouble()
+                is String -> value1.toDouble() == BigDecimal(value2).toDouble()
+                else -> value1.toDouble() == BigDecimal(value2.toString()).toDouble()
+            }
+            value2 is Number -> eqWhenOneNumberAtLeast(value2, value1)
+            else -> false
+        }
+    }
+
+    private fun eqWhenOneDateAtLeast(value1: Any, value2: Any): Boolean {
+        return when {
+            value1 is Date -> when (value2) {
+                // compare date only on Date vs String
+                is String -> {
+                    if (value2.length >= 8) {
+                        val date1 = DateTimeFormatter.ofPattern("yyyyMMdd").format(value1.toInstant())
+                        // remove all irrelevant chars and use first 8 chars
+                        date1 == ParameterUtils.removeIrrelevantCharsFromDateString(value2).substring(0, 8)
+                    } else {
+                        false
+                    }
+                }
+                // compare date only on Date vs LocalDate
+                is LocalDate -> {
+                    val date1 = value1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                    date1 == value2
+                }
+                // compare all fields until second on Date vs LocalDateTime
+                is LocalDateTime -> {
+                    val date1 = value1.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                        .truncatedTo(ChronoUnit.SECONDS)
+                    date1 == value2.truncatedTo(ChronoUnit.SECONDS)
+                }
+                // compare all fields until second on Date vs LocalDateTime
+                is Date -> {
+                    val date1 = with(Calendar.getInstance()) {
+                        time = value1
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val date2 = with(Calendar.getInstance()) {
+                        time = value2
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    date1 == date2
+                }
+                else -> false
+            }
+            value1 is LocalDate -> value2.let {
+                val date1 = Date.from(value1.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+                eqWhenOneDateAtLeast(date1, it)
+            }
+            value1 is LocalDateTime -> eqWhenOneDateAtLeast(value1.atZone(ZoneId.systemDefault()).toInstant(), value2)
+            value2 is Date -> eqWhenOneDateAtLeast(value2, value1)
+            value2 is LocalDate -> eqWhenOneDateAtLeast(value2, value1)
+            value2 is LocalDateTime -> eqWhenOneDateAtLeast(value2, value1)
+            else -> false
+        }
+    }
+
     private fun eq(value1: Any?, value2: Any?): Boolean {
         return when {
             value1 == null -> value2 == null
             value2 == null -> false
             value1 == value2 -> true
             value1.toString() == value2.toString() -> true
-            else -> {
-                TODO()
-            }
+            eqWhenOneNumberAtLeast(value1, value2) -> true
+            eqWhenOneDateAtLeast(value1, value2) -> true
+            else -> false
         }
     }
 
