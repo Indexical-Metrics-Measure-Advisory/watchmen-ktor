@@ -31,7 +31,7 @@ abstract class AbstractTopicAction(private val context: ActionContext, private v
         return with(context) {
             val topicId = action["topicId"]?.toString()
             if (topicId.isNullOrBlank()) {
-                throw RuntimeException("Topic Id of action cannot be null or empty.")
+                throw RuntimeException("Topic id of action cannot be null or empty.")
             }
 
 
@@ -51,7 +51,7 @@ abstract class AbstractTopicAction(private val context: ActionContext, private v
         return with(context) {
             val factorId = action["factorId"]?.toString()
             if (factorId.isNullOrBlank()) {
-                throw RuntimeException("Factor Id of action cannot be null or empty.")
+                throw RuntimeException("Factor id of action cannot be null or empty.")
             }
 
             topic.factors.find { it.factorId == factorId }

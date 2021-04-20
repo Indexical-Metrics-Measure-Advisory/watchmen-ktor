@@ -83,11 +83,11 @@ private fun takeIfIsTopicFactor(map: Map<*, *>): TopicFactorParameter? {
         val (conditional, on: ParameterJoint?) = takeIfConditional(map)
         val topicId = map["topicId"]?.toString()
         if (topicId.isNullOrBlank()) {
-            throw RuntimeException("Topic Id of topic/factor parameter cannot be null or blank.")
+            throw RuntimeException("Topic id of topic/factor parameter cannot be null or blank.")
         }
         val factorId = map["factorId"]?.toString()
         if (factorId.isNullOrBlank()) {
-            throw RuntimeException("Factor Id of topic/factor parameter cannot be null or blank.")
+            throw RuntimeException("Factor id of topic/factor parameter cannot be null or blank.")
         }
 
         TopicFactorParameter(topicId, factorId, conditional, on)

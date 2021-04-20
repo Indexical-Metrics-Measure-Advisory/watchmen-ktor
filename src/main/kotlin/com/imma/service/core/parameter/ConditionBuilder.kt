@@ -58,9 +58,9 @@ class ConditionBuilder(
             when (filter) {
                 is ParameterJoint -> this.build(joint)
                 is ParameterExpression -> Expression().apply {
-                    left = parameterBuilder.build(filter.left)
+                    left = parameterBuilder.buildParameter(filter.left)
                     operator = toExpressionOperator(filter.operator)
-                    right = filter.right?.let { parameterBuilder.build(it) }
+                    right = filter.right?.let { parameterBuilder.buildParameter(it) }
                 }
                 else -> throw RuntimeException("Unsupported filter[$filter].")
             }

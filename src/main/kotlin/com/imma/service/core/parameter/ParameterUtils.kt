@@ -1,8 +1,17 @@
 package com.imma.service.core.parameter
 
-import com.imma.model.compute.ComputedParameter
-import com.imma.model.compute.ParameterComputeType
+import com.imma.model.compute.*
+import com.imma.model.core.Factor
+import com.imma.model.core.Topic
+import com.imma.service.core.PipelineTopics
 import org.jetbrains.kotlin.utils.doNothing
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 @Suppress("EnumEntryName")
 enum class ParameterShouldBe {
@@ -11,6 +20,8 @@ enum class ParameterShouldBe {
     date,
     collection
 }
+
+data class FoundFactor(val topic: Topic, val factor: Factor)
 
 class ParameterUtils {
     companion object {
@@ -68,6 +79,158 @@ class ParameterUtils {
                 shouldBe == ParameterShouldBe.numeric -> doNothing()
                 // cannot get collection by computing except case-then
                 shouldBe == ParameterShouldBe.collection -> throw RuntimeException("Cannot get collection result on parameter[$parameter].")
+            }
+        }
+
+        fun readTopicFactorParameter(
+            parameter: TopicFactorParameter,
+            topics: PipelineTopics,
+            validOrThrow: (topicId: String) -> Unit
+        ): FoundFactor {
+            val topicId = parameter.topicId
+            if (topicId.isBlank()) {
+                throw RuntimeException("Topic id of parameter[$parameter] cannot be blank.")
+            }
+            validOrThrow(topicId)
+            val topic = topics[topicId]
+                ?: throw RuntimeException("Topic[$topicId] of parameter[$parameter] not found.")
+
+            val factorId = parameter.factorId
+            if (factorId.isBlank()) {
+                throw RuntimeException("Factor id of parameter[$parameter] cannot be blank.")
+            }
+            val factor = topic.factors.find { it.factorId == factorId }
+                ?: throw RuntimeException("Factor[$factorId] of parameter[$parameter] not found.")
+
+            return FoundFactor(topic, factor)
+        }
+
+        private fun removeIrrelevantCharsFromDateString(date: String): String {
+            return date.split("").filter {
+                it != " " && it != "-" && it != "/" && it != ":"
+            }.joinToString(separator = "")
+        }
+
+        private fun computeToDate(date: String, pattern: String, removeIrrelevantChars: Boolean = false): LocalDate {
+            return if (removeIrrelevantChars) {
+                LocalDate.parse(removeIrrelevantCharsFromDateString(date), DateTimeFormatter.ofPattern(pattern))
+            } else {
+                LocalDate.parse(date, DateTimeFormatter.ofPattern(pattern))
+            }
+        }
+
+        private fun computeToDate(date: String?, parameter: Parameter): LocalDate? {
+            return when {
+                date.isNullOrBlank() -> null
+                // format is yyyyMMdd
+                date.length == 8 -> computeToDate(date, "yyyyMMdd")
+                // format is yyyy/MM/dd, yyyy-MM-dd
+                date.length == 10 -> computeToDate(date, "yyyyMMdd", true)
+                // format is yyyyMMddHHmmss
+                date.length == 14 -> computeToDate(date.substring(0, 8), "yyyyMMddHHmmss")
+                // date format is yyyy/MM/dd, yyyy-MM-dd
+                // time format is HH:mm:ss
+                date.length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMddHHmmss", true)
+                else -> throw RuntimeException("Cannot cast given value[$date] to date, which is computed by parameter[$parameter].")
+            }
+        }
+
+        fun computeToDate(date: Any?, parameter: Parameter): LocalDate? {
+            return when (date) {
+                null -> null
+                is Date -> date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                is LocalDate -> date
+                is LocalDateTime -> date.toLocalDate()
+                is String -> computeToDate(date, parameter)
+                else -> throw RuntimeException("Cannot cast given value to date[$date], which is computed by parameter[$parameter].")
+            }
+        }
+
+        fun computeToNumeric(value: Any?, parameter: Parameter): BigDecimal? {
+            return if (value == null) {
+                value
+            } else {
+                try {
+                    when (value) {
+                        is BigDecimal -> value
+                        is BigInteger -> BigDecimal(value)
+                        is Int -> BigDecimal(value)
+                        is Long -> BigDecimal(value)
+                        else -> BigDecimal(value.toString())
+                    }
+                } catch (t: Throwable) {
+                    throw RuntimeException("Cannot cast given value[$value] to numeric, which is retrieved by parameter[$parameter].")
+                }
+            }
+        }
+
+        fun computeToCollection(value: Any?, parameter: Parameter): List<Any?> {
+            return when (value) {
+                null -> listOf()
+                is List<*> -> value
+                is Array<*> -> value.toList()
+                is String -> value.split(",")
+                else -> throw RuntimeException("Cannot cast given value to list[$value], which is computed by parameter[$parameter].")
+            }
+        }
+
+        fun computeVariable(
+            variable: String,
+            parameter: ConstantParameter,
+            getValue: (propertyName: String) -> Any?
+        ): Any? {
+            if (variable.isBlank()) {
+                return null
+            }
+
+            var value: Any? = null
+            val parts = variable.split(".")
+            for ((index, part) in parts.withIndex()) {
+                value = when {
+                    index == 0 -> getValue(part)
+                    value == null -> null
+                    value is Map<*, Any?> -> value[part]
+                    else -> throw RuntimeException("Cannot retrieve value of variable[$variable], which is defined by parameter[$parameter].")
+                }
+            }
+
+            return value
+        }
+
+        fun computeConstant(
+            value: String,
+            parameter: ConstantParameter,
+            shouldBe: ParameterShouldBe,
+            computeVariable: (variable: String) -> Any?
+        ): Any? {
+            @Suppress("RegExpRedundantEscape")
+            val regexp = "([^\\{]*(\\{[^\\}]+\\})?)".toRegex()
+            val values = regexp.findAll(value).map { segment ->
+                val text = segment.value
+                when (val braceStartIndex = text.indexOf("{")) {
+                    -1 -> text
+                    0 -> {
+                        val variable = text.substring(1, text.length - 1).trim()
+                        computeVariable(variable)
+                    }
+                    else -> {
+                        val prefix = text.substring(0, braceStartIndex)
+                        val variable = text.substring(1, text.length - 1).trim()
+                        "$prefix${computeVariable(variable) ?: ""}"
+                    }
+                }
+            }.toList()
+
+            val v = if (values.size == 1) {
+                values[0]
+            } else {
+                values.filterNotNull().joinToString("")
+            }
+            return when (shouldBe) {
+                ParameterShouldBe.any -> v
+                ParameterShouldBe.numeric -> computeToNumeric(v, parameter)
+                ParameterShouldBe.date -> computeToDate(v, parameter)
+                ParameterShouldBe.collection -> computeToCollection(v, parameter)
             }
         }
     }
