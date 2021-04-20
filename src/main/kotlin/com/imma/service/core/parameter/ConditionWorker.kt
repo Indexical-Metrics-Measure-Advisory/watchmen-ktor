@@ -12,6 +12,49 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
+private typealias CompareFunc = (value1: Any?, value2: Any?) -> Boolean
+private typealias CompareFuncPair = Pair<CompareFunc, CompareFunc>
+
+private val eqeq: CompareFunc = { value1, value2 -> value1 == value2 }
+private val eqeqs: CompareFuncPair = eqeq to eqeq
+
+private fun toDate(localDate: LocalDate): Date {
+    return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+}
+
+private fun toDate(localDateTime: LocalDateTime): Date {
+    return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant())
+}
+
+private fun toLocalDate(date: Date): LocalDate {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+}
+
+private fun toLocalDateTime(date: Date): LocalDateTime {
+    return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+}
+
+@Suppress("SameParameterValue")
+private fun format(date: Date, pattern: String): String {
+    return DateTimeFormatter.ofPattern(pattern).format(date.toInstant())
+}
+
+private fun toSeconds(date: Date): Date {
+    return Calendar.getInstance().run {
+        time = date
+        set(Calendar.MILLISECOND, 0)
+        time
+    }
+}
+
+private fun toSeconds(localDateTime: LocalDateTime): LocalDateTime {
+    return localDateTime.truncatedTo(ChronoUnit.SECONDS)
+}
+
+private fun purifyYMD(date: String): String {
+    return ParameterUtils.removeIrrelevantCharsFromDateString(date).substring(0, 8)
+}
+
 /**
  * condition worker for workout a boolean value.
  * which means:
@@ -36,66 +79,52 @@ class ConditionWorker(
         return value == null || (value is String && value.isEmpty())
     }
 
-    private fun eqWhenOneNumberAtLeast(value1: Any, value2: Any): Boolean {
+    private fun compareWhenOneNumberAtLeast(value1: Any, value2: Any, functions: CompareFuncPair): Boolean {
         return when {
             value1 is Number -> when (value2) {
-                is Number -> value1.toDouble() == value2.toDouble()
-                is BigDecimal -> value1.toDouble() == value2.toDouble()
-                is BigInteger -> value1.toDouble() == value2.toDouble()
-                is String -> value1.toDouble() == BigDecimal(value2).toDouble()
-                else -> value1.toDouble() == BigDecimal(value2.toString()).toDouble()
+                is Number -> functions.first(value1.toDouble(), value2.toDouble())
+                is BigDecimal -> functions.first(value1.toDouble(), value2.toDouble())
+                is BigInteger -> functions.first(value1.toDouble(), value2.toDouble())
+                is String -> functions.first(value1.toDouble(), BigDecimal(value2).toDouble())
+                else -> functions.first(value1.toDouble(), BigDecimal(value2.toString()).toDouble())
             }
-            value2 is Number -> eqWhenOneNumberAtLeast(value2, value1)
+            value1 is BigDecimal -> when (value2) {
+                is Number -> functions.first(value1.toDouble(), value2.toDouble())
+                is BigDecimal -> functions.first(value1, value2)
+                is BigInteger -> functions.first(value1, BigDecimal(value2))
+                is String -> functions.first(value1, BigDecimal(value2))
+                else -> functions.first(value1, BigDecimal(value2.toString()))
+            }
+            value1 is BigInteger -> when (value2) {
+                is Number -> functions.first(value1.toDouble(), value2.toDouble())
+                is BigDecimal -> functions.first(BigDecimal(value1), value2)
+                is BigInteger -> functions.first(value1, value2)
+                is String -> functions.first(BigDecimal(value1), BigDecimal(value2))
+                else -> functions.first(BigDecimal(value1), BigDecimal(value2.toString()))
+            }
+            value2 is Number -> compareWhenOneNumberAtLeast(value2, value1, functions.second to functions.first)
             else -> false
         }
     }
 
-    private fun eqWhenOneDateAtLeast(value1: Any, value2: Any): Boolean {
+    private fun compareWhenOneDateAtLeast(value1: Any, value2: Any, functions: CompareFuncPair): Boolean {
         return when {
             value1 is Date -> when (value2) {
                 // compare date only on Date vs String
-                is String -> {
-                    if (value2.length >= 8) {
-                        val date1 = DateTimeFormatter.ofPattern("yyyyMMdd").format(value1.toInstant())
-                        // remove all irrelevant chars and use first 8 chars
-                        date1 == ParameterUtils.removeIrrelevantCharsFromDateString(value2).substring(0, 8)
-                    } else {
-                        false
-                    }
-                }
+                is String -> value2.length >= 8 && functions.first(format(value1, "yyyyMMdd"), purifyYMD(value2))
                 // compare date only on Date vs LocalDate
-                is LocalDate -> {
-                    val date1 = value1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-                    date1 == value2
-                }
+                is LocalDate -> functions.first(toLocalDate(value1), value2)
                 // compare all fields until second on Date vs LocalDateTime
-                is LocalDateTime -> {
-                    val date1 = value1.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-                        .truncatedTo(ChronoUnit.SECONDS)
-                    date1 == value2.truncatedTo(ChronoUnit.SECONDS)
-                }
+                is LocalDateTime -> functions.first(toSeconds(toLocalDateTime(value1)), toSeconds(value2))
                 // compare all fields until second on Date vs LocalDateTime
-                is Date -> {
-                    val date1 = with(Calendar.getInstance()) {
-                        time = value1
-                        set(Calendar.MILLISECOND, 0)
-                    }
-                    val date2 = with(Calendar.getInstance()) {
-                        time = value2
-                        set(Calendar.MILLISECOND, 0)
-                    }
-                    date1 == date2
-                }
+                is Date -> functions.first(toSeconds(value1), toSeconds(value2))
                 else -> false
             }
-            value1 is LocalDate -> value2.let {
-                val date1 = Date.from(value1.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
-                eqWhenOneDateAtLeast(date1, it)
-            }
-            value1 is LocalDateTime -> eqWhenOneDateAtLeast(value1.atZone(ZoneId.systemDefault()).toInstant(), value2)
-            value2 is Date -> eqWhenOneDateAtLeast(value2, value1)
-            value2 is LocalDate -> eqWhenOneDateAtLeast(value2, value1)
-            value2 is LocalDateTime -> eqWhenOneDateAtLeast(value2, value1)
+            value1 is LocalDate -> compareWhenOneDateAtLeast(toDate(value1), value2, functions)
+            value1 is LocalDateTime -> compareWhenOneDateAtLeast(toDate(value1), value2, functions)
+            value2 is Date -> compareWhenOneDateAtLeast(value2, value1, functions.second to functions.first)
+            value2 is LocalDate -> compareWhenOneDateAtLeast(value2, value1, functions.second to functions.first)
+            value2 is LocalDateTime -> compareWhenOneDateAtLeast(value2, value1, functions.second to functions.first)
             else -> false
         }
     }
@@ -105,9 +134,9 @@ class ConditionWorker(
             value1 == null -> value2 == null
             value2 == null -> false
             value1 == value2 -> true
-            value1.toString() == value2.toString() -> true
-            eqWhenOneNumberAtLeast(value1, value2) -> true
-            eqWhenOneDateAtLeast(value1, value2) -> true
+            eqeq(value1.toString(), value2.toString()) -> true
+            compareWhenOneNumberAtLeast(value1, value2, eqeqs) -> true
+            compareWhenOneDateAtLeast(value1, value2, eqeqs) -> true
             else -> false
         }
     }
