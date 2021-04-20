@@ -43,7 +43,7 @@ private fun String.toCamelCase(): String {
 class DynamicTopicUtils {
     companion object {
         /**
-         * replace blank and dash to underline, convert to snake case
+         * replace blank, strikethrough to underline, convert to snake case
          */
         fun toCollectionName(topicName: String): String {
             return topicName.trim {
@@ -52,7 +52,7 @@ class DynamicTopicUtils {
         }
 
         /**
-         * replace blank and dash to underline, convert to snake case
+         * replace blank, strikethrough to underline, convert to snake case
          */
         fun toFieldName(factorName: String): String {
             return factorName.trim {

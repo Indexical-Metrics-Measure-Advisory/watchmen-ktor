@@ -25,11 +25,8 @@ class MappedEntityFieldDef(name: String, type: EntityFieldType, private val desc
 class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: List<EntityFieldDef>) :
     EntityDef(name, fields) {
     override fun toDocument(entity: Any): Document {
-        val map = fields.map { it ->
-            val field = it as MappedEntityFieldDef
-            val name = field.fieldName
-            val value = field.read(entity)
-            name to value
+        val map = fields.map { field ->
+            field.fieldName to field.read(entity)
         }.toMap().toMutableMap()
 
         this.removeEmptyId(map)
@@ -37,15 +34,9 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
         return Document(map)
     }
 
-    private fun createEntity(): Any {
-        val constructor = entityClass.getConstructor()
-        return constructor.newInstance()
-    }
-
     override fun fromDocument(doc: Document): Any {
-        return this.createEntity().also {
-            fields.forEach {
-                val field = it as MappedEntityFieldDef
+        return entityClass.getConstructor().newInstance().also {
+            fields.forEach { field ->
                 field.write(this, doc[field.fieldName])
             }
         }
@@ -58,11 +49,7 @@ class MappedEntityDef(name: String, private val entityClass: Class<*>, fields: L
                     || field.key == propertyOrFactorName
                     || field.fieldName == propertyOrFactorName
         }
-        return if (field == null) {
-            propertyOrFactorName
-        } else {
-            (field as MappedEntityFieldDef).fieldName
-        }
+        return field?.fieldName ?: propertyOrFactorName
     }
 
     override fun isMultipleTopicsSupported(): Boolean {

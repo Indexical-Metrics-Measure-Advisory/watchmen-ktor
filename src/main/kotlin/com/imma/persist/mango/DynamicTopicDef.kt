@@ -43,29 +43,8 @@ class DynamicTopicDef(val topic: Topic) :
             )
         } + listOf(createdAt, lastModifiedAt)
     ) {
-    private val fieldsMapByFactorName: Map<String, DynamicFactorDef> =
-        fields.map { it.key to (it as DynamicFactorDef) }.toMap()
     private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
         fields.map { it as DynamicFactorDef }.map { it.fieldName to it }.toMap()
-
-    /**
-     * convert key to persist name if definition found, otherwise keep it.
-     */
-    private fun toPersistDocument(map: Map<String, Any?>): Document {
-        return Document().let { doc ->
-            map.map { (key, value) ->
-                val field = fieldsMapByFactorName[key]
-                if (field != null) {
-                    // convert name to field name
-                    doc.append(field.fieldName, value)
-                } else {
-                    // not found in definition, just let be
-                    doc.append(key, value)
-                }
-            }
-            doc
-        }
-    }
 
     override fun toDocument(entity: Any): Document {
         @Suppress("DuplicatedCode")
@@ -74,28 +53,19 @@ class DynamicTopicDef(val topic: Topic) :
         }
 
         @Suppress("UNCHECKED_CAST")
-        val map = (entity as Map<String, Any?>).toMutableMap()
+        val map = (entity as Map<String, Any?>).map { (key, value) ->
+            toFieldName(key) to value
+        }.toMap().toMutableMap()
         this.removeEmptyId(map)
         this.handleLastModifiedAt(map)
-        return toPersistDocument(map)
-    }
-
-    /**
-     * convert key to factor name if definition found, otherwise keep it.
-     */
-    private fun fromPersistDocument(doc: Document): MutableMap<String, Any?> {
-        return doc.map { (key, value) ->
-            val field = fieldsMapByFieldName[key.toLowerCase()]
-            if (field != null) {
-                field.key to value
-            } else {
-                key to value
-            }
-        }.toMap().toMutableMap()
+        return Document(map)
     }
 
     override fun fromDocument(doc: Document): Any {
-        return fromPersistDocument(doc)
+        return doc.map { (key, value) ->
+            val field = fieldsMapByFieldName[key.toLowerCase()]
+            (field?.key ?: key) to value
+        }.toMap().toMutableMap()
     }
 
     /**
@@ -110,11 +80,7 @@ class DynamicTopicDef(val topic: Topic) :
                     || it.fieldName == propertyOrFactorName
         }
 
-        return if (field == null) {
-            propertyOrFactorName
-        } else {
-            (field as DynamicFactorDef).fieldName
-        }
+        return field?.fieldName ?: propertyOrFactorName
     }
 
     override fun isMultipleTopicsSupported(): Boolean {
