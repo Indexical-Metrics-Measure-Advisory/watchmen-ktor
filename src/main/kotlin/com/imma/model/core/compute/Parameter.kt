@@ -134,7 +134,7 @@ private fun takeIfIsCompute(map: Map<*, *>): ComputedParameter? {
         }
         val params: MutableList<Parameter> = when (val parameters = map["parameters"]) {
             null -> throw RuntimeException("Sub parameter of compute parameter cannot be null.")
-            is List<*> -> takeAsParameters(parameters)
+            is Collection<*> -> takeAsParameters(parameters)
             is Array<*> -> takeAsParameters(parameters.asList())
             else -> throw RuntimeException("Parameters of compute parameter should be a list or an array, but is [$parameters] now.")
         }

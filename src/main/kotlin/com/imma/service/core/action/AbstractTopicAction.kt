@@ -40,10 +40,10 @@ abstract class AbstractTopicAction(private val context: ActionContext, private v
 			@Suppress("UNCHECKED_CAST")
 			when {
 				mapping == null -> throw RuntimeException("Mapping of insert/merge action cannot be null.")
-				mapping !is List<*> && mapping !is Array<*> -> throw RuntimeException("By of insert/merge action should be a list or an array, but is [$mapping] now.")
-				mapping is List<*> && mapping.size == 0 -> throw RuntimeException("Mapping of insert/merge action cannot be empty.")
+				mapping !is Collection<*> && mapping !is Array<*> -> throw RuntimeException("By of insert/merge action should be a collection or an array, but is [$mapping] now.")
+				mapping is Collection<*> && mapping.size == 0 -> throw RuntimeException("Mapping of insert/merge action cannot be empty.")
 				mapping is Array<*> && mapping.size == 0 -> throw RuntimeException("Mapping of insert/merge action cannot be empty.")
-				mapping is List<*> -> takeAsRowMappingOrThrow(mapping as List<Map<*, *>>)
+				mapping is Collection<*> -> takeAsRowMappingOrThrow(mapping as Collection<Map<*, *>>)
 				mapping is Array<*> -> takeAsRowMappingOrThrow(mapping as Array<Map<*, *>>)
 				else -> neverOccur()
 			}

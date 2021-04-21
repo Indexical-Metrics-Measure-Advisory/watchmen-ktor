@@ -31,6 +31,12 @@ class ConstantParameterKits {
 					part == "size" && value is Map<*, *> -> value.size
 					part == "length" && value is String -> value.length
 					value is Map<*, Any?> -> value[part]
+					value is Collection<*> -> value.map {
+						if (it is Map<*, Any?>) it[part] else throw RuntimeException(throws())
+					}
+					value is Array<*> -> value.map {
+						if (it is Map<*, Any?>) it[part] else throw RuntimeException(throws())
+					}
 					else -> throw RuntimeException(throws())
 				}
 			}

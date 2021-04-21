@@ -89,7 +89,7 @@ private fun takeAsFilters(filters: Collection<*>): MutableList<ParameterConditio
 private fun takeAsFilters(filters: Any?): MutableList<ParameterCondition> {
     return when (filters) {
         null -> throw RuntimeException("Sub filters of joint cannot be null.")
-        is List<*> -> takeAsFilters(filters)
+        is Collection<*> -> takeAsFilters(filters)
         is Array<*> -> takeAsFilters(filters.asList())
         else -> throw RuntimeException("Sub filters of joint should be a list or an array, but is [$filters] now.")
     }

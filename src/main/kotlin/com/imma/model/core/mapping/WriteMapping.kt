@@ -39,7 +39,7 @@ private fun takeAsFactorMappingOrThrow(map: Map<*, *>): FactorMapping {
 	return FactorMapping(takeAsParameterOrThrow(source), factorId.toString(), arithmetic)
 }
 
-fun takeAsRowMappingOrThrow(list: List<Map<*, *>>): RowMapping {
+fun takeAsRowMappingOrThrow(list: Collection<Map<*, *>>): RowMapping {
 	return list.map { takeAsFactorMappingOrThrow(it) }.toMutableList()
 }
 
