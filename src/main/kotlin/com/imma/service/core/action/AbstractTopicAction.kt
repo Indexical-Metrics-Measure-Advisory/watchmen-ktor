@@ -55,7 +55,6 @@ abstract class AbstractTopicAction(private val context: ActionContext, private v
 				throw RuntimeException("Topic id of action cannot be null or empty.")
 			}
 
-
 			val topic = topics[topicId] ?: services.topic {
 				findTopicById(topicId)
 			} ?: throw RuntimeException("Topic[$topicId] of action not found.")

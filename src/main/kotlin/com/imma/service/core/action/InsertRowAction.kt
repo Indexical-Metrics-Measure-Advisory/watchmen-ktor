@@ -1,7 +1,6 @@
 package com.imma.service.core.action
 
 import com.imma.service.core.log.RunType
-import com.imma.service.core.parameter.ConditionBuilder
 
 class InsertRowAction(private val context: ActionContext, private val logger: ActionLogger) :
 	AbstractTopicAction(context, logger) {
@@ -9,10 +8,11 @@ class InsertRowAction(private val context: ActionContext, private val logger: Ac
 		val value = with(context) {
 			val topic = prepareTopic()
 			val mapping = prepareMapping()
-			services.dynamicTopic {
-//				exists(topic, ConditionBuilder(topic, pipeline, topics, sourceData, variables).build(joint))
+			val one = mutableMapOf<String, Any?>().apply {
+				// TODO
 			}
+			services.dynamicTopic { insertOne(topic, one) }
 		}
-		logger.log(mutableMapOf("value" to value), RunType.process)
+		logger.log(mutableMapOf("newValue" to value), RunType.process)
 	}
 }

@@ -7,15 +7,19 @@ import com.imma.service.Service
 import com.imma.service.Services
 
 class DynamicTopicService(services: Services) : Service(services) {
-    fun exists(topic: Topic, where: Where): Boolean {
-        return persist().exists(where, Map::class.java, topic.name!!)
-    }
+	fun insertOne(topic: Topic, one: Map<String, *>) {
+		persist().insertOne(one, Map::class.java, topic.name!!)
+	}
 
-    fun <T> findOne(topic: Topic, where: Where): T? {
-        return persist().findOne(where, Map::class.java, topic.name!!)
-    }
+	fun exists(topic: Topic, where: Where): Boolean {
+		return persist().exists(where, Map::class.java, topic.name!!)
+	}
 
-    fun <T> findOne(topic: Topic, select: Select, where: Where): T? {
-        return persist().findOne(select, where, Map::class.java, topic.name!!)
-    }
+	fun <T> findOne(topic: Topic, where: Where): T? {
+		return persist().findOne(where, Map::class.java, topic.name!!)
+	}
+
+	fun <T> findOne(topic: Topic, select: Select, where: Where): T? {
+		return persist().findOne(select, where, Map::class.java, topic.name!!)
+	}
 }
