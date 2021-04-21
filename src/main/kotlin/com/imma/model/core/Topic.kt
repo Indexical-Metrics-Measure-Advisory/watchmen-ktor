@@ -42,7 +42,6 @@ enum class FactorType(val type: String) {
     year("year"),                           // 4 digits
     `half-year`("half-year"),               // 1: first half, 2: second half
     quarter("quarter"),                     // 1 - 4
-    season("season"),                       // 1: spring, 2: summer, 3: autumn, 4: winter
     month("month"),                         // 1 - 12
     `half-month`("half-month"),             // 1: first half, 2: second half
     `ten-days`("ten-days"),                 // 1, 2, 3

@@ -1,106 +1,179 @@
 package com.imma.persist.mango
 
 import com.imma.model.core.Factor
+import com.imma.model.core.FactorType
 import com.imma.model.core.Topic
+import com.imma.model.core.compute.ValueKits
 import org.bson.Document
 
 class DynamicFactorDef(val factor: Factor, type: EntityFieldType) : EntityFieldDef(factor.name!!, type) {
-    override fun read(entity: Any): Any? {
-        if (Map::class.java.isAssignableFrom(entity.javaClass)) {
-            return (entity as Map<*, *>)[key]
-        } else {
-            throw RuntimeException("Only map is supported, but is [$entity] now.")
-        }
-    }
+	override fun read(entity: Any): Any? {
+		if (Map::class.java.isAssignableFrom(entity.javaClass)) {
+			return (entity as Map<*, *>)[key]
+		} else {
+			throw RuntimeException("Only map is supported, but is [$entity] now.")
+		}
+	}
 
-    override fun write(entity: Any, value: Any?) {
-        if (Map::class.java.isAssignableFrom(entity.javaClass)) {
-            @Suppress("UNCHECKED_CAST")
-            (entity as MutableMap<Any, Any?>)[key] = value
-        } else {
-            throw RuntimeException("Only map is supported, but is [$entity] now.")
-        }
-    }
+	override fun write(entity: Any, value: Any?) {
+		if (Map::class.java.isAssignableFrom(entity.javaClass)) {
+			@Suppress("UNCHECKED_CAST")
+			(entity as MutableMap<Any, Any?>)[key] = value
+		} else {
+			throw RuntimeException("Only map is supported, but is [$entity] now.")
+		}
+	}
 }
 
 private val id = DynamicFactorDef(Factor(factorId = "_id", name = "_id"), EntityFieldType.ID)
 private val createdAt = DynamicFactorDef(
-    Factor(factorId = "_create_time", name = "_create_time"),
-    EntityFieldType.CREATED_AT
+	Factor(factorId = "_create_time", name = "_create_time"),
+	EntityFieldType.CREATED_AT
 )
 private val lastModifiedAt = DynamicFactorDef(
-    Factor(factorId = "_last_modify_time", name = "_last_modify_time"),
-    EntityFieldType.LAST_MODIFIED_AT
+	Factor(factorId = "_last_modify_time", name = "_last_modify_time"),
+	EntityFieldType.LAST_MODIFIED_AT
 )
 
 class DynamicTopicDef(val topic: Topic) :
-    EntityDef(
-        topic.name!!,
-        listOf(id) + topic.factors.map { factor ->
-            DynamicFactorDef(
-                factor,
-                EntityFieldType.REGULAR
-            )
-        } + listOf(createdAt, lastModifiedAt)
-    ) {
-    private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
-        fields.map { it as DynamicFactorDef }.map { it.fieldName to it }.toMap()
+	EntityDef(
+		topic.name!!,
+		listOf(id) + topic.factors.map { factor ->
+			DynamicFactorDef(
+				factor,
+				EntityFieldType.REGULAR
+			)
+		} + listOf(createdAt, lastModifiedAt)
+	) {
+	private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
+		fields.map { it as DynamicFactorDef }.map { it.fieldName to it }.toMap()
 
-    override fun toDocument(entity: Any): Document {
-        @Suppress("DuplicatedCode")
-        if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
-            throw RuntimeException("Only map is supported, but is [$entity] now.")
-        }
+	override fun toDocument(entity: Any): Document {
+		@Suppress("DuplicatedCode")
+		if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
+			throw RuntimeException("Only map is supported, but is [$entity] now.")
+		}
 
-        @Suppress("UNCHECKED_CAST")
-        val map = (entity as Map<String, Any?>).map { (key, value) ->
-            toFieldName(key) to value
-        }.toMap().toMutableMap()
-        this.removeEmptyId(map)
-        this.handleLastModifiedAt(map)
-        return Document(map)
-    }
+		@Suppress("UNCHECKED_CAST")
+		val map = (entity as Map<String, Any?>).map { (key, value) ->
+			val field = findField(key)
+			when (val type = field?.factor?.type) {
+				FactorType.sequence -> ValueKits.computeToSequence(value) { "Cannot cast value[$value] to sequence." }
+				FactorType.number -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to number." }
+				FactorType.unsigned -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to unsigned." }
 
-    override fun fromDocument(doc: Document): Any {
-        return doc.map { (key, value) ->
-            val field = fieldsMapByFieldName[key.toLowerCase()]
-            (field?.key ?: key) to value
-        }.toMap().toMutableMap()
-    }
+				FactorType.text -> value?.toString()
 
-    /**
-     * @param propertyOrFactorName might be factor id
-     */
-    override fun toFieldName(propertyOrFactorName: String): String {
-        val field = fields.find {
-            val field = it as DynamicFactorDef
-            val factor = field.factor
-            factor.factorId == propertyOrFactorName
-                    || factor.name == propertyOrFactorName
-                    || it.fieldName == propertyOrFactorName
-        }
+				FactorType.address -> value?.toString()
+				FactorType.continent -> value?.toString()
+				FactorType.region -> value?.toString()
+				FactorType.country -> value?.toString()
+				FactorType.province -> value?.toString()
+				FactorType.city -> value?.toString()
+				FactorType.district -> value?.toString()
+				FactorType.road -> value?.toString()
+				FactorType.community -> value?.toString()
+				FactorType.floor -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to floor." }
+				FactorType.`residence-type` -> value?.toString()
+				FactorType.`residential-area` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to floor." }
 
-        return field?.fieldName ?: propertyOrFactorName
-    }
+				FactorType.email -> value?.toString()
+				FactorType.phone -> value?.toString()
+				FactorType.mobile -> value?.toString()
+				FactorType.fax -> value?.toString()
 
-    override fun isMultipleTopicsSupported(): Boolean {
-        return false
-    }
+				FactorType.datetime -> TODO()
+				FactorType.`full-datetime` -> TODO()
+				FactorType.date -> ValueKits.computeToDate(value) { "Cannot cast value[$value] to date." }
+				FactorType.time -> ValueKits.computeToTime(value) { "Cannot cast value[$value] to time." }
+				FactorType.year -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to year." }
+				FactorType.`half-year` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to half-year." }
+				FactorType.quarter -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to quarter." }
+				FactorType.month -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to month." }
+				FactorType.`half-month` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to half-month." }
+				FactorType.`ten-days` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to ten-days." }
+				FactorType.`week-of-year` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to week-of-year." }
+				FactorType.`week-of-month` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to week-of-month." }
+				FactorType.`half-week` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to half-week." }
+				FactorType.`day-of-month` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to day-of-month." }
+				FactorType.`day-of-week` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to day-of-week." }
+				FactorType.`day-kind` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to day-kind." }
+				FactorType.hour -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to hour." }
+				FactorType.`hour-kind` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to hour-kind." }
+				FactorType.minute -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to minute." }
+				FactorType.second -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to second." }
+				FactorType.millisecond -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to millisecond." }
+				FactorType.`am-pm` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to am-pm." }
 
-    /**
-     * @param entityOrTopicName might be topic id
-     */
-    override fun isTopicSupported(entityOrTopicName: String): Boolean {
-        return entityOrTopicName == key
-                || entityOrTopicName == topic.topicId
-                || entityOrTopicName == collectionName
-    }
+				FactorType.gender -> value?.toString()
+				FactorType.occupation -> value?.toString()
+				FactorType.`date-of-birth` -> ValueKits.computeToDate(value) { "Cannot cast value[$value] to date-of-birth." }
+				FactorType.age -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to age." }
+				FactorType.`id-no` -> value?.toString()
+				FactorType.religion -> value?.toString()
+				FactorType.nationality -> value?.toString()
 
-    override fun toCollectionName(): String {
-        return collectionName
-    }
+				FactorType.`biz-trade` -> value?.toString()
+				FactorType.`biz-scale` -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to biz-scale." }
+
+				FactorType.boolean -> ValueKits.computeToBoolean(value) { "Cannot cast value[$value] to boolean." }
+
+				FactorType.`enum` -> value?.toString()
+				else -> throw RuntimeException("Factor type[$type] is not supported for dynamic topic.")
+			}
+			toFieldName(field, key) to value
+		}.toMap().toMutableMap()
+		this.removeEmptyId(map)
+		this.handleLastModifiedAt(map)
+		return Document(map)
+	}
+
+	override fun fromDocument(doc: Document): Any {
+		return doc.map { (key, value) ->
+			val field = fieldsMapByFieldName[key.toLowerCase()]
+			(field?.key ?: key) to value
+		}.toMap().toMutableMap()
+	}
+
+	private fun findField(propertyOrFactorName: String): DynamicFactorDef? {
+		return fields.find {
+			val field = it as DynamicFactorDef
+			val factor = field.factor
+			factor.factorId == propertyOrFactorName
+					|| factor.name == propertyOrFactorName
+					|| it.fieldName == propertyOrFactorName
+		} as DynamicFactorDef?
+	}
+
+	private fun toFieldName(field: EntityFieldDef?, propertyOrFactorName: String): String {
+		return field?.fieldName ?: propertyOrFactorName
+	}
+
+	/**
+	 * @param propertyOrFactorName might be factor id
+	 */
+	override fun toFieldName(propertyOrFactorName: String): String {
+		return toFieldName(findField(propertyOrFactorName), propertyOrFactorName)
+	}
+
+	override fun isMultipleTopicsSupported(): Boolean {
+		return false
+	}
+
+	/**
+	 * @param entityOrTopicName might be topic id
+	 */
+	override fun isTopicSupported(entityOrTopicName: String): Boolean {
+		return entityOrTopicName == key
+				|| entityOrTopicName == topic.topicId
+				|| entityOrTopicName == collectionName
+	}
+
+	override fun toCollectionName(): String {
+		return collectionName
+	}
 }
 
 fun createDynamicTopicDef(topic: Topic): DynamicTopicDef {
-    return DynamicTopicDef(topic)
+	return DynamicTopicDef(topic)
 }

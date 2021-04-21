@@ -1,15 +1,51 @@
 package com.imma.model.core.compute
 
+import com.imma.model.snowflake.SnowflakeHelper
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 class ValueKits {
 	companion object {
+		fun computeToSequence(value: Any?, throws: () -> String): Long {
+			return if (value == null) {
+				SnowflakeHelper.nextSnowflakeId()
+			} else {
+				try {
+					value.toString().toLong()
+				} catch (t: Throwable) {
+					throw RuntimeException(throws(), t)
+				}
+			}
+		}
+
+		fun computeToBoolean(value: Any?, throws: () -> String): Boolean {
+			return when (value) {
+				null -> false
+				is Boolean -> value
+				is Number -> value.toInt() > 0
+				is BigDecimal -> value.toInt() > 0
+				is BigInteger -> value.toInt() > 0
+				else -> {
+					val v = value.toString()
+					if ("true,t,yes,y".contains(v, true)) {
+						true
+					} else {
+						try {
+							v.toInt() > 0
+						} catch (t: Throwable) {
+							throw RuntimeException(throws(), t)
+						}
+					}
+				}
+			}
+		}
+
 		fun computeToNumeric(value: Any?, throws: () -> String): BigDecimal? {
 			return if (value == null) {
 				value
@@ -23,7 +59,7 @@ class ValueKits {
 						else -> BigDecimal(value.toString())
 					}
 				} catch (t: Throwable) {
-					throw RuntimeException(throws())
+					throw RuntimeException(throws(), t)
 				}
 			}
 		}
@@ -60,6 +96,45 @@ class ValueKits {
 						// date format is yyyy/MM/dd, yyyy-MM-dd
 						// time format is HH:mm:ss
 						length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMdd", true)
+						else -> throw RuntimeException(throws())
+					}
+				}
+				else -> throw RuntimeException(throws())
+			}
+		}
+
+		private fun computeToTime(
+			dateOrTime: String,
+			pattern: String,
+			removeIrrelevantChars: Boolean = false
+		): LocalTime {
+			return if (removeIrrelevantChars) {
+				LocalTime.parse(removeIrrelevantCharsFromDateString(dateOrTime), DateTimeFormatter.ofPattern(pattern))
+			} else {
+				LocalTime.parse(dateOrTime, DateTimeFormatter.ofPattern(pattern))
+			}
+		}
+
+		fun computeToTime(dateOrTime: Any?, throws: () -> String): LocalTime? {
+			return when (dateOrTime) {
+				null -> null
+				is Date -> dateOrTime.toInstant().atZone(ZoneId.systemDefault()).toLocalTime()
+				is LocalDate -> LocalTime.of(0, 0, 0)
+				is LocalDateTime -> dateOrTime.toLocalTime()
+				is String -> {
+					val length = dateOrTime.length
+					when {
+						// format is HHmmss
+						length == 6 -> computeToTime(dateOrTime, "HHmmss")
+						// format is yyyyMMddHHmmss
+						length == 14 -> computeToTime(dateOrTime.substring(8), "HHmmss")
+						// format is yyyyMMdd HHmmss
+						length == 15 -> computeToTime(dateOrTime.substring(9), "HHmmss")
+						// format is yyyy/MM/ddHH:mm:ss, yyyy-MM-ddHH:mm:ss
+						length == 18 -> computeToTime(dateOrTime.substring(10), "HHmmss", true)
+						// date format is yyyy/MM/dd, yyyy-MM-dd
+						// time format is HH:mm:ss
+						length > 18 -> computeToTime(dateOrTime.substring(11, 19), "HHmmss", true)
 						else -> throw RuntimeException(throws())
 					}
 				}
