@@ -18,12 +18,20 @@ class ConstantParameterKits {
 		/**
 		 * variable can be:
 		 * 1. x, x[.y[.z]...] -> property path, get value from given function, and get next from previous value, value must be a map. multiple segments are allowed,
-		 * 2. nextSeq -> next auto generated sequence,
-		 * 3. x.size, x[.y[.z]...].size -> property path, get value from given function, and size of this value. value must be a collection or a map,
-		 * 4. x.length, x[.y[.z]...].length -> property path, get value from given function, and size of this value. value must be a string.
+		 * 2. &nextSeq -> next auto generated sequence,
+		 * 3. x.&count, x[.y[.z]...].&count -> property path, get value from given function, and size of this value. value must be a collection/array or a map,
+		 * 4. x.&length, x[.y[.z]...].&length -> property path, get value from given function, and size of this value. value must be a string.
 		 *
 		 * if any path returns a collection or an array, the next level will retrieve value from each elements in this collection or array.
-		 * IMPORTANT multiple collections or arrays are not supported yet.
+		 * eg. use {x.y.z},
+		 *  1. get x which is a map,
+		 *  2. get x.y(size n) which is collection/array,
+		 *  3. get x.y.z(size n).
+		 * eg. use {a.b.c.d},
+		 *  1. get a which is a map,
+		 *  2. get a.b(size n) which is a collection/array,
+		 *  3. assume size of c (is a map) on each a.b is m, then get a.b.c(size n * m) which is a collection/array,
+		 *  4. get a.b.c.d(size n * m).
 		 *
 		 * @param variable
 		 * @param getFirstValue function to get value of first part of path. Ignored when it is {@code nextSeq}.
@@ -38,12 +46,13 @@ class ConstantParameterKits {
 			val parts = variable.split(".")
 			for ((index, part) in parts.withIndex()) {
 				value = when {
-					index == 0 && part == "nextSeq" -> SnowflakeHelper.nextSnowflakeId()
+					index == 0 && part == "&nextSeq" -> SnowflakeHelper.nextSnowflakeId()
 					index == 0 -> getFirstValue(part)
 					value == null -> null
-					part == "count" && value is Collection<*> -> value.size
-					part == "count" && value is Map<*, *> -> value.size
-					part == "length" && value is String -> value.length
+					part == "&count" && value is Collection<*> -> value.size
+					part == "&count" && value is Array<*> -> value.size
+					part == "&count" && value is Map<*, *> -> value.size
+					part == "&length" && value is String -> value.length
 					value is Map<*, *> -> value[part]
 					value is Collection<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
 					value is Array<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
