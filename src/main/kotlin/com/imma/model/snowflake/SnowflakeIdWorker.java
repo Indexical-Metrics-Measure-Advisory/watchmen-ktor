@@ -1,4 +1,4 @@
-package com.imma.persist.snowflake;
+package com.imma.model.snowflake;
 
 public class SnowflakeIdWorker {
 	/**

@@ -1,6 +1,6 @@
 package com.imma.persist.mango
 
-import com.imma.persist.DynamicTopicUtils
+import com.imma.persist.DynamicTopicKits
 import org.bson.Document
 
 class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(name, type) {
@@ -66,13 +66,13 @@ class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastMod
                 createdAt?.fieldName -> createdAt?.key
                 lastModifiedAt?.key -> lastModifiedAt?.key
                 lastModifiedAt?.fieldName -> lastModifiedAt?.key
-                else -> DynamicTopicUtils.fromFieldName(key)
+                else -> DynamicTopicKits.fromFieldName(key)
             } to value
         }.toMap().toMutableMap()
     }
 
     override fun toFieldName(propertyOrFactorName: String): String {
-        return DynamicTopicUtils.toFieldName(propertyOrFactorName)
+        return DynamicTopicKits.toFieldName(propertyOrFactorName)
     }
 
     override fun isMultipleTopicsSupported(): Boolean {

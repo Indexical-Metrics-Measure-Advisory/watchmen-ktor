@@ -15,6 +15,9 @@ class FactorElement : Element() {
     }
 }
 
+/**
+ * not like constant parameter, constant element doesn't support variables mixin anymore.
+ */
 class ConstantElement : Element() {
     var value: Any? = null
     override fun toString(): String {

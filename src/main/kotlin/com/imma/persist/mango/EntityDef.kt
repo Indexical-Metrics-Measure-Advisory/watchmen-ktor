@@ -1,6 +1,6 @@
 package com.imma.persist.mango
 
-import com.imma.persist.DynamicTopicUtils
+import com.imma.persist.DynamicTopicKits
 import com.imma.utils.getCurrentDateTime
 import com.imma.utils.nothing
 import org.bson.Document
@@ -10,7 +10,7 @@ enum class EntityFieldType {
 }
 
 abstract class EntityFieldDef(val key: String, val type: EntityFieldType) {
-    val fieldName: String = DynamicTopicUtils.toFieldName(key)
+    val fieldName: String = DynamicTopicKits.toFieldName(key)
     abstract fun read(entity: Any): Any?
     abstract fun write(entity: Any, value: Any?)
 }
@@ -36,7 +36,7 @@ abstract class EntityDef(val key: String, val fields: List<EntityFieldDef>) {
         }
     }
 
-    val collectionName = DynamicTopicUtils.toCollectionName(key)
+    val collectionName = DynamicTopicKits.toCollectionName(key)
 
     val id: EntityFieldDef = fields.find { def -> def.type == EntityFieldType.ID }
         ?: throw RuntimeException("Id field not defined.")

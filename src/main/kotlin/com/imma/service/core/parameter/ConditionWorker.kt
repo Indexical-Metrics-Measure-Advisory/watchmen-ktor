@@ -125,7 +125,7 @@ private fun toSeconds(localDateTime: LocalDateTime): LocalDateTime {
 }
 
 private fun purifyYMD(date: String): String {
-    return ParameterUtils.removeIrrelevantCharsFromDateString(date).substring(0, 8)
+    return ValueKits.removeIrrelevantCharsFromDateString(date).substring(0, 8)
 }
 
 private fun compareWhenOneNumberAtLeast(value1: Any, value2: Any, functions: CompareFunctions): Boolean {

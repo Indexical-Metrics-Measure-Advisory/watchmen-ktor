@@ -40,7 +40,7 @@ private fun String.toCamelCase(): String {
     }.beginWithLowerCase()
 }
 
-class DynamicTopicUtils {
+class DynamicTopicKits {
     companion object {
         /**
          * replace blank, strikethrough to underline, convert to snake case
