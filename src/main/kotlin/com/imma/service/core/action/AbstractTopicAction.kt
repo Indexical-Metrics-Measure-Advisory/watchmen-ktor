@@ -2,8 +2,10 @@ package com.imma.service.core.action
 
 import com.imma.model.core.Factor
 import com.imma.model.core.Topic
+import com.imma.model.core.compute.Parameter
 import com.imma.model.core.compute.ParameterJoint
 import com.imma.model.core.compute.takeAsParameterJointOrThrow
+import com.imma.model.core.compute.takeAsParameterOrThrow
 import com.imma.model.core.mapping.RowMapping
 import com.imma.model.core.mapping.takeAsRowMappingOrThrow
 import com.imma.utils.neverOccur
@@ -44,6 +46,16 @@ abstract class AbstractTopicAction(private val context: ActionContext, private v
 				mapping is List<*> -> takeAsRowMappingOrThrow(mapping as List<Map<*, *>>)
 				mapping is Array<*> -> takeAsRowMappingOrThrow(mapping as Array<Map<*, *>>)
 				else -> neverOccur()
+			}
+		}
+	}
+
+	fun prepareSource(): Parameter {
+		return with(context) {
+			when (val source = action["source"]) {
+				null -> throw RuntimeException("Source of write action cannot be null.")
+				!is Map<*, *> -> throw RuntimeException("Source of write action should be a map, but is [$source] now.")
+				else -> takeAsParameterOrThrow(source)
 			}
 		}
 	}
