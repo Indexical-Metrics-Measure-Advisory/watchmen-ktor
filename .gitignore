@@ -32,7 +32,7 @@ gradle
 .idea
 
 # build
-build
+/build
 
 # mac files
 .DS_Store
