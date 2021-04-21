@@ -1,6 +1,6 @@
 package com.imma.service.core.pipeline
 
-import com.imma.model.compute.takeAsParameterJointOrThrow
+import com.imma.model.core.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.EngineWorker
 import com.imma.service.core.PipelineSourceData
 import com.imma.service.core.TriggerData

@@ -6,6 +6,7 @@ val spring_version: String by project
 //val spring_data_mango_version: String by project
 val mongo_driver_version: String by project
 val mail_version: String by project
+val trino_version: String by project
 
 plugins {
     java
@@ -55,6 +56,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jackson_version")
 //    implementation("org.springframework.data:spring-data-mongodb:$spring_data_mango_version")
+    implementation("io.trino:trino-jdbc:$trino_version")
     implementation("org.mongodb:mongodb-driver-sync:$mongo_driver_version")
     implementation("org.springframework:spring-context-support:$spring_version")
     implementation("com.sun.mail:jakarta.mail:$mail_version")

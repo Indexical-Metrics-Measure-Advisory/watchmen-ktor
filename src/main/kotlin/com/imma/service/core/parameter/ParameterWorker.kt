@@ -1,6 +1,6 @@
 package com.imma.service.core.parameter
 
-import com.imma.model.compute.*
+import com.imma.model.core.compute.*
 import com.imma.model.core.*
 import com.imma.service.core.PipelineSourceData
 import com.imma.service.core.PipelineTopics

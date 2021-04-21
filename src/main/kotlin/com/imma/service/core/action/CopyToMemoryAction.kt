@@ -1,6 +1,6 @@
 package com.imma.service.core.action
 
-import com.imma.model.compute.takeAsParameterOrThrow
+import com.imma.model.core.compute.takeAsParameterOrThrow
 import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ParameterWorker
 

@@ -1,4 +1,4 @@
-package com.imma.model.compute
+package com.imma.model.core.compute
 
 @Suppress("EnumEntryName")
 enum class ParameterKind(val kind: String) {

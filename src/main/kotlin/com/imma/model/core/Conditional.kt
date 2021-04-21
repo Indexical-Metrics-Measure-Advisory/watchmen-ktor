@@ -1,6 +1,6 @@
 package com.imma.model.core
 
-import com.imma.model.compute.ParameterJointDelegate
+import com.imma.model.core.compute.ParameterJointDelegate
 
 interface Conditional {
     var conditional: Boolean

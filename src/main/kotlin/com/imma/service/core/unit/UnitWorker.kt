@@ -1,6 +1,6 @@
 package com.imma.service.core.unit
 
-import com.imma.model.compute.takeAsParameterJointOrThrow
+import com.imma.model.core.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.EngineWorker
 import com.imma.service.core.action.ActionContext
 import com.imma.service.core.action.ActionWorker

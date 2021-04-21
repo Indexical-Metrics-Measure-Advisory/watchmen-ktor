@@ -1,6 +1,6 @@
 package com.imma.persist.core.util
 
-import com.imma.model.compute.ValueKits
+import com.imma.model.core.compute.ValueKits
 import com.imma.persist.core.Element
 import com.imma.persist.core.ElementShouldBe
 

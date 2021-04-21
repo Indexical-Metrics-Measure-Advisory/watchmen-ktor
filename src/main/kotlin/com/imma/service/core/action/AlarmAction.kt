@@ -1,7 +1,7 @@
 package com.imma.service.core.action
 
-import com.imma.model.compute.ConstantParameter
-import com.imma.model.compute.takeAsParameterJointOrThrow
+import com.imma.model.core.compute.ConstantParameter
+import com.imma.model.core.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ConditionWorker
 import com.imma.service.core.parameter.ParameterWorker

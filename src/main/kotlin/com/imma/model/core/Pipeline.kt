@@ -2,7 +2,7 @@ package com.imma.model.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import com.imma.model.compute.ParameterJointDelegate
+import com.imma.model.core.compute.ParameterJointDelegate
 import com.imma.persist.annotation.*
 import java.util.*
 

@@ -1,9 +1,9 @@
 package com.imma.service.core.parameter
 
-import com.imma.model.compute.ParameterExpression
-import com.imma.model.compute.ParameterExpressionOperator
-import com.imma.model.compute.ParameterJoint
-import com.imma.model.compute.ParameterJointType
+import com.imma.model.core.compute.ParameterExpression
+import com.imma.model.core.compute.ParameterExpressionOperator
+import com.imma.model.core.compute.ParameterJoint
+import com.imma.model.core.compute.ParameterJointType
 import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
 import com.imma.persist.core.*
