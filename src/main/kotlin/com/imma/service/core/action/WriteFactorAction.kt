@@ -13,7 +13,7 @@ class WriteFactorAction(private val context: ActionContext, private val logger: 
 			val one = mutableMapOf<String, Any?>().apply {
 				// TODO
 			}
-			services.dynamicTopic { insertOne(topic, one) }
+//			services.dynamicTopic { insertOne(topic, one) }
 		}
 		logger.log(mutableMapOf("newValue" to value), RunType.process)
 	}

@@ -6,6 +6,15 @@ typealias GetFirstValue = (propertyName: String) -> Any?
 
 class ConstantParameterKits {
 	companion object {
+		private fun getValueAsList(from: Any?, propertyName: String, throws: () -> String): List<Any?> {
+			return when (from) {
+				is Map<*, *> -> listOf(from[propertyName])
+				is Collection<*> -> from.map { if (it is Map<*, *>) it[propertyName] else throw RuntimeException(throws()) }
+				is Array<*> -> from.map { if (it is Map<*, *>) it[propertyName] else throw RuntimeException(throws()) }
+				else -> listOf()
+			}
+		}
+
 		/**
 		 * variable can be:
 		 * 1. x, x[.y[.z]...] -> property path, get value from given function, and get next from previous value, value must be a map. multiple segments are allowed,
@@ -32,16 +41,12 @@ class ConstantParameterKits {
 					index == 0 && part == "nextSeq" -> SnowflakeHelper.nextSnowflakeId()
 					index == 0 -> getFirstValue(part)
 					value == null -> null
-					part == "size" && value is Collection<*> -> value.size
-					part == "size" && value is Map<*, *> -> value.size
+					part == "count" && value is Collection<*> -> value.size
+					part == "count" && value is Map<*, *> -> value.size
 					part == "length" && value is String -> value.length
 					value is Map<*, *> -> value[part]
-					value is Collection<*> -> value.map {
-						if (it is Map<*, *>) it[part] else throw RuntimeException(throws())
-					}
-					value is Array<*> -> value.map {
-						if (it is Map<*, *>) it[part] else throw RuntimeException(throws())
-					}
+					value is Collection<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
+					value is Array<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
 					else -> throw RuntimeException(throws())
 				}
 			}

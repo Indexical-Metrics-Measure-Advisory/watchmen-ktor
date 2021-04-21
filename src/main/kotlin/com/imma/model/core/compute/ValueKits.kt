@@ -29,9 +29,7 @@ class ValueKits {
 		}
 
 		fun removeIrrelevantCharsFromDateString(date: String): String {
-			return date.split("").filter {
-				it != " " && it != "-" && it != "/" && it != ":"
-			}.joinToString(separator = "")
+			return date.split("").filter { !" -/:.TZ".contains(it) }.joinToString("")
 		}
 
 		private fun computeToDate(date: String, pattern: String, removeIrrelevantChars: Boolean = false): LocalDate {
@@ -56,12 +54,12 @@ class ValueKits {
 						// format is yyyy/MM/dd, yyyy-MM-dd
 						length == 10 -> computeToDate(date, "yyyyMMdd", true)
 						// format is yyyyMMddHHmmss
-						length == 14 -> computeToDate(date.substring(0, 8), "yyyyMMddHHmmss")
+						length == 14 -> computeToDate(date.substring(0, 8), "yyyyMMdd")
 						// format is yyyyMMdd HHmmss
-						length == 15 -> computeToDate(date.substring(0, 8), "yyyyMMdd HHmmss")
+						length == 15 -> computeToDate(date.substring(0, 8), "yyyyMMdd")
 						// date format is yyyy/MM/dd, yyyy-MM-dd
 						// time format is HH:mm:ss
-						length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMddHHmmss", true)
+						length >= 18 -> computeToDate(date.substring(0, 10), "yyyyMMdd", true)
 						else -> throw RuntimeException(throws())
 					}
 				}

@@ -12,7 +12,7 @@ class InsertOrMergeRowAction(private val context: ActionContext, private val log
 			val one = mutableMapOf<String, Any?>().apply {
 				// TODO
 			}
-			services.dynamicTopic { insertOne(topic, one) }
+//			services.dynamicTopic { insertOne(topic, one) }
 		}
 		logger.log(mutableMapOf("newValue" to value), RunType.process)
 	}
