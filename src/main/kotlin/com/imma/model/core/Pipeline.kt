@@ -26,6 +26,7 @@ data class PipelineStageUnitAction(
 
 data class PipelineStageUnit(
     var unitId: String? = null,
+    var name: String? = null,
     override var conditional: Boolean = false,
     override var on: ParameterJointDelegate = mutableMapOf(),
     var `do`: List<PipelineStageUnitAction> = mutableListOf(),
