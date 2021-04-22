@@ -82,8 +82,8 @@ class DynamicTopicDef(val topic: Topic) :
 				FactorType.mobile -> value?.toString()
 				FactorType.fax -> value?.toString()
 
-				FactorType.datetime -> TODO()
-				FactorType.`full-datetime` -> TODO()
+				FactorType.datetime -> ValueKits.computeToDateTime(value) { "Cannot cast value[$value] to datetime." }
+				FactorType.`full-datetime` -> ValueKits.computeToDateTime(value) { "Cannot cast value[$value] to full-datetime." }
 				FactorType.date -> ValueKits.computeToDate(value) { "Cannot cast value[$value] to date." }
 				FactorType.time -> ValueKits.computeToTime(value) { "Cannot cast value[$value] to time." }
 				FactorType.year -> ValueKits.computeToNumeric(value) { "Cannot cast value[$value] to year." }

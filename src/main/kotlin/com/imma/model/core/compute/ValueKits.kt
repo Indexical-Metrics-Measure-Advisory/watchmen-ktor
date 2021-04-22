@@ -142,6 +142,60 @@ class ValueKits {
 			}
 		}
 
+		private fun computeToDateTime(
+			dateOrTime: String,
+			pattern: String,
+			removeIrrelevantChars: Boolean = false
+		): LocalDateTime {
+			return if (removeIrrelevantChars) {
+				LocalDateTime.parse(
+					removeIrrelevantCharsFromDateString(dateOrTime),
+					DateTimeFormatter.ofPattern(pattern)
+				)
+			} else {
+				LocalDateTime.parse(dateOrTime, DateTimeFormatter.ofPattern(pattern))
+			}
+		}
+
+		fun computeToDateTime(dateOrTime: Any?, throws: () -> String): LocalDateTime? {
+			return when (dateOrTime) {
+				null -> null
+				is Date -> dateOrTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+				is LocalDate -> dateOrTime.atStartOfDay().atZone(ZoneId.systemDefault()).toLocalDateTime()
+				is LocalDateTime -> dateOrTime
+				is String -> {
+					val str = removeIrrelevantCharsFromDateString(dateOrTime)
+					val length = str.length
+					when {
+						length >= 14 -> computeToDateTime(str.substring(0, 14), "yyyyMMddHHmmss").withNano(0)
+						else -> throw RuntimeException(throws())
+					}
+				}
+				else -> throw RuntimeException(throws())
+			}
+		}
+
+		fun computeToFullDateTime(dateOrTime: Any?, throws: () -> String): LocalDateTime? {
+			return when (dateOrTime) {
+				null -> null
+				is Date -> dateOrTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+				is LocalDate -> dateOrTime.atStartOfDay().atZone(ZoneId.systemDefault()).toLocalDateTime()
+				is LocalDateTime -> dateOrTime
+				is String -> {
+					val str = removeIrrelevantCharsFromDateString(dateOrTime)
+					val length = str.length
+					when {
+						length == 14 -> computeToDateTime(str, "yyyyMMddHHmmss").withNano(0)
+						length == 15 -> computeToDateTime(str, "yyyyMMddHHmmssS")
+						length == 16 -> computeToDateTime(str, "yyyyMMddHHmmssSS")
+						length >= 17 -> computeToDateTime(str.substring(0, 17), "yyyyMMddHHmmssSSS")
+						else -> throw RuntimeException(throws())
+					}
+				}
+				else -> throw RuntimeException(throws())
+			}
+		}
+
 		fun computeToCollection(value: Any?, throws: () -> String): List<Any?> {
 			return when (value) {
 				null -> listOf()
