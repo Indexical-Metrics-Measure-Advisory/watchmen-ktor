@@ -65,7 +65,7 @@ object RouteConstants {
     const val PIPELINE_SAVE: String = "/pipeline/save"
     const val PIPELINE_RENAME: String = "/pipeline/rename"
     const val PIPELINE_ENABLEMENT_TOGGLE: String = "/pipeline/enablement/toggle"
-    const val PIPELINE_LIST_ALL: String = "pipeline/list/all"
-    const val PIPELINE_GRAPHICS_SAVE_BY_ME: String = "pipeline/graphics/me"
-    const val PIPELINE_GRAPHICS_MINE: String = "pipeline/graphics/mine"
+    const val PIPELINE_LIST_ALL: String = "/pipeline/list/all"
+    const val PIPELINE_GRAPHICS_SAVE_BY_ME: String = "/pipeline/graphics/me"
+    const val PIPELINE_GRAPHICS_MINE: String = "/pipeline/graphics/mine"
 }
