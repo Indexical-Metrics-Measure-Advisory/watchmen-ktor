@@ -36,7 +36,7 @@ data class ReportRect(
 
 @Entity(CollectionNames.REPORT)
 data class Report(
-    @Id("_id")
+    @Id
     var reportId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -58,8 +58,8 @@ data class Report(
     var chart: Chart = Chart(),
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple()

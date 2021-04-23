@@ -10,7 +10,7 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.USER_GROUP)
 class UserGroupForHolder {
-    @Id("_id")
+    @Id
     var userGroupId: String? = null
 
     @Field("name")

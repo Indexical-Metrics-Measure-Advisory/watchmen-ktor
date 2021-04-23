@@ -36,7 +36,7 @@ data class SubjectDataSet(
 
 @Entity(CollectionNames.SUBJECT)
 data class Subject(
-    @Id("_id")
+    @Id
     var subjectId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -50,9 +50,9 @@ data class Subject(
     var dataset: SubjectDataSet = SubjectDataSet(),
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     @Transient

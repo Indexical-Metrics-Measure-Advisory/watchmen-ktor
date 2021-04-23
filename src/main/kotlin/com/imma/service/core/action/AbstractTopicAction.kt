@@ -1,6 +1,7 @@
 package com.imma.service.core.action
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.imma.model.EntityColumns
 import com.imma.model.core.Factor
 import com.imma.model.core.Topic
 import com.imma.model.core.compute.*
@@ -240,12 +241,13 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		}
 
 		// do update
-		val id = oldOne["_id"]
+		val id = oldOne[EntityColumns.OBJECT_ID]
 		services.dynamicTopic {
-			updateOne(topic, updates, where { factor("_id") eq { value(id) } })
+			updateOne(topic, updates, where { factor(EntityColumns.OBJECT_ID) eq { value(id) } })
 		}
-		// TODO merge updated values to new one
-		newOne["_id"] = id
+
+		newOne[EntityColumns.OBJECT_ID] = id
+		// merge updated values to new one
 		updates.parts.forEach {
 			// here is id, see updates creation logic above
 			val factorId = it.factor.factorIdOrName

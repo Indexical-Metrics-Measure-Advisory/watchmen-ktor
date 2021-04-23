@@ -1,5 +1,6 @@
 package com.imma.service.core
 
+import com.imma.model.EntityColumns
 import com.imma.model.core.*
 import com.imma.service.Service
 import com.imma.service.Services
@@ -194,7 +195,7 @@ class EngineLogger(private val instanceId: String, services: Services) : Service
 		// return data changed on topics, for trigger next pipelines
 		return changes.fold(mutableMapOf<String, MutableList<Pair<Any?, Any?>>>()) { map, (topicId, oldValue, newValue) ->
 			// new value always exists, and it is always be a map with "_id"
-			val dataId = (newValue!! as Map<*, *>)["_id"]!!
+			val dataId = (newValue!! as Map<*, *>)[EntityColumns.OBJECT_ID]!!
 			// mix topic id and data id, as key
 			val key = "$topicId,$dataId"
 			val diffs = map[key]

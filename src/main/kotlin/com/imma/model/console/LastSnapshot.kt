@@ -7,7 +7,7 @@ import com.imma.persist.annotation.Id
 
 @Entity(CollectionNames.LAST_SNAPSHOT)
 class LastSnapshot(
-    @Id("_id")
+    @Id
     var userId: String? = null,
     @Field("language")
     var language: String? = null,

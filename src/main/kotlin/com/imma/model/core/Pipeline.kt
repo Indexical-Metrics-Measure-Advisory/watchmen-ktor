@@ -52,7 +52,7 @@ enum class PipelineTriggerType(val type: String) {
 
 @Entity(CollectionNames.PIPELINE)
 data class Pipeline(
-    @Id("_id")
+    @Id
     var pipelineId: String? = null,
     @Field("topic_id")
     var topicId: String? = null,
@@ -70,8 +70,8 @@ data class Pipeline(
     var enabled: Boolean = false,
     @Field("validated")
     var validated: Boolean = false,
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple(), Conditional

@@ -7,7 +7,7 @@ import java.util.*
 
 @Entity(CollectionNames.SPACE)
 data class Space(
-    @Id("_id")
+    @Id
     var spaceId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -15,9 +15,9 @@ data class Space(
     var description: String? = null,
     @Field("topic_ids")
     var topicIds: List<String>? = mutableListOf(),
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     // transient fields here for avoid construct exception by spring data using kotlin data class

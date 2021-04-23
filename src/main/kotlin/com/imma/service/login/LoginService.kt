@@ -5,7 +5,6 @@ import com.imma.model.admin.User
 import com.imma.service.Service
 import com.imma.service.Services
 import com.imma.utils.getCurrentDateTime
-import com.imma.utils.getCurrentDateTimeAsString
 import org.mindrot.jbcrypt.BCrypt
 
 class LoginService(services: Services) : Service(services) {

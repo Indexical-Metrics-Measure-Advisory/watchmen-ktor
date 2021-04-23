@@ -22,3 +22,9 @@ object CollectionNames {
 
     const val RUNTIME_PIPELINE_LOG: String = "runtime_pipeline_logs"
 }
+
+object EntityColumns {
+    const val OBJECT_ID = "_id"
+    const val CREATED_AT = "_create_time"
+    const val LAST_MODIFIED_AT = "_last_modify_time"
+}

@@ -1,5 +1,6 @@
 package com.imma.persist.mango
 
+import com.imma.model.EntityColumns
 import com.imma.model.core.Factor
 import com.imma.model.core.FactorType
 import com.imma.model.core.Topic
@@ -25,7 +26,10 @@ class DynamicFactorDef(val factor: Factor, type: EntityFieldType) : EntityFieldD
 	}
 }
 
-private val id = DynamicFactorDef(Factor(factorId = "_id", name = "_id"), EntityFieldType.ID)
+private val id = DynamicFactorDef(
+	Factor(factorId = EntityColumns.OBJECT_ID, name = EntityColumns.OBJECT_ID),
+	EntityFieldType.ID
+)
 private val createdAt = DynamicFactorDef(
 	Factor(factorId = "_create_time", name = "_create_time"),
 	EntityFieldType.CREATED_AT

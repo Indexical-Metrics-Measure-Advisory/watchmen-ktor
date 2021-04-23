@@ -45,7 +45,7 @@ data class ReportGraphics(
 
 @Entity(CollectionNames.CONNECTED_SPACE_GRAPHICS)
 data class ConnectedSpaceGraphics(
-    @Id("_id")
+    @Id
     var connectId: String? = null,
     @Field("user_id")
     var userId: String? = null,

@@ -35,7 +35,7 @@ data class TopicGraphics(
 
 @Entity(CollectionNames.PIPELINE_GRAPHICS)
 data class PipelineGraphics(
-    @Id("_id")
+    @Id
     var userId: String? = null,
     @Field("topics")
     var topics: List<TopicGraphics> = mutableListOf()

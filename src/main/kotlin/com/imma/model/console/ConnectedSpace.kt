@@ -7,7 +7,7 @@ import java.util.*
 
 @Entity(CollectionNames.CONNECTED_SPACE)
 data class ConnectedSpace(
-    @Id("_id")
+    @Id
     var connectId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -17,9 +17,9 @@ data class ConnectedSpace(
     var userId: String? = null,
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     @Transient

@@ -10,7 +10,7 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.ENUM)
 class EnumForHolder {
-    @Id("_id")
+    @Id
     var enumId: String? = null
 
     @Field("name")

@@ -10,7 +10,7 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.TOPIC)
 class TopicForHolder {
-    @Id("_id")
+    @Id
     var topicId: String? = null
 
     @Field("name")

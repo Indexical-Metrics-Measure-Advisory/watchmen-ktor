@@ -118,7 +118,7 @@ enum class TopicType(val type: String) {
 
 @Entity(CollectionNames.TOPIC)
 data class Topic(
-    @Id("_id")
+    @Id
     var topicId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -130,8 +130,8 @@ data class Topic(
     var description: String? = null,
     @Field("factors")
     var factors: MutableList<Factor> = mutableListOf(),
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple()

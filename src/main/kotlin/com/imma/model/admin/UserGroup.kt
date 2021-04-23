@@ -7,7 +7,7 @@ import java.util.*
 
 @Entity(CollectionNames.USER_GROUP)
 data class UserGroup(
-    @Id("_id")
+    @Id
     var userGroupId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -15,9 +15,9 @@ data class UserGroup(
     var description: String? = null,
     @Field("space_ids")
     var spaceIds: List<String>? = mutableListOf(),
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple() {
     // transient fields here for avoid construct exception by spring data using kotlin data class

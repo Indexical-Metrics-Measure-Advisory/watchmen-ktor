@@ -10,7 +10,7 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.SPACE)
 class AvailableSpace {
-    @Id("_id")
+    @Id
     var spaceId: String? = null
 
     @Field("name")

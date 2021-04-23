@@ -7,7 +7,7 @@ import java.util.*
 
 @Entity
 data class EnumItem(
-    @Id("_id")
+    @Id
     var enumItemId: String? = null,
 	@Field("code")
 	var code: String? = null,
@@ -17,15 +17,15 @@ data class EnumItem(
 	var replaceCode: String? = null,
 	@Field("parent_code")
 	var parentCode: String? = null,
-	@CreatedAt("_create_time")
+	@CreatedAt
 	var createTime: Date? = null,
-	@LastModifiedAt("_last_modify_time")
+	@LastModifiedAt
 	var lastModifyTime: Date? = null,
 )
 
 @Entity(CollectionNames.ENUM)
 data class Enum(
-	@Id("_id")
+	@Id
 	var enumId: String? = null,
 	@Field("name")
 	var name: String? = null,
@@ -35,8 +35,8 @@ data class Enum(
 	var parentEnumId: String? = null,
 	@Transient
 	var items: MutableList<EnumItem> = mutableListOf(),
-	@CreatedAt("_create_time")
+	@CreatedAt
 	override var createTime: Date? = null,
-	@LastModifiedAt("_last_modify_time")
+	@LastModifiedAt
 	override var lastModifyTime: Date? = null,
 ) : Tuple()

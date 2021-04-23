@@ -116,7 +116,7 @@ data class StageLog(
 
 @Entity(CollectionNames.RUNTIME_PIPELINE_LOG)
 data class PipelineRuntimeLog(
-	@Id("_id")
+	@Id
 	override var uid: String? = null,
 	@Field("pipeline_id")
 	var pipelineId: String? = null,
@@ -140,8 +140,8 @@ data class PipelineRuntimeLog(
 	override var message: String? = null,
 	@Field("error")
 	override var error: String? = null,
-	@CreatedAt("_create_time")
+	@CreatedAt
 	var createTime: Date? = null,
-	@LastModifiedAt("_last_modify_time")
+	@LastModifiedAt
 	var lastModifyTime: Date? = null,
 ) : LogHasConditional

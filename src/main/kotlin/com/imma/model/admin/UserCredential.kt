@@ -7,14 +7,14 @@ import java.util.*
 
 @Entity(CollectionNames.USER_CREDENTIAL)
 data class UserCredential(
-    @Id("_id")
+    @Id
     var userId: String? = null,
     @Field("name")
     var name: String? = null,
     @Field("credential")
     var credential: String? = null,
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple()

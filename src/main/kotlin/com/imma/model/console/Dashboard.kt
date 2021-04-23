@@ -31,7 +31,7 @@ data class Paragraph(
 
 @Entity(CollectionNames.DASHBOARD)
 data class Dashboard(
-    @Id("_id")
+    @Id
     var dashboardId: String? = null,
     @Field("name")
     var name: String? = null,
@@ -45,8 +45,8 @@ data class Dashboard(
     var paragraphs: List<Paragraph> = mutableListOf(),
     @Field("last_visit_time")
     var lastVisitTime: String? = null,
-    @CreatedAt("_create_time")
+    @CreatedAt
     override var createTime: Date? = null,
-    @LastModifiedAt("_last_modify_time")
+    @LastModifiedAt
     override var lastModifyTime: Date? = null,
 ) : Tuple()
