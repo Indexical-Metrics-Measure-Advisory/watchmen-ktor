@@ -27,4 +27,14 @@ object EntityColumns {
     const val OBJECT_ID = "_id"
     const val CREATED_AT = "_create_time"
     const val LAST_MODIFIED_AT = "_last_modify_time"
+
+    const val AGGREGATE_ASSIST = "_aggregate_assist"
+    const val EMPTY_AGGREGATE_ASSIST = "{}"
+    const val AVG_COUNT = "avg_count"
+}
+
+object ConstantPredefines {
+    const val NEXT_SEQ = "&nextSeq"
+    const val COUNT = "&count"
+    const val LENGTH = "&length"
 }

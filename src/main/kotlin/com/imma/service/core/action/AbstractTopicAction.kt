@@ -299,23 +299,23 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 	}
 
 	private fun fromAggregateAssist(one: Map<String, *>, key: String, defaultValue: Any? = null): Any? {
-		val jsonStr = one["_aggregate_assist"] as String?
-		val assist = jsonParer.readValue(jsonStr ?: "{}", Map::class.java)
+		val jsonStr = one[EntityColumns.AGGREGATE_ASSIST] as String?
+		val assist = jsonParer.readValue(jsonStr ?: EntityColumns.EMPTY_AGGREGATE_ASSIST, Map::class.java)
 		return assist[key] ?: defaultValue
 	}
 
 	private fun getCountOfAvg(one: Map<String, *>, factor: Factor): BigDecimal {
 		val name = DynamicTopicKits.toFieldName(factor.name!!)
-		return toNumeric(fromAggregateAssist(one, "$name.avg_count"), BigDecimal.ZERO)
+		return toNumeric(fromAggregateAssist(one, "$name.${EntityColumns.AVG_COUNT}"), BigDecimal.ZERO)
 	}
 
 	@Suppress("SameParameterValue")
 	private fun setCountOfAvg(values: MutableMap<String, BigDecimal>, factor: Factor, value: BigDecimal) {
 		val name = DynamicTopicKits.toFieldName(factor.name!!)
-		values["$name.avg_count"] = value
+		values["$name.${EntityColumns.AVG_COUNT}"] = value
 	}
 
 	private fun toAggregateAssist(values: Map<String, BigDecimal>): Pair<String, Map<String, BigDecimal>> {
-		return "_aggregate_assist" to values
+		return EntityColumns.AGGREGATE_ASSIST to values
 	}
 }

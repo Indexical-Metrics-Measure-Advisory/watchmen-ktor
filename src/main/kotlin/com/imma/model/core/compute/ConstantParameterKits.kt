@@ -1,5 +1,6 @@
 package com.imma.model.core.compute
 
+import com.imma.model.ConstantPredefines
 import com.imma.model.snowflake.SnowflakeHelper
 
 typealias GetFirstValue = (propertyName: String) -> Any?
@@ -18,9 +19,9 @@ class ConstantParameterKits {
 		/**
 		 * variable can be:
 		 * 1. x, x[.y[.z]...] -> property path, get value from given function, and get next from previous value, value must be a map. multiple segments are allowed,
-		 * 2. &nextSeq -> next auto generated sequence,
-		 * 3. x.&count, x[.y[.z]...].&count -> property path, get value from given function, and size of this value. value must be a collection/array or a map,
-		 * 4. x.&length, x[.y[.z]...].&length -> property path, get value from given function, and size of this value. value must be a string.
+		 * 2. {@code ConstantPredefines.NEXT_SEQ} -> next auto generated sequence,
+		 * 3. x.{@code ConstantPredefines.COUNT}, x[.y[.z]...].{@code ConstantPredefines.COUNT} -> property path, get value from given function, and size of this value. value must be a collection/array or a map,
+		 * 4. x.{@code ConstantPredefines.LENGTH}, x[.y[.z]...].{@code ConstantPredefines.LENGTH} -> property path, get value from given function, and size of this value. value must be a string.
 		 *
 		 * if any path returns a collection or an array, the next level will retrieve value from each elements in this collection or array.
 		 * eg. use {x.y.z},
@@ -46,13 +47,13 @@ class ConstantParameterKits {
 			val parts = variable.split(".")
 			for ((index, part) in parts.withIndex()) {
 				value = when {
-					index == 0 && part == "&nextSeq" -> SnowflakeHelper.nextSnowflakeId()
+					index == 0 && part == ConstantPredefines.NEXT_SEQ -> SnowflakeHelper.nextSnowflakeId()
 					index == 0 -> getFirstValue(part)
 					value == null -> null
-					part == "&count" && value is Collection<*> -> value.size
-					part == "&count" && value is Array<*> -> value.size
-					part == "&count" && value is Map<*, *> -> value.size
-					part == "&length" && value is String -> value.length
+					part == ConstantPredefines.COUNT && value is Collection<*> -> value.size
+					part == ConstantPredefines.COUNT && value is Array<*> -> value.size
+					part == ConstantPredefines.COUNT && value is Map<*, *> -> value.size
+					part == ConstantPredefines.LENGTH && value is String -> value.length
 					value is Map<*, *> -> value[part]
 					value is Collection<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
 					value is Array<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
