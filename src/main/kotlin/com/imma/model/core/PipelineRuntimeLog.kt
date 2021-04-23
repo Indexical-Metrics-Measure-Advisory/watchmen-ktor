@@ -114,7 +114,7 @@ data class StageLog(
 	override var error: String? = null
 ) : LogHasConditional
 
-@Entity(CollectionNames.PIPELINE_LOG)
+@Entity(CollectionNames.RUNTIME_PIPELINE_LOG)
 data class PipelineRuntimeLog(
 	@Id("_id")
 	override var uid: String? = null,

@@ -39,6 +39,6 @@ class DynamicTopicService(services: Services) : Service(services) {
 	}
 
 	fun insertRuntimePipelineLog(runtimeLog: PipelineRuntimeLog) {
-		persist().insertOne(runtimeLog, PipelineRuntimeLog::class.java, CollectionNames.PIPELINE_LOG)
+		persist().insertOne(runtimeLog, PipelineRuntimeLog::class.java, CollectionNames.RUNTIME_PIPELINE_LOG)
 	}
 }

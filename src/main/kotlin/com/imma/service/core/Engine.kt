@@ -11,10 +11,6 @@ data class PipelineTrigger(
 
 class Engine {
 	companion object {
-		fun run(topicId: String, trigger: PipelineTrigger) {
-			// TODO find pipelines by given topic id, and trigger them
-		}
-
 		fun run(pipeline: Pipeline, trigger: PipelineTrigger) {
 			PipelineContext(pipeline, trigger).use { PipelineWorker(it).run() }
 		}

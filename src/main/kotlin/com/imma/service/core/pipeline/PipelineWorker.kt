@@ -1,5 +1,6 @@
 package com.imma.service.core.pipeline
 
+import com.imma.model.core.Pipeline
 import com.imma.model.core.compute.takeAsParameterJointOrThrow
 import com.imma.service.core.Engine
 import com.imma.service.core.EngineWorker
@@ -11,7 +12,7 @@ import com.imma.service.core.stage.StageContext
 import com.imma.service.core.stage.StageWorker
 
 class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
-	private val logger: PipelineLogger by lazy { PipelineLogger(context) }
+	private val pipelineLogger: PipelineLogger by lazy { PipelineLogger(context) }
 
 	private fun shouldRun(): Boolean {
 		return context.run {
@@ -30,36 +31,55 @@ class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
 		if (shouldRun()) {
 			try {
 				this.markStart()
-				logger.start("Start to run pipeline.", context.previousOfTriggerData, context.currentOfTriggerData)
+				pipelineLogger.start(
+					"Start to run pipeline.",
+					context.previousOfTriggerData,
+					context.currentOfTriggerData
+				)
 				with(context.pipeline) {
 					stages.forEach { StageWorker(StageContext(context, it)).run() }
 				}
 
-				logger.success("End of run pipeline.", this.markEnd())
+				pipelineLogger.success("End of run pipeline.", this.markEnd())
 			} catch (t: Throwable) {
-				logger.fail("Failed to run pipeline.", t, this.markEnd())
+				pipelineLogger.fail("Failed to run pipeline.", t, this.markEnd())
 			}
 		} else {
-			logger.ignore("Pipeline ignored because of condition not reached.")
+			pipelineLogger.ignore("Pipeline ignored because of condition not reached.")
 		}
 	}
 
 	fun run() {
-		context.pipeline.apply {
+		with(context) {
 			try {
-				when {
-					!validated -> logger.ignore("Pipeline is invalidated.", RunType.invalidate)
-					topicId.isNullOrBlank() -> logger.ignore(
-						"Pipeline is invalidated because of source topic is not given.",
-						RunType.invalidate
-					)
-					!enabled -> logger.ignore("Pipeline is not enabled.", RunType.disable)
-					else -> doRun()
+				pipeline.apply {
+					when {
+						!validated -> pipelineLogger.ignore("Pipeline is invalidated.", RunType.invalidate)
+						topicId.isNullOrBlank() -> pipelineLogger.ignore(
+							"Pipeline is invalidated because of source topic is not given.",
+							RunType.invalidate
+						)
+						!enabled -> pipelineLogger.ignore("Pipeline is not enabled.", RunType.disable)
+						else -> doRun()
+					}
 				}
 			} finally {
 				// write log
-				val changes = context.logger.output(context)
-				changes.forEach { Engine.run(it.first, PipelineTrigger(it.second, it.third)) }
+				val changes = logger.output(context)
+
+				// TODO pipelines definition should be retrieved from memory cache
+				val pipelines: MutableMap<String, List<Pipeline>> = mutableMapOf()
+				changes.map {
+					val topicId = it.first
+					if (pipelines[topicId] == null) {
+						pipelines[topicId] = services.pipeline { listPipelines(topicId) }
+					}
+					it
+				}.forEach { change ->
+					// TODO next pipelines trigger should be parallel
+					val (topicId, oldValue, newValue) = change
+					pipelines[topicId]?.forEach { Engine.run(it, PipelineTrigger(oldValue, newValue)) }
+				}
 			}
 		}
 	}
