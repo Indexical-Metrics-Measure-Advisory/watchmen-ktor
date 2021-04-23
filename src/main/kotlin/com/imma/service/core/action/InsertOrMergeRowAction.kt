@@ -14,6 +14,6 @@ class InsertOrMergeRowAction(private val context: ActionContext, private val log
 			}
 //			services.dynamicTopic { insertOne(topic, one) }
 		}
-		logger.log(mutableMapOf("newValue" to value), RunType.process)
+		logger.log("newValue" to value)
 	}
 }

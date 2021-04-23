@@ -20,6 +20,6 @@ class ReadFactorAction(private val context: ActionContext, private val logger: A
             variables[variableName] = row
             row
         }
-        logger.log(mutableMapOf("value" to value), RunType.process)
+        logger.log("value" to value)
     }
 }

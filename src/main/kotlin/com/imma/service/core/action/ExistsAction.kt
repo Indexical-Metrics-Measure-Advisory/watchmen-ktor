@@ -16,6 +16,6 @@ class ExistsAction(private val context: ActionContext, private val logger: Actio
                 variables[variableName] = it
             }
         }
-        logger.log(mutableMapOf("value" to value), RunType.process)
+        logger.log("value" to value)
     }
 }

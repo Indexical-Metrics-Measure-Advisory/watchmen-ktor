@@ -1,7 +1,8 @@
 package com.imma.service.core.log
 
 import com.imma.model.core.PipelineStageUnitActionType
-import java.time.ZoneOffset
+import com.imma.model.core.RunStatus
+import java.time.ZoneId
 import java.util.*
 
 data class RunLog(
@@ -17,7 +18,7 @@ data class RunLog(
 	var message: String? = null,
 	var error: String? = null,
 	var data: Map<String, Any?>? = null,
-	var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC)).time,
+	var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneId.systemDefault())).time,
 	var completeTime: Double? = null,
 	var insertCount: Int? = null,
 	var updateCount: Int? = null

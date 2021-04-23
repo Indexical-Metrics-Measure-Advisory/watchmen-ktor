@@ -22,4 +22,12 @@ class DynamicTopicService(services: Services) : Service(services) {
 	fun <T> findOne(topic: Topic, select: Select, where: Where): T? {
 		return persist().findOne(select, where, Map::class.java, topic.name!!)
 	}
+
+	fun <T> list(topic: Topic, where: Where): List<T> {
+		return persist().list(where, Map::class.java, topic.name!!)
+	}
+
+	fun <T> list(topic: Topic, select: Select, where: Where): List<T> {
+		return persist().list(select, where, Map::class.java, topic.name!!)
+	}
 }

@@ -7,35 +7,38 @@ import com.imma.service.core.*
 import com.imma.service.core.pipeline.PipelineContext
 
 class StageContext(
-    private val pipelineContext: PipelineContext,
-    val stage: PipelineStage,
-    val sourceData: PipelineSourceData
+	private val pipelineContext: PipelineContext,
+	val stage: PipelineStage,
+	val sourceData: PipelineSourceData,
 ) : RunContext {
-    val instanceId: String
-        get() {
-            return pipelineContext.instanceId
-        }
-    val pipeline: Pipeline
-        get() {
-            return pipelineContext.pipeline
-        }
+	val instanceId: String
+		get() {
+			return pipelineContext.instanceId
+		}
+	val pipeline: Pipeline
+		get() {
+			return pipelineContext.pipeline
+		}
 
-    val topics: PipelineTopics
-        get() {
-            return pipelineContext.topics
-        }
-    val variables: PipelineVariables by lazy { createPipelineVariables() }
+	val topics: PipelineTopics
+		get() {
+			return pipelineContext.topics
+		}
+	val variables: PipelineVariables
+		get() {
+			return pipelineContext.variables
+		}
 
-    val services: Services
-        get() {
-            return pipelineContext.services
-        }
-    val logger: EngineLogger
-        get() {
-            return pipelineContext.logger
-        }
+	val services: Services
+		get() {
+			return pipelineContext.services
+		}
+	val logger: EngineLogger
+		get() {
+			return pipelineContext.logger
+		}
 
-    override fun isSourceTopic(topicId: String): Boolean {
-        return topicId == pipeline.topicId
-    }
+	override fun isSourceTopic(topicId: String): Boolean {
+		return topicId == pipeline.topicId
+	}
 }
