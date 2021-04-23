@@ -6,11 +6,12 @@ class InsertRowAction(private val context: ActionContext, private val logger: Ac
 		with(context) {
 			val topic = prepareTopic()
 			val mapping = prepareMapping()
-			insertRow(topic, mapping)
+			topic.topicId to insertRow(topic, mapping)
 		}.also {
 			logger.log(
+				"topicId" to it.first,
 				"oldValue" to null,
-				"newValue" to it,
+				"newValue" to it.second,
 				"insertCount" to 1,
 				"updateCount" to 0
 			)

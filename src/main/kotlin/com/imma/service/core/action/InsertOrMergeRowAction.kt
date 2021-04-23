@@ -12,18 +12,19 @@ class InsertOrMergeRowAction(private val context: ActionContext, private val log
 			val oldOne = services.dynamicTopic { findOne(topic, findBy) }
 
 			if (oldOne == null) {
-				oldOne to insertRow(topic, mapping)
+				Triple(topic.topicId, oldOne, insertRow(topic, mapping))
 			} else {
-				oldOne to mergeRow(topic, mapping, oldOne)
+				Triple(topic.topicId, oldOne, mergeRow(topic, mapping, oldOne))
 			}
 		}.also {
 			logger.log(
-				"oldValue" to it.first,
-				"newValue" to it.second,
+				"topicId" to it.first,
+				"oldValue" to it.second,
+				"newValue" to it.third,
 				// old value not exists, insert 1; otherwise insert 0
-				"insertCount" to if (it.first == null) 1 else 0,
+				"insertCount" to if (it.second == null) 1 else 0,
 				// old value not exists, update 0; otherwise update 1
-				"updateCount" to if (it.first == null) 0 else 1
+				"updateCount" to if (it.second == null) 0 else 1
 			)
 		}
 	}

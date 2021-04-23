@@ -10,11 +10,11 @@ class ReadFactorAction(private val context: ActionContext, private val logger: A
 			val topic = prepareTopic()
 			val factor = prepareFactor(topic)
 			val joint = prepareBy()
-			val row: Any? = services.dynamicTopic {
+			services.dynamicTopic {
 				findOne(topic, select { factor(factor.name!!) }, build(topic, joint))
+			}.also {
+				variables[variableName] = it
 			}
-			variables[variableName] = row
-			row
 		}.also {
 			logger.log("value" to it)
 		}

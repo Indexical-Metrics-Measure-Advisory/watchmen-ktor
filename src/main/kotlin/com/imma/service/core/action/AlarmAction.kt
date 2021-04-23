@@ -54,16 +54,16 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
 				val severity = AlarmActionSeverity.values().find {
 					it.severity == action["severity"]?.toString()
 				} ?: AlarmActionSeverity.medium
-				val message = compute(param)?.toString() ?: "No Message"
-				CONSUMERS.forEach { consumer ->
-					try {
-						consumer.alarm(severity, message)
-					} catch (t: Throwable) {
-						// ignore and write throwable to system log
-						systemLogger.error("Error occurred on alarm consumer[${consumer.javaClass}]", t)
+				(compute(param)?.toString() ?: "No Message").also {
+					CONSUMERS.forEach { consumer ->
+						try {
+							consumer.alarm(severity, it)
+						} catch (t: Throwable) {
+							// ignore and write throwable to system log
+							systemLogger.error("Error occurred on alarm consumer[${consumer.javaClass}]", t)
+						}
 					}
 				}
-				message
 			}.also {
 				logger.log("value" to it, "conditionResult" to true)
 			}

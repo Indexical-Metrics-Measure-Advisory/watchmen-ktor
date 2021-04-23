@@ -13,11 +13,12 @@ class MergeRowAction(private val context: ActionContext, private val logger: Act
 			val oldOne = services.dynamicTopic { findOne(topic, findBy) }
 				?: throw RuntimeException("Cannot find row from topic[${topic.name}] on filter[$findBy].")
 
-			oldOne to mergeRow(topic, mapping, oldOne)
+			Triple(topic.topicId, oldOne, mergeRow(topic, mapping, oldOne))
 		}.also {
 			logger.log(
-				"oldValue" to it.first,
-				"newValue" to it.second,
+				"topicId" to it.first,
+				"oldValue" to it.second,
+				"newValue" to it.third,
 				"insertCount" to 0,
 				"updateCount" to 1
 			)

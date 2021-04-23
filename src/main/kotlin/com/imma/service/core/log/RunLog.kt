@@ -20,6 +20,4 @@ data class RunLog(
 	var data: Map<String, Any?>? = null,
 	var createTime: Date = Calendar.getInstance(TimeZone.getTimeZone(ZoneId.systemDefault())).time,
 	var completeTime: Double? = null,
-	var insertCount: Int? = null,
-	var updateCount: Int? = null
 )

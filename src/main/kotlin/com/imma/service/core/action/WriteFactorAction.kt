@@ -26,14 +26,16 @@ class WriteFactorAction(private val context: ActionContext, private val logger: 
 			}.let {
 				mutableListOf(it)
 			}
+
 			// still raise whole data to trigger next pipeline, if exists
-			oldOne to mergeRow(topic, mapping, oldOne)
+			Triple(topic.topicId, oldOne, mergeRow(topic, mapping, oldOne))
 		}.also {
 			logger.log(
-				"oldValue" to it.first,
-				"newValue" to it.second,
+				"topicId" to it.first,
+				"oldValue" to it.second,
+				"newValue" to it.third,
 				"insertCount" to 0,
-				"updateCount" to 1
+				"updateCount" to 1,
 			)
 		}
 	}
