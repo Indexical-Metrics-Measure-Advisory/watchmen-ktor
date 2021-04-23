@@ -1,19 +1,40 @@
 package com.imma.service.core.action
 
+import com.imma.model.core.mapping.RowMapping
+import com.imma.model.core.mapping.takeAsFactorMappingOrThrow
+
 class WriteFactorAction(private val context: ActionContext, private val logger: ActionLogger) :
 	AbstractTopicAction(context) {
 	fun run() {
-		val value = with(context) {
+		with(context) {
 			val topic = prepareTopic()
 			val factor = prepareFactor(topic)
 			val source = prepareSource()
-			var by = prepareBy()
-			val one = mutableMapOf<String, Any?>().apply {
-				// TODO
+			val arithmetic = prepareArithmetic()
+			val by = prepareBy()
+
+			val findBy = build(topic, by)
+			val oldOne = services.dynamicTopic { findOne(topic, findBy) }
+				?: throw RuntimeException("Cannot find row from topic[${topic.name}] on filter[$findBy].")
+
+			val mapping: RowMapping = mapOf(
+				"source" to source,
+				"factorId" to factor.factorId,
+				"arithmetic" to arithmetic
+			).let {
+				takeAsFactorMappingOrThrow(it)
+			}.let {
+				mutableListOf(it)
 			}
-//			services.dynamicTopic { insertOne(topic, one) }
+			// still raise whole data to trigger next pipeline, if exists
+			oldOne to mergeRow(topic, mapping, oldOne)
 		}.also {
-			logger.log("newValue" to it)
+			logger.log(
+				"oldValue" to it.first,
+				"newValue" to it.second,
+				"insertCount" to 0,
+				"updateCount" to 1
+			)
 		}
 	}
 }

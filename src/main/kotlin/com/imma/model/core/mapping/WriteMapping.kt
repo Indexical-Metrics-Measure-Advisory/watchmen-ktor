@@ -19,7 +19,7 @@ data class FactorMapping(
 
 typealias RowMapping = MutableList<FactorMapping>
 
-private fun takeAsFactorMappingOrThrow(map: Map<*, *>): FactorMapping {
+fun takeAsFactorMappingOrThrow(map: Map<*, *>): FactorMapping {
 	val source = map["source"] ?: throw RuntimeException("Source of factor mapping[$map] cannot be null.")
 	if (source !is Map<*, *>) {
 		throw RuntimeException("Source of factor mapping[$map] should be a map, but is[$source] now.")

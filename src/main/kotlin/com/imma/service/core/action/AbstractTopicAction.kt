@@ -122,6 +122,15 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		}
 	}
 
+	protected fun prepareArithmetic(): WriteAggregateArithmetic {
+		return with(context) {
+			when (val v = action["arithmetic"]) {
+				null -> WriteAggregateArithmetic.none
+				else -> WriteAggregateArithmetic.valueOf(v.toString())
+			}
+		}
+	}
+
 	protected fun compute(parameter: Parameter): Any? {
 		return with(context) {
 			val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
