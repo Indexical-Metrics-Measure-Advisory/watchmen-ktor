@@ -31,11 +31,11 @@ private val id = DynamicFactorDef(
 	EntityFieldType.ID
 )
 private val createdAt = DynamicFactorDef(
-	Factor(factorId = "_create_time", name = "_create_time"),
+	Factor(factorId = EntityColumns.CREATED_AT, name = EntityColumns.CREATED_AT),
 	EntityFieldType.CREATED_AT
 )
 private val lastModifiedAt = DynamicFactorDef(
-	Factor(factorId = "_last_modify_time", name = "_last_modify_time"),
+	Factor(factorId = EntityColumns.LAST_MODIFIED_AT, name = EntityColumns.LAST_MODIFIED_AT),
 	EntityFieldType.LAST_MODIFIED_AT
 )
 

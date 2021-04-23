@@ -24,8 +24,8 @@ class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(na
 }
 
 private val id = MapEntityFieldDef(EntityColumns.OBJECT_ID, EntityFieldType.ID)
-private val createdAt = MapEntityFieldDef("_create_time", EntityFieldType.CREATED_AT)
-private val lastModifiedAt = MapEntityFieldDef("_last_modify_time", EntityFieldType.LAST_MODIFIED_AT)
+private val createdAt = MapEntityFieldDef(EntityColumns.CREATED_AT, EntityFieldType.CREATED_AT)
+private val lastModifiedAt = MapEntityFieldDef(EntityColumns.LAST_MODIFIED_AT, EntityFieldType.LAST_MODIFIED_AT)
 
 /**
  * entity definition for map.
