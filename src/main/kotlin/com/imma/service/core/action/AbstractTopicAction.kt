@@ -1,24 +1,46 @@
 package com.imma.service.core.action
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.imma.model.core.Factor
 import com.imma.model.core.Topic
-import com.imma.model.core.compute.Parameter
-import com.imma.model.core.compute.ParameterJoint
-import com.imma.model.core.compute.takeAsParameterJointOrThrow
-import com.imma.model.core.compute.takeAsParameterOrThrow
+import com.imma.model.core.compute.*
 import com.imma.model.core.mapping.RowMapping
 import com.imma.model.core.mapping.WriteAggregateArithmetic
 import com.imma.model.core.mapping.takeAsRowMappingOrThrow
+import com.imma.persist.DynamicTopicKits
 import com.imma.persist.core.Updates
 import com.imma.persist.core.Where
 import com.imma.persist.core.update
 import com.imma.persist.core.where
+import com.imma.service.core.PipelineTriggerData
 import com.imma.service.core.parameter.*
 import com.imma.utils.neverOccur
 import com.imma.utils.nothing
 import java.math.BigDecimal
 
+class PipelineTriggerDataDelegate : LinkedHashMap<String, Any?>(), PipelineTriggerData {
+	override fun get(key: String): Any {
+		return super.get(key) ?: 0
+	}
+}
+
 abstract class AbstractTopicAction(private val context: ActionContext) {
+	private val jsonParer by lazy { ObjectMapper() }
+
+	private fun toNumeric(value: Any?): BigDecimal? {
+		return value.run {
+			ValueKits.computeToNumeric(this) { "Cannot cast value[$this] to numeric." }
+		}
+	}
+
+	private fun toNumeric(value: Any?, defaultValue: BigDecimal): BigDecimal {
+		return toNumeric(value ?: defaultValue)!!
+	}
+
+	private fun toNumericOrZero(value: Any?): BigDecimal {
+		return toNumeric(value, BigDecimal.ZERO)
+	}
+
 	protected fun prepareVariableName(): String {
 		return with(context) {
 			val variableName = action["variableName"]?.toString()
@@ -126,6 +148,16 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		}
 	}
 
+	private fun delegatePrevious(previousOfTriggerData: PipelineTriggerData?): PipelineTriggerData {
+		return if (previousOfTriggerData == null) {
+			PipelineTriggerDataDelegate()
+		} else {
+			PipelineTriggerDataDelegate().apply {
+				putAll(previousOfTriggerData)
+			}
+		}
+	}
+
 	private fun toNumericUsePrevious(param: Parameter): Any? {
 		return with(context) {
 			val worker = ParameterWorker(pipeline, topics, delegatePrevious(previousOfTriggerData), variables)
@@ -230,5 +262,15 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 
 		// build update
 		set(factorId) to newSum
+	}
+
+	private fun fromAggregateAssist(from: String?, factor: Factor, defaultValue: Any? = null): Any? {
+		val assist = jsonParer.readValue(from ?: "{}", Map::class.java)
+		return assist[DynamicTopicKits.toFieldName(factor.name!!)] ?: defaultValue
+	}
+
+	@Suppress("SameParameterValue")
+	private fun itemCountAggregateAssist(from: String?, factor: Factor, defaultValue: BigDecimal): BigDecimal {
+		return toNumeric(fromAggregateAssist(from, factor), defaultValue)
 	}
 }

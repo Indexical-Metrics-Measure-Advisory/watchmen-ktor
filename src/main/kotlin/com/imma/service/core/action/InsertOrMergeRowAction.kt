@@ -1,7 +1,5 @@
 package com.imma.service.core.action
 
-import com.imma.service.core.parameter.ConditionBuilder
-
 class InsertOrMergeRowAction(private val context: ActionContext, private val logger: ActionLogger) :
 	AbstractTopicAction(context) {
 	fun run() {
@@ -10,7 +8,7 @@ class InsertOrMergeRowAction(private val context: ActionContext, private val log
 			val mapping = prepareMapping()
 			val by = prepareBy()
 
-			val findBy = ConditionBuilder(topic, pipeline, topics, currentOfTriggerData, variables).build(by)
+			val findBy = build(topic, by)
 			val oldOne = services.dynamicTopic { findOne(topic, findBy) }
 
 			if (oldOne == null) {
