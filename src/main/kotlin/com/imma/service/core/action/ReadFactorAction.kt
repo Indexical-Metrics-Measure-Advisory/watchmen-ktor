@@ -1,24 +1,22 @@
 package com.imma.service.core.action
 
 import com.imma.persist.core.select
-import com.imma.service.core.parameter.ConditionBuilder
 
 class ReadFactorAction(private val context: ActionContext, private val logger: ActionLogger) :
-    AbstractTopicAction(context, logger) {
-    fun run() {
-        val value = with(context) {
-            val variableName = prepareVariableName()
-            val topic = prepareTopic()
-            val factor = prepareFactor(topic)
-            val joint = prepareBy()
-            val row: Any? = services.dynamicTopic {
-                findOne(topic, select {
-                    factor(factor.name!!)
-                }, ConditionBuilder(topic, pipeline, topics, currentOfTriggerData, variables).build(joint))
-            }
-            variables[variableName] = row
-            row
-        }
-        logger.log("value" to value)
-    }
+	AbstractTopicAction(context) {
+	fun run() {
+		with(context) {
+			val variableName = prepareVariableName()
+			val topic = prepareTopic()
+			val factor = prepareFactor(topic)
+			val joint = prepareBy()
+			val row: Any? = services.dynamicTopic {
+				findOne(topic, select { factor(factor.name!!) }, build(topic, joint))
+			}
+			variables[variableName] = row
+			row
+		}.also {
+			logger.log("value" to it)
+		}
+	}
 }

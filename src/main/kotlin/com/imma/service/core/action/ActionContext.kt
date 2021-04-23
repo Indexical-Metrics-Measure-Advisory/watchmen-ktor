@@ -5,12 +5,13 @@ import com.imma.model.core.PipelineStage
 import com.imma.model.core.PipelineStageUnit
 import com.imma.model.core.PipelineStageUnitAction
 import com.imma.service.Services
-import com.imma.service.core.*
-import com.imma.service.core.parameter.ConditionBuilder
-import com.imma.service.core.parameter.ConditionWorker
+import com.imma.service.core.EngineLogger
+import com.imma.service.core.PipelineTopics
+import com.imma.service.core.PipelineTriggerData
+import com.imma.service.core.PipelineVariables
 import com.imma.service.core.unit.UnitContext
 
-class ActionContext(private val unitContext: UnitContext, val action: PipelineStageUnitAction) : RunContext {
+class ActionContext(private val unitContext: UnitContext, val action: PipelineStageUnitAction) {
 	val instanceId: String
 		get() = unitContext.instanceId
 	val pipeline: Pipeline
@@ -33,8 +34,4 @@ class ActionContext(private val unitContext: UnitContext, val action: PipelineSt
 		get() = unitContext.services
 	val logger: EngineLogger
 		get() = unitContext.logger
-
-	override fun isSourceTopic(topicId: String): Boolean {
-		return topicId == pipeline.topicId
-	}
 }

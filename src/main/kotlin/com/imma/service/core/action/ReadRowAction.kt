@@ -1,20 +1,20 @@
 package com.imma.service.core.action
 
-import com.imma.service.core.parameter.ConditionBuilder
-
 class ReadRowAction(private val context: ActionContext, private val logger: ActionLogger) :
-	AbstractTopicAction(context, logger) {
+	AbstractTopicAction(context) {
 	fun run() {
-		val value = with(context) {
+		with(context) {
 			val variableName = prepareVariableName()
 			val topic = prepareTopic()
 			val joint = prepareBy()
-			val row: Any? = services.dynamicTopic {
-				findOne(topic, ConditionBuilder(topic, pipeline, topics, currentOfTriggerData, variables).build(joint))
+
+			services.dynamicTopic {
+				findOne(topic, build(topic, joint))
+			}.also {
+				variables[variableName] = it
 			}
-			variables[variableName] = row
-			row
+		}.also {
+			logger.log("value" to it)
 		}
-		logger.log("value" to value)
 	}
 }

@@ -1,7 +1,7 @@
 package com.imma.service.core.action
 
 class WriteFactorAction(private val context: ActionContext, private val logger: ActionLogger) :
-	AbstractTopicAction(context, logger) {
+	AbstractTopicAction(context) {
 	fun run() {
 		val value = with(context) {
 			val topic = prepareTopic()
@@ -12,7 +12,8 @@ class WriteFactorAction(private val context: ActionContext, private val logger: 
 				// TODO
 			}
 //			services.dynamicTopic { insertOne(topic, one) }
+		}.also {
+			logger.log("newValue" to it)
 		}
-		logger.log("newValue" to value)
 	}
 }

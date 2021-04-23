@@ -5,7 +5,6 @@ import com.imma.service.core.pipeline.PipelineContext
 import com.imma.service.core.pipeline.PipelineWorker
 
 data class PipelineTrigger(
-	val topicId: String,
 	val previous: PipelineTriggerData? = null,
 	val now: PipelineTriggerData = mapOf()
 )

@@ -2,8 +2,6 @@ package com.imma.service.core.action
 
 import com.imma.model.core.compute.ConstantParameter
 import com.imma.model.core.compute.takeAsParameterJointOrThrow
-import com.imma.service.core.parameter.ConditionWorker
-import com.imma.service.core.parameter.ParameterWorker
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -19,7 +17,8 @@ interface AlarmConsumer {
 	fun alarm(severity: AlarmActionSeverity, message: String)
 }
 
-class AlarmAction(private val context: ActionContext, private val logger: ActionLogger) {
+class AlarmAction(private val context: ActionContext, private val logger: ActionLogger) :
+	AbstractTopicAction(context) {
 	private val systemLogger: Logger = LoggerFactory.getLogger(this.javaClass)
 
 	companion object {
@@ -43,34 +42,31 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
 				!conditional.toString().toBoolean() -> true
 				on == null -> true
 				on !is Map<*, *> -> throw RuntimeException("Unsupported condition found in alarm action.")
-				else -> ConditionWorker(pipeline, topics, currentOfTriggerData, variables).computeJoint(
-					takeAsParameterJointOrThrow(on)
-				)
+				else -> compute(takeAsParameterJointOrThrow(on))
 			}
 		}
 	}
 
 	fun run() {
 		if (shouldRun()) {
-			val value = with(context) {
+			with(context) {
 				val param = ConstantParameter(action["message"]?.toString(), false)
 				val severity = AlarmActionSeverity.values().find {
 					it.severity == action["severity"]?.toString()
 				} ?: AlarmActionSeverity.medium
-				ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
-					.computeParameter(param)?.toString() ?: "No Message"
-					.also { message ->
-						CONSUMERS.forEach { consumer ->
-							try {
-								consumer.alarm(severity, message)
-							} catch (t: Throwable) {
-								// ignore and write throwable to system log
-								systemLogger.error("Error occurred on alarm consumer[${consumer.javaClass}]", t)
-							}
-						}
+				val message = compute(param)?.toString() ?: "No Message"
+				CONSUMERS.forEach { consumer ->
+					try {
+						consumer.alarm(severity, message)
+					} catch (t: Throwable) {
+						// ignore and write throwable to system log
+						systemLogger.error("Error occurred on alarm consumer[${consumer.javaClass}]", t)
 					}
+				}
+				message
+			}.also {
+				logger.log("value" to it, "conditionResult" to true)
 			}
-			logger.log("value" to value, "conditionResult" to true)
 		} else {
 			logger.log("conditionResult" to false)
 		}

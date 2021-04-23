@@ -5,7 +5,7 @@ import com.imma.service.Services
 import com.imma.service.core.*
 import java.io.Closeable
 
-class PipelineContext(val pipeline: Pipeline, data: PipelineTrigger) : RunContext, Closeable {
+class PipelineContext(val pipeline: Pipeline, data: PipelineTrigger) : Closeable {
 	val services: Services by lazy { Services() }
 
 	/** logger use independent services */
@@ -30,10 +30,6 @@ class PipelineContext(val pipeline: Pipeline, data: PipelineTrigger) : RunContex
 
 	var previousOfTriggerData: PipelineTriggerData? = data.previous
 	var currentOfTriggerData: PipelineTriggerData = data.now
-
-	override fun isSourceTopic(topicId: String): Boolean {
-		return topicId == pipeline.topicId
-	}
 
 	override fun close() {
 		logger.close()

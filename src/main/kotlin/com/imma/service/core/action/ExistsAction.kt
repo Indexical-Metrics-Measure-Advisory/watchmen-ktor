@@ -1,20 +1,19 @@
 package com.imma.service.core.action
 
-import com.imma.service.core.parameter.ConditionBuilder
-
 class ExistsAction(private val context: ActionContext, private val logger: ActionLogger) :
-	AbstractTopicAction(context, logger) {
+	AbstractTopicAction(context) {
 	fun run() {
-		val value = with(context) {
+		with(context) {
 			val variableName = prepareVariableName()
 			val topic = prepareTopic()
 			val joint = prepareBy()
 			services.dynamicTopic {
-				exists(topic, ConditionBuilder(topic, pipeline, topics, currentOfTriggerData, variables).build(joint))
+				exists(topic, build(topic, joint))
 			}.also {
 				variables[variableName] = it
 			}
+		}.also {
+			logger.log("value" to it)
 		}
-		logger.log("value" to value)
 	}
 }

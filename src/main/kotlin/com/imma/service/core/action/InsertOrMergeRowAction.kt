@@ -1,19 +1,32 @@
 package com.imma.service.core.action
 
-import com.imma.service.core.log.RunType
+import com.imma.service.core.parameter.ConditionBuilder
 
 class InsertOrMergeRowAction(private val context: ActionContext, private val logger: ActionLogger) :
-	AbstractTopicAction(context, logger) {
+	AbstractTopicAction(context) {
 	fun run() {
-		val value = with(context) {
+		with(context) {
 			val topic = prepareTopic()
 			val mapping = prepareMapping()
-			var by = prepareBy()
-			val one = mutableMapOf<String, Any?>().apply {
-				// TODO
+			val by = prepareBy()
+
+			val findBy = ConditionBuilder(topic, pipeline, topics, currentOfTriggerData, variables).build(by)
+			val oldOne = services.dynamicTopic { findOne(topic, findBy) }
+
+			if (oldOne == null) {
+				oldOne to insertRow(topic, mapping)
+			} else {
+				oldOne to mergeRow(topic, mapping, oldOne)
 			}
-//			services.dynamicTopic { insertOne(topic, one) }
+		}.also {
+			logger.log(
+				"oldValue" to it.first,
+				"newValue" to it.second,
+				// old value not exists, insert 1; otherwise insert 0
+				"insertCount" to if (it.first == null) 1 else 0,
+				// old value not exists, update 0; otherwise update 1
+				"updateCount" to if (it.first == null) 0 else 1
+			)
 		}
-		logger.log("newValue" to value)
 	}
 }

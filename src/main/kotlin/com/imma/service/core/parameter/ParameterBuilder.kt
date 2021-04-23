@@ -1,13 +1,16 @@
 package com.imma.service.core.parameter
 
-import com.imma.model.core.compute.*
 import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
+import com.imma.model.core.compute.*
 import com.imma.persist.core.ComputedElement
 import com.imma.persist.core.ConstantElement
 import com.imma.persist.core.Element
 import com.imma.persist.core.build.ElementBuilder
-import com.imma.service.core.*
+import com.imma.service.core.PipelineTopics
+import com.imma.service.core.PipelineTriggerData
+import com.imma.service.core.PipelineVariables
+import com.imma.service.core.createPipelineVariables
 
 /**
  * condition builder for workout a expression
@@ -22,8 +25,8 @@ class ParameterBuilder(
 	private val topics: PipelineTopics,
 	private val sourceData: PipelineTriggerData,
 	private val variables: PipelineVariables = createPipelineVariables()
-) : RunContext {
-	override fun isSourceTopic(topicId: String): Boolean {
+) {
+	private fun isSourceTopic(topicId: String): Boolean {
 		return topicId == pipeline.topicId
 	}
 
