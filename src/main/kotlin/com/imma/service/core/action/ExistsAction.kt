@@ -13,7 +13,7 @@ class ExistsAction(private val context: ActionContext, private val logger: Actio
 				variables[variableName] = it
 			}
 		}.also {
-			logger.log("value" to it)
+			logger.process("value" to it)
 		}
 	}
 }

@@ -26,7 +26,7 @@ class StageWorker(private val context: StageContext) : EngineWorker() {
 		if (shouldRun()) {
 			try {
 				this.markStart()
-				logger.log("Start to run stage.", RunType.start)
+				logger.start("Start to run stage.")
 
 				with(context.stage) {
 					units.forEach { UnitWorker(UnitContext(context, it)).run() }
@@ -38,7 +38,7 @@ class StageWorker(private val context: StageContext) : EngineWorker() {
 				throw t
 			}
 		} else {
-			logger.log("Stage ignored because of condition not reached.", RunType.ignore)
+			logger.ignore("Stage ignored because of condition not reached.")
 		}
 	}
 }

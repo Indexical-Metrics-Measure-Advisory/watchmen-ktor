@@ -30,7 +30,7 @@ class WriteFactorAction(private val context: ActionContext, private val logger: 
 			// still raise whole data to trigger next pipeline, if exists
 			Triple(topic.topicId, oldOne, mergeRow(topic, mapping, oldOne))
 		}.also {
-			logger.log(
+			logger.process(
 				"topicId" to it.first,
 				"oldValue" to it.second,
 				"newValue" to it.third,

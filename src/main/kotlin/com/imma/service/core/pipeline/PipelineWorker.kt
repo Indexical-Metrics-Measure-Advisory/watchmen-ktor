@@ -1,7 +1,9 @@
 package com.imma.service.core.pipeline
 
 import com.imma.model.core.compute.takeAsParameterJointOrThrow
+import com.imma.service.core.Engine
 import com.imma.service.core.EngineWorker
+import com.imma.service.core.PipelineTrigger
 import com.imma.service.core.createPipelineVariables
 import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ConditionWorker
@@ -38,7 +40,7 @@ class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
 				logger.fail("Failed to run pipeline.", t, this.markEnd())
 			}
 		} else {
-			logger.log("Pipeline ignored because of condition not reached.", RunType.ignore)
+			logger.ignore("Pipeline ignored because of condition not reached.")
 		}
 	}
 
@@ -56,7 +58,8 @@ class PipelineWorker(private val context: PipelineContext) : EngineWorker() {
 				}
 			} finally {
 				// write log
-				context.logger.output()
+				val changes = context.logger.output(context)
+				changes.forEach { Engine.run(it.first, PipelineTrigger(it.second, it.third)) }
 			}
 		}
 	}

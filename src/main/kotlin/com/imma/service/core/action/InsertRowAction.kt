@@ -8,7 +8,7 @@ class InsertRowAction(private val context: ActionContext, private val logger: Ac
 			val mapping = prepareMapping()
 			topic.topicId to insertRow(topic, mapping)
 		}.also {
-			logger.log(
+			logger.process(
 				"topicId" to it.first,
 				"oldValue" to null,
 				"newValue" to it.second,

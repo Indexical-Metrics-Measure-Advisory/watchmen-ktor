@@ -26,7 +26,7 @@ class UnitWorker(private val context: UnitContext) : EngineWorker() {
         if (this.shouldRun()) {
             try {
                 this.markStart()
-                logger.log("Start to run unit.", RunType.start)
+                logger.start("Start to run unit.")
 
                 with(context.unit) {
                     `do`.forEach { ActionWorker(ActionContext(context, it)).run() }

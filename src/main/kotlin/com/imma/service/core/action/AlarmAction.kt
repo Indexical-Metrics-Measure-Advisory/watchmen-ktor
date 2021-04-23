@@ -65,10 +65,10 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
 					}
 				}
 			}.also {
-				logger.log("value" to it, "conditionResult" to true)
+				logger.process("value" to it)
 			}
 		} else {
-			logger.log("conditionResult" to false)
+			logger.process("conditionResult" to false)
 		}
 	}
 }

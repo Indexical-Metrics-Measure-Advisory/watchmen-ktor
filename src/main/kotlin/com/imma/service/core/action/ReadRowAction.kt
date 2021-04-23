@@ -14,7 +14,7 @@ class ReadRowAction(private val context: ActionContext, private val logger: Acti
 				variables[variableName] = it
 			}
 		}.also {
-			logger.log("value" to it)
+			logger.process("value" to it)
 		}
 	}
 }

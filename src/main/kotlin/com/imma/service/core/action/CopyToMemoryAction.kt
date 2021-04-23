@@ -21,7 +21,7 @@ class CopyToMemoryAction(private val context: ActionContext, private val logger:
 				variables[variableName] = it
 			}
 		}.also {
-			logger.log("value" to it)
+			logger.process("value" to it)
 		}
 	}
 }

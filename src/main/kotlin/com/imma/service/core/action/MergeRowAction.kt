@@ -15,7 +15,7 @@ class MergeRowAction(private val context: ActionContext, private val logger: Act
 
 			Triple(topic.topicId, oldOne, mergeRow(topic, mapping, oldOne))
 		}.also {
-			logger.log(
+			logger.process(
 				"topicId" to it.first,
 				"oldValue" to it.second,
 				"newValue" to it.third,

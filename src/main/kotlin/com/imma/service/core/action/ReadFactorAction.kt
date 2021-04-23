@@ -16,7 +16,7 @@ class ReadFactorAction(private val context: ActionContext, private val logger: A
 				variables[variableName] = it
 			}
 		}.also {
-			logger.log("value" to it)
+			logger.process("value" to it)
 		}
 	}
 }

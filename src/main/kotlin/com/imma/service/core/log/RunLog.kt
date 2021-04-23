@@ -6,7 +6,6 @@ import java.time.ZoneId
 import java.util.*
 
 data class RunLog(
-	var logId: String? = null,
 	var instanceId: String? = null,
 	var pipelineId: String? = null,
 	var type: RunType = RunType.`not-defined`,

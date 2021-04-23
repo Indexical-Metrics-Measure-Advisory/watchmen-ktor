@@ -1,5 +1,7 @@
 package com.imma.service.dynamic
 
+import com.imma.model.CollectionNames
+import com.imma.model.core.PipelineRuntimeLog
 import com.imma.model.core.Topic
 import com.imma.persist.core.Select
 import com.imma.persist.core.Updates
@@ -34,5 +36,9 @@ class DynamicTopicService(services: Services) : Service(services) {
 
 	fun list(topic: Topic, select: Select, where: Where): List<Map<String, *>> {
 		return persist().list(select, where, Map::class.java, topic.name!!)
+	}
+
+	fun insertRuntimePipelineLog(runtimeLog: PipelineRuntimeLog) {
+		persist().insertOne(runtimeLog, PipelineRuntimeLog::class.java, CollectionNames.PIPELINE_LOG)
 	}
 }
