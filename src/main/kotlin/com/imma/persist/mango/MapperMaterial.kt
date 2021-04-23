@@ -73,7 +73,7 @@ data class MapperMaterial(
 	fun toUpdates(updates: Updates): List<Document> {
 		return updates.parts.map {
 			val factor = it.factor
-			val factorName = factor.factorName
+			val factorName = factor.factorIdOrName
 			if (factorName.isNullOrBlank()) {
 				throw RuntimeException("Factor name cannot be null or blank.")
 			}
@@ -273,10 +273,10 @@ data class MapperMaterial(
 	 */
 	@Suppress("UNUSED_PARAMETER")
 	private fun fromFactorElement(element: FactorElement, shouldBe: ElementShouldBe, inExp: Boolean = true): String {
-		val topicName = element.topicName
-		val factorName = element.factorName
+		val topicIdOrName = element.topicIdOrName
+		val factorIdOrName = element.factorIdOrName
 
-		if (!topicName.isNullOrBlank() && !def.isTopicSupported(topicName)) {
+		if (!topicIdOrName.isNullOrBlank() && !def.isTopicSupported(topicIdOrName)) {
 			// topic name is assigned
 			// and not supported by current entity
 			throw RuntimeException("Unsupported topic of [$element].")
@@ -285,7 +285,7 @@ data class MapperMaterial(
 		return if (def.isMultipleTopicsSupported()) {
 			throw RuntimeException("Joins between multiple topics are not supported.")
 		} else {
-			val fieldName = toFieldName("$factorName")
+			val fieldName = toFieldName("$factorIdOrName")
 			// in where, $fieldName
 			// in select, fieldName
 			if (inExp) "\$$fieldName" else fieldName

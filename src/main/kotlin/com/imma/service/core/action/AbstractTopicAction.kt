@@ -33,6 +33,7 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		}
 	}
 
+	@Suppress("SameParameterValue")
 	private fun toNumeric(value: Any?, defaultValue: BigDecimal): BigDecimal {
 		return toNumeric(value ?: defaultValue)!!
 	}
@@ -180,15 +181,29 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 	}
 
 	protected fun ActionContext.insertRow(topic: Topic, mapping: RowMapping) {
-		val one = mapping.map { row ->
-			val (source, factorId, arithmetic) = row
+		val one = mapping.run {
+			val aggregates = mutableMapOf<String, BigDecimal>()
+			this.map { row ->
+				val (source, factorId, arithmetic) = row
 
-			if (arithmetic == WriteAggregateArithmetic.count) {
-				// the first one, count always be 1
-				factorId to 1
-			} else {
-				// the first one, arithmetic is ignored
-				factorId to compute(source)
+				if (arithmetic == WriteAggregateArithmetic.count) {
+					// the first one, count always be 1
+					factorId to 1
+				} else {
+					// the first one, arithmetic is ignored
+					compute(source).also {
+						// write aggregate assist
+						if (arithmetic == WriteAggregateArithmetic.avg) {
+							val factor = topic.factors.find { it.factorId == factorId }!!
+							// the first one, count of avg always be 1
+							setCountOfAvg(aggregates, factor, BigDecimal.ONE)
+						}
+					}.run {
+						factorId to this
+					}
+				}
+			}.toMutableList().also {
+				it.add(toAggregateAssist(aggregates))
 			}
 		}.toMap().toMutableMap()
 		services.dynamicTopic { insertOne(topic, one) }
@@ -222,6 +237,14 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		}
 		// TODO merge updated values to new one
 		newOne["_id"] = id
+		updates.parts.forEach {
+			// here is id, see updates creation logic above
+			val factorId = it.factor.factorIdOrName
+
+			// convert factor id to factor name
+			val factorName = topic.factors.find { it.factorId == factorId }!!.name!!
+			newOne[factorName] = it.value
+		}
 
 		// return old/new value pair
 		return newOne
@@ -236,7 +259,7 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		val toFactor = topic.factors.find { it.factorId == factorId }!!
 
 		val oldAvg = toNumericOrZero(oldOne[toFactor.name!!])
-		val itemCount = itemCountAggregateAssist(oldOne["_avg_assist"] as String?, toFactor, BigDecimal.ZERO)
+		val itemCount = getCountOfAvg(oldOne, toFactor)
 		val newValue = toNumericOrZero(toNumericUseCurrent(source))
 		val oldValue = toNumericOrZero(toNumericUsePrevious(source))
 		// new avg value = (old avg value * item count + (new value - old value)) / count
@@ -264,13 +287,24 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 		set(factorId) to newSum
 	}
 
-	private fun fromAggregateAssist(from: String?, factor: Factor, defaultValue: Any? = null): Any? {
-		val assist = jsonParer.readValue(from ?: "{}", Map::class.java)
-		return assist[DynamicTopicKits.toFieldName(factor.name!!)] ?: defaultValue
+	private fun fromAggregateAssist(one: Map<String, *>, key: String, defaultValue: Any? = null): Any? {
+		val jsonStr = one["_aggregate_assist"] as String?
+		val assist = jsonParer.readValue(jsonStr ?: "{}", Map::class.java)
+		return assist[key] ?: defaultValue
+	}
+
+	private fun getCountOfAvg(one: Map<String, *>, factor: Factor): BigDecimal {
+		val name = DynamicTopicKits.toFieldName(factor.name!!)
+		return toNumeric(fromAggregateAssist(one, "$name.avg_count"), BigDecimal.ZERO)
 	}
 
 	@Suppress("SameParameterValue")
-	private fun itemCountAggregateAssist(from: String?, factor: Factor, defaultValue: BigDecimal): BigDecimal {
-		return toNumeric(fromAggregateAssist(from, factor), defaultValue)
+	private fun setCountOfAvg(values: MutableMap<String, BigDecimal>, factor: Factor, value: BigDecimal) {
+		val name = DynamicTopicKits.toFieldName(factor.name!!)
+		values["$name.avg_count"] = value
+	}
+
+	private fun toAggregateAssist(values: Map<String, BigDecimal>): Pair<String, Map<String, BigDecimal>> {
+		return "_aggregate_assist" to values
 	}
 }

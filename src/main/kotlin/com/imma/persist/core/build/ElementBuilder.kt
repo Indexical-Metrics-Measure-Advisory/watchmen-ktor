@@ -10,16 +10,16 @@ class ElementBuilder {
 		val SINGLETON: ElementBuilder = ElementBuilder()
 	}
 
-	fun factor(factorName: String): FactorElement {
+	fun factor(factorIdOrName: String): FactorElement {
 		val element = FactorElement()
-		element.factorName = factorName
+		element.factorIdOrName = factorIdOrName
 		return element
 	}
 
-	fun factor(topicName: String, factorName: String): FactorElement {
+	fun factor(topicIdOrName: String, factorIdOrName: String): FactorElement {
 		val element = FactorElement()
-		element.topicName = topicName
-		element.factorName = factorName
+		element.topicIdOrName = topicIdOrName
+		element.factorIdOrName = factorIdOrName
 		return element
 	}
 

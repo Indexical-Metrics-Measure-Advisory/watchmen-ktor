@@ -35,8 +35,8 @@ class PushIntoArray(private val updates: Updates, private val value: Any) {
 class Updates {
     val parts: MutableList<FactorUpdate> = mutableListOf()
 
-    fun set(factorName: String): FactorUpdate {
-        val change = FactorUpdate(ElementBuilder.SINGLETON.factor(factorName), FactorUpdateType.SET)
+    fun set(factorIdOrName: String): FactorUpdate {
+        val change = FactorUpdate(ElementBuilder.SINGLETON.factor(factorIdOrName), FactorUpdateType.SET)
         parts.add(change)
         return change
     }
