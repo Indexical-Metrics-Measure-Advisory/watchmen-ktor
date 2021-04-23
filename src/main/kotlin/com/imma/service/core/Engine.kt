@@ -4,16 +4,16 @@ import com.imma.model.core.Pipeline
 import com.imma.service.core.pipeline.PipelineContext
 import com.imma.service.core.pipeline.PipelineWorker
 
-data class TriggerData(
-    val topicId: String,
-    val previous: Map<String, Any> = mapOf(),
-    val now: Map<String, Any> = mapOf()
+data class PipelineTrigger(
+	val topicId: String,
+	val previous: PipelineTriggerData? = null,
+	val now: PipelineTriggerData = mapOf()
 )
 
 class Engine {
-    companion object {
-        fun run(pipeline: Pipeline, data: TriggerData) {
-            PipelineContext(pipeline).use { PipelineWorker(it).run(data) }
-        }
-    }
+	companion object {
+		fun run(pipeline: Pipeline, trigger: PipelineTrigger) {
+			PipelineContext(pipeline, trigger).use { PipelineWorker(it).run() }
+		}
+	}
 }

@@ -308,7 +308,7 @@ private class ParameterComputer(
 class ConditionWorker(
     private val pipeline: Pipeline,
     private val topics: PipelineTopics,
-    private val sourceData: PipelineSourceData,
+    private val sourceData: PipelineTriggerData,
     private val variables: PipelineVariables = createPipelineVariables()
 ) : RunContext {
     private val parameterWorker: ParameterWorker by lazy { ParameterWorker(pipeline, topics, sourceData, variables) }

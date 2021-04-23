@@ -43,7 +43,7 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
 				!conditional.toString().toBoolean() -> true
 				on == null -> true
 				on !is Map<*, *> -> throw RuntimeException("Unsupported condition found in alarm action.")
-				else -> ConditionWorker(pipeline, topics, sourceData, variables).computeJoint(
+				else -> ConditionWorker(pipeline, topics, currentOfTriggerData, variables).computeJoint(
 					takeAsParameterJointOrThrow(on)
 				)
 			}
@@ -57,7 +57,7 @@ class AlarmAction(private val context: ActionContext, private val logger: Action
 				val severity = AlarmActionSeverity.values().find {
 					it.severity == action["severity"]?.toString()
 				} ?: AlarmActionSeverity.medium
-				ParameterWorker(pipeline, topics, sourceData, variables)
+				ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
 					.computeParameter(param)?.toString() ?: "No Message"
 					.also { message ->
 						CONSUMERS.forEach { consumer ->

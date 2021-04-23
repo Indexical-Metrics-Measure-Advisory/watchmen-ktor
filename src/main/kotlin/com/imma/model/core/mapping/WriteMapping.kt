@@ -8,10 +8,7 @@ enum class WriteAggregateArithmetic(val type: String) {
 	none("none"),
 	count("count"),
 	sum("sum"),
-	avg("avg"),
-	max("max"),
-	min("min"),
-	median("med"),
+	avg("avg")
 }
 
 data class FactorMapping(

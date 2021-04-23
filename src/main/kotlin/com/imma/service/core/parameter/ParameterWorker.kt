@@ -2,7 +2,7 @@ package com.imma.service.core.parameter
 
 import com.imma.model.core.compute.*
 import com.imma.model.core.*
-import com.imma.service.core.PipelineSourceData
+import com.imma.service.core.PipelineTriggerData
 import com.imma.service.core.PipelineTopics
 import com.imma.service.core.PipelineVariables
 import com.imma.service.core.RunContext
@@ -21,7 +21,7 @@ import java.time.temporal.WeekFields
 class ParameterWorker(
 	private val pipeline: Pipeline,
 	private val topics: PipelineTopics,
-	private val sourceData: PipelineSourceData,
+	private val sourceData: PipelineTriggerData,
 	private val variables: PipelineVariables
 ) : RunContext {
 	override fun isSourceTopic(topicId: String): Boolean {

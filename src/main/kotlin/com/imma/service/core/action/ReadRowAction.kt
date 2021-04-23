@@ -10,7 +10,7 @@ class ReadRowAction(private val context: ActionContext, private val logger: Acti
 			val topic = prepareTopic()
 			val joint = prepareBy()
 			val row: Any? = services.dynamicTopic {
-				findOne(topic, ConditionBuilder(topic, pipeline, topics, sourceData, variables).build(joint))
+				findOne(topic, ConditionBuilder(topic, pipeline, topics, currentOfTriggerData, variables).build(joint))
 			}
 			variables[variableName] = row
 			row

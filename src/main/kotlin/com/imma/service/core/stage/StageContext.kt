@@ -8,35 +8,26 @@ import com.imma.service.core.pipeline.PipelineContext
 
 class StageContext(
 	private val pipelineContext: PipelineContext,
-	val stage: PipelineStage,
-	val sourceData: PipelineSourceData,
+	val stage: PipelineStage
 ) : RunContext {
 	val instanceId: String
-		get() {
-			return pipelineContext.instanceId
-		}
+		get() = pipelineContext.instanceId
 	val pipeline: Pipeline
-		get() {
-			return pipelineContext.pipeline
-		}
-
+		get() = pipelineContext.pipeline
 	val topics: PipelineTopics
-		get() {
-			return pipelineContext.topics
-		}
+		get() = pipelineContext.topics
+
+	val previousOfTriggerData: PipelineTriggerData?
+		get() = pipelineContext.previousOfTriggerData
+	val currentOfTriggerData: PipelineTriggerData
+		get() = pipelineContext.currentOfTriggerData
 	val variables: PipelineVariables
-		get() {
-			return pipelineContext.variables
-		}
+		get() = pipelineContext.variables
 
 	val services: Services
-		get() {
-			return pipelineContext.services
-		}
+		get() = pipelineContext.services
 	val logger: EngineLogger
-		get() {
-			return pipelineContext.logger
-		}
+		get() = pipelineContext.logger
 
 	override fun isSourceTopic(topicId: String): Boolean {
 		return topicId == pipeline.topicId

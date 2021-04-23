@@ -1,7 +1,6 @@
 package com.imma.service.core.action
 
 import com.imma.model.core.compute.takeAsParameterOrThrow
-import com.imma.service.core.log.RunType
 import com.imma.service.core.parameter.ParameterWorker
 
 class CopyToMemoryAction(private val context: ActionContext, private val logger: ActionLogger) {
@@ -18,7 +17,7 @@ class CopyToMemoryAction(private val context: ActionContext, private val logger:
                 throw RuntimeException("Source of copy to memory action should be a map, but is [$source] now.")
             }
 
-            val worker = ParameterWorker(pipeline, topics, sourceData, variables)
+            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
             worker.computeParameter(takeAsParameterOrThrow(source)).also {
                 variables[variableName] = it
             }

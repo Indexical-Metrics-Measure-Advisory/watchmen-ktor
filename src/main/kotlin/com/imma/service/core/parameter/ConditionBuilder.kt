@@ -7,7 +7,7 @@ import com.imma.model.core.compute.ParameterJointType
 import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
 import com.imma.persist.core.*
-import com.imma.service.core.PipelineSourceData
+import com.imma.service.core.PipelineTriggerData
 import com.imma.service.core.PipelineTopics
 import com.imma.service.core.PipelineVariables
 import com.imma.service.core.createPipelineVariables
@@ -23,7 +23,7 @@ class ConditionBuilder(
     keptTopic: Topic,
     pipeline: Pipeline,
     topics: PipelineTopics,
-    sourceData: PipelineSourceData,
+    sourceData: PipelineTriggerData,
     variables: PipelineVariables = createPipelineVariables()
 ) {
     private val parameterBuilder: ParameterBuilder =

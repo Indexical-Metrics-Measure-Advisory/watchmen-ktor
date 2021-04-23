@@ -1,6 +1,5 @@
 package com.imma.model.core.compute
 
-import com.imma.model.snowflake.SnowflakeHelper
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
@@ -13,14 +12,10 @@ import java.util.*
 class ValueKits {
 	companion object {
 		fun computeToSequence(value: Any?, throws: () -> String): Long {
-			return if (value == null) {
-				SnowflakeHelper.nextSnowflakeId()
-			} else {
-				try {
-					value.toString().toLong()
-				} catch (t: Throwable) {
-					throw RuntimeException(throws(), t)
-				}
+			try {
+				return value.toString().toLong()
+			} catch (t: Throwable) {
+				throw RuntimeException(throws(), t)
 			}
 		}
 

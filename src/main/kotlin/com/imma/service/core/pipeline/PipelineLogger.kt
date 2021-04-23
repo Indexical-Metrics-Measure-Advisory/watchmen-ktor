@@ -1,11 +1,12 @@
 package com.imma.service.core.pipeline
 
 import com.imma.service.core.EngineLoggerDelegate
+import com.imma.service.core.PipelineTriggerData
 import com.imma.service.core.log.RunLog
 import com.imma.service.core.log.RunType
 
 class PipelineLogger(private val context: PipelineContext) : EngineLoggerDelegate(context.logger) {
-	fun start(msg: String, previous: Map<String, Any>, now: Map<String, Any>) {
+	fun start(msg: String, previous: PipelineTriggerData?, now: PipelineTriggerData) {
 		logger.append {
 			fillIds(this)
 			message = msg

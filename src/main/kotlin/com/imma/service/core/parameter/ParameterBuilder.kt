@@ -20,7 +20,7 @@ class ParameterBuilder(
 	private val keptTopic: Topic,
 	private val pipeline: Pipeline,
 	private val topics: PipelineTopics,
-	private val sourceData: PipelineSourceData,
+	private val sourceData: PipelineTriggerData,
 	private val variables: PipelineVariables = createPipelineVariables()
 ) : RunContext {
 	override fun isSourceTopic(topicId: String): Boolean {

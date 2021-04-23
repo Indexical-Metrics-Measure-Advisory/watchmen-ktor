@@ -17,7 +17,7 @@ class InsertRowAction(private val context: ActionContext, private val logger: Ac
 					factorId to 1
 				} else {
 					// the first one, arithmetic is ignored
-					factorId to ParameterBuilder(topic, pipeline, topics, sourceData, variables).buildParameter(source)
+					factorId to ParameterBuilder(topic, pipeline, topics, currentOfTriggerData, variables).buildParameter(source)
 				}
 			}.toMap().toMutableMap()
 			services.dynamicTopic { insertOne(topic, one) }
