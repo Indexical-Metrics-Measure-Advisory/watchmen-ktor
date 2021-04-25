@@ -1,1 +1,2 @@
-com.imma.plugin.PluginInitializer=com.imma.plugin.AlarmMailSenderInitializer
+com.imma.plugin.PluginInitializer=com.imma.persist.mango.MongoInitializer,\
+com.imma.plugin.AlarmMailSenderInitializer

@@ -11,6 +11,7 @@ import com.imma.persist.core.Select
 import com.imma.persist.core.Updates
 import com.imma.persist.core.Where
 import com.imma.persist.core.where
+import com.imma.plugin.PluginInitializer
 import com.imma.utils.EnvConstants
 import com.imma.utils.Envs
 import com.imma.utils.toDataPage
@@ -27,8 +28,13 @@ class MongoPersistKitProvider(name: String) : PersistKitProvider(name) {
     }
 }
 
-fun mongo() {
-    PersistKits.register(MongoPersistKitProvider("mongo"))
+class MongoInitializer : PluginInitializer {
+    override fun register() {
+        val mongoEnabled = Envs.boolean(EnvConstants.MONGO_ENABLED, false)
+        if (mongoEnabled) {
+            PersistKits.register(MongoPersistKitProvider("mongo"))
+        }
+    }
 }
 
 /**
@@ -100,7 +106,7 @@ class MongoPersistKit : AbstractPersistKit() {
     }
 
     override fun <T : Any> upsertOne(one: T, entityClass: Class<*>, entityName: String): T {
-        val material = MongoMapperMaterialBuilder.create().type(entityClass).name(entityName).build()
+        val material = MongoMapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
         getMongoCollection(material).findOneAndUpdate(
             material.buildIdFilter(),
             material.toDocument { nextSnowflakeIdStr() },

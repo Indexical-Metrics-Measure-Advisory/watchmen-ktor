@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.imma.auth.*
-import com.imma.persist.mango.mongo
 import com.imma.plugin.PluginLoader
 import com.imma.rest.*
 import com.imma.service.Services
@@ -34,7 +33,6 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @kotlin.jvm.JvmOverloads
 fun Application.module(@Suppress("UNUSED_PARAMETER") testing: Boolean = false) {
     envs {
-        mongo()
         PluginLoader.loadPlugins()
     }
 
