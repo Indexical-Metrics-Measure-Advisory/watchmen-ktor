@@ -1,19 +1,20 @@
 package com.imma.persist.mango
 
 import com.imma.persist.core.*
-import com.imma.persist.core.util.ElementKits
+import com.imma.persist.defs.EntityDef
+import com.imma.persist.defs.MapperMaterial
 import org.bson.BsonInt32
 import org.bson.Document
 
-data class MapperMaterial(
-	val entity: Any?,
-	val entityClass: Class<*>? = null,
-	val entityName: String? = null
-) {
-	private val def: EntityDef = EntityMapper.getDef(this)
+class MongoMapperMaterial(
+	entity: Any?,
+	entityClass: Class<*>? = null,
+	entityName: String? = null
+) : MapperMaterial(entity, entityClass, entityName) {
+	private val def: MongoEntityDef = MongoEntityMapper.getDef(this)
 
-	fun toCollectionName(): String {
-		return def.toCollectionName()
+	override fun getDef(): EntityDef {
+		return this.def
 	}
 
 	fun toDocument(generateId: () -> Any): Document {
@@ -29,7 +30,8 @@ data class MapperMaterial(
 	}
 
 	fun generateIdFilter(): Document {
-		return def.generateIdFilter(entity!!)
+		val filter = def.generateIdFilter(entity!!)
+		return Document(filter.first, filter.second)
 	}
 
 	/**
@@ -38,20 +40,6 @@ data class MapperMaterial(
 	fun buildIdFilter(id: String? = null): Document {
 		val where = where { factor(getIdFieldName()) eq { value(id ?: getIdValue()) } }
 		return toFilter(where)
-	}
-
-	@Suppress("MemberVisibilityCanBePrivate")
-	fun toFieldName(propertyOrFactorName: String): String {
-		return def.toFieldName(propertyOrFactorName)
-	}
-
-	fun getIdFieldName(): String {
-		return def.id.key
-	}
-
-	@Suppress("MemberVisibilityCanBePrivate")
-	fun getIdValue(): Any? {
-		return entity?.let { def.id.read(entity) }
 	}
 
 	/**
@@ -160,57 +148,7 @@ data class MapperMaterial(
 		}
 	}
 
-	private fun fromElement(element: Element, shouldBe: ElementShouldBe = ElementShouldBe.any): Any? {
-		return when (element) {
-			is FactorElement -> fromFactorElement(element, shouldBe)
-			is ConstantElement -> fromConstantElement(element, shouldBe)
-			is ComputedElement -> fromComputedElement(element, shouldBe)
-			else -> throw RuntimeException("Unsupported [$element] in balanced expression.")
-		}
-	}
-
-	private fun checkMinElementCount(element: ComputedElement, count: Int) {
-		val size = element.elements.size
-		if (size < count) {
-			throw RuntimeException("At least $count element(s) in [$element], but only [$size] now.")
-		}
-	}
-
-	private fun checkMaxElementCount(element: ComputedElement, count: Int) {
-		val size = element.elements.size
-		if (size > count) {
-			throw RuntimeException("At most $count element(s) in [$element], but [$size] now.")
-		}
-	}
-
-	private fun checkElements(element: ComputedElement) {
-		when (element.operator) {
-			ElementComputeOperator.add -> checkMinElementCount(element, 2)
-			ElementComputeOperator.subtract -> checkMinElementCount(element, 2)
-			ElementComputeOperator.multiply -> checkMinElementCount(element, 2)
-			ElementComputeOperator.divide -> checkMinElementCount(element, 2)
-			ElementComputeOperator.modulus -> {
-				checkMinElementCount(element, 2)
-				checkMaxElementCount(element, 2)
-			}
-			ElementComputeOperator.`year-of` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`half-year-of` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`quarter-of` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`month-of` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`week-of-year` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`week-of-month` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`day-of-month` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`day-of-week` -> checkMaxElementCount(element, 1)
-			ElementComputeOperator.`case-then` -> {
-				checkMinElementCount(element, 1)
-				if (element.elements.count { it.joint == null } > 1) {
-					throw RuntimeException("Multiple anyway routes in case-then expression of [$element] is not allowed.")
-				}
-			}
-		}
-	}
-
-	private fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): Any {
+	override fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): Any {
 		val operator = element.operator ?: throw RuntimeException("Operator of [$element] cannot be null.")
 		val elements = element.elements.also {
 			if (it.size == 0) throw RuntimeException("Elements of [$element] cannot be null.")
@@ -251,69 +189,36 @@ data class MapperMaterial(
 		return elements.find { it.joint == null }?.let { cases.default(fromElement(it, shouldBe)) } ?: cases.done()
 	}
 
-	/**
-	 * 1. null -> null
-	 * 2. shouldBe == any -> value itself
-	 * 3. value is string && blank -> null
-	 * 4. convert by kits
-	 */
-	private fun fromConstantElement(element: ConstantElement, shouldBe: ElementShouldBe): Any? {
-		val value = element.value
-
-		return when {
-			value == null -> null
-			shouldBe == ElementShouldBe.any -> value
-			value is String && value.isBlank() -> null
-			else -> ElementKits.to(value, shouldBe, element)
-		}
+	override fun toFieldNameInExpression(fieldName: String): String {
+		return "\$$fieldName"
 	}
 
-	/**
-	 * topic name must same as entity name, which means only single collection operation is supported
-	 */
-	@Suppress("UNUSED_PARAMETER")
-	private fun fromFactorElement(element: FactorElement, shouldBe: ElementShouldBe, inExp: Boolean = true): String {
-		val topicIdOrName = element.topicIdOrName
-		val factorIdOrName = element.factorIdOrName
-
-		if (!topicIdOrName.isNullOrBlank() && !def.isTopicSupported(topicIdOrName)) {
-			// topic name is assigned
-			// and not supported by current entity
-			throw RuntimeException("Unsupported topic of [$element].")
-		}
-
-		return if (def.isMultipleTopicsSupported()) {
-			throw RuntimeException("Joins between multiple topics are not supported.")
-		} else {
-			val fieldName = toFieldName("$factorIdOrName")
-			// in where, $fieldName
-			// in select, fieldName
-			if (inExp) "\$$fieldName" else fieldName
-		}
+	override fun toFieldNameInSelection(fieldName: String): String {
+		return fieldName
 	}
 }
 
-class MapperMaterialBuilder private constructor(private val entity: Any?) {
+class MongoMapperMaterialBuilder private constructor(private val entity: Any?) {
 	private var clazz: Class<*>? = null
 	private var name: String? = null
 
 	companion object {
-		fun create(entity: Any? = null): MapperMaterialBuilder {
-			return MapperMaterialBuilder(entity)
+		fun create(entity: Any? = null): MongoMapperMaterialBuilder {
+			return MongoMapperMaterialBuilder(entity)
 		}
 	}
 
-	fun type(clazz: Class<*>): MapperMaterialBuilder {
+	fun type(clazz: Class<*>): MongoMapperMaterialBuilder {
 		this.clazz = clazz
 		return this
 	}
 
-	fun name(name: String): MapperMaterialBuilder {
+	fun name(name: String): MongoMapperMaterialBuilder {
 		this.name = name
 		return this
 	}
 
-	fun build(): MapperMaterial {
-		return MapperMaterial(entity, clazz, name)
+	fun build(): MongoMapperMaterial {
+		return MongoMapperMaterial(entity, clazz, name)
 	}
 }

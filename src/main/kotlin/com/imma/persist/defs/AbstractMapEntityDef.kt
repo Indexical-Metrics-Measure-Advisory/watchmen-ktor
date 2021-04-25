@@ -1,8 +1,7 @@
-package com.imma.persist.mango
+package com.imma.persist.defs
 
 import com.imma.model.EntityColumns
 import com.imma.persist.DynamicTopicKits
-import org.bson.Document
 
 class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(name, type) {
 	override fun read(entity: Any): Any? {
@@ -27,6 +26,8 @@ private val id = MapEntityFieldDef(EntityColumns.OBJECT_ID, EntityFieldType.ID)
 private val createdAt = MapEntityFieldDef(EntityColumns.CREATED_AT, EntityFieldType.CREATED_AT)
 private val lastModifiedAt = MapEntityFieldDef(EntityColumns.LAST_MODIFIED_AT, EntityFieldType.LAST_MODIFIED_AT)
 
+interface MapEntityDef : EntityDef
+
 /**
  * entity definition for map.
  * 1. id/createdAt/lastModifiedAt will be installed
@@ -35,8 +36,9 @@ private val lastModifiedAt = MapEntityFieldDef(EntityColumns.LAST_MODIFIED_AT, E
  *
  * note: don't use snake case as entity/property name, use plain text or camel case
  */
-class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastModifiedAt)) {
-	override fun toDocument(entity: Any): Document {
+abstract class AbstractMapEntityDef(name: String) : AbstractEntityDef(name, listOf(id, createdAt, lastModifiedAt)),
+	MapEntityDef {
+	override fun toPersistObject(entity: Any): PersistObject {
 		if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
 			throw RuntimeException("Only map is supported, but is [$entity] now.")
 		}
@@ -55,18 +57,18 @@ class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastMod
 		}.toMap().toMutableMap()
 		this.removeEmptyId(map)
 		this.handleLastModifiedAt(map)
-		return Document(map)
+		return map
 	}
 
-	override fun fromDocument(doc: Document): Any {
-		return doc.map { (key, value) ->
+	override fun fromPersistObject(po: PersistObject): Any {
+		return po.map { (key, value) ->
 			when (key) {
 				id.fieldName -> id.key
 				id.key -> id.key
-				createdAt?.key -> createdAt?.key
-				createdAt?.fieldName -> createdAt?.key
-				lastModifiedAt?.key -> lastModifiedAt?.key
-				lastModifiedAt?.fieldName -> lastModifiedAt?.key
+				createdAt?.key -> createdAt.key
+				createdAt?.fieldName -> createdAt.key
+				lastModifiedAt?.key -> lastModifiedAt.key
+				lastModifiedAt?.fieldName -> lastModifiedAt.key
 				else -> DynamicTopicKits.fromFieldName(key)
 			} to value
 		}.toMap().toMutableMap()
@@ -87,8 +89,4 @@ class MapEntityDef(name: String) : EntityDef(name, listOf(id, createdAt, lastMod
 	override fun toCollectionName(): String {
 		return collectionName
 	}
-}
-
-fun createMapEntityDef(entityName: String): MapEntityDef {
-	return MapEntityDef(entityName)
 }

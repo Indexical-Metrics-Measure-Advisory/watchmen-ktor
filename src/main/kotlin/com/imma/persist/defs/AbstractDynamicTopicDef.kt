@@ -1,11 +1,10 @@
-package com.imma.persist.mango
+package com.imma.persist.defs
 
 import com.imma.model.EntityColumns
 import com.imma.model.core.Factor
 import com.imma.model.core.FactorType
 import com.imma.model.core.Topic
 import com.imma.model.core.compute.ValueKits
-import org.bson.Document
 
 class DynamicFactorDef(val factor: Factor, type: EntityFieldType) : EntityFieldDef(factor.name!!, type) {
 	override fun read(entity: Any): Any? {
@@ -39,8 +38,12 @@ private val lastModifiedAt = DynamicFactorDef(
 	EntityFieldType.LAST_MODIFIED_AT
 )
 
-class DynamicTopicDef(val topic: Topic) :
-	EntityDef(
+interface DynamicTopicDef : EntityDef {
+	fun getTopic(): Topic
+}
+
+abstract class AbstractDynamicTopicDef(private val topic: Topic) :
+	AbstractEntityDef(
 		topic.name!!,
 		listOf(id) + topic.factors.map { factor ->
 			DynamicFactorDef(
@@ -48,11 +51,15 @@ class DynamicTopicDef(val topic: Topic) :
 				EntityFieldType.REGULAR
 			)
 		} + listOf(createdAt, lastModifiedAt)
-	) {
+	), DynamicTopicDef {
 	private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
 		fields.map { it as DynamicFactorDef }.map { it.fieldName to it }.toMap()
 
-	override fun toDocument(entity: Any): Document {
+	override fun getTopic(): Topic {
+		return topic
+	}
+
+	override fun toPersistObject(entity: Any): PersistObject {
 		@Suppress("DuplicatedCode")
 		if (!Map::class.java.isAssignableFrom(entity.javaClass)) {
 			throw RuntimeException("Only map is supported, but is [$entity] now.")
@@ -129,11 +136,11 @@ class DynamicTopicDef(val topic: Topic) :
 		}.toMap().toMutableMap()
 		this.removeEmptyId(map)
 		this.handleLastModifiedAt(map)
-		return Document(map)
+		return map
 	}
 
-	override fun fromDocument(doc: Document): Any {
-		return doc.map { (key, value) ->
+	override fun fromPersistObject(po: PersistObject): Any {
+		return po.map { (key, value) ->
 			val field = fieldsMapByFieldName[key.toLowerCase()]
 			(field?.key ?: key) to value
 		}.toMap().toMutableMap()
@@ -176,8 +183,4 @@ class DynamicTopicDef(val topic: Topic) :
 	override fun toCollectionName(): String {
 		return collectionName
 	}
-}
-
-fun createDynamicTopicDef(topic: Topic): DynamicTopicDef {
-	return DynamicTopicDef(topic)
 }
