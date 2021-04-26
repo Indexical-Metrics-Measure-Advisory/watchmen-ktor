@@ -60,10 +60,11 @@ abstract class RDBMSMapperMaterial(
 			val fieldName = toFieldName(factorName)
 
 			when (it.type) {
+				// replace value
 				FactorUpdateType.SET -> SQLPart("$fieldName = ?", listOf(it.value))
-				// TODO pull value from array
+				// pull value from array
 				FactorUpdateType.PULL -> functions.pull(fieldName, it.value)
-				// TODO push value into array
+				// push value into array
 				FactorUpdateType.PUSH -> functions.push(fieldName, it.value)
 			}
 		}.joinToString(", ") { part ->

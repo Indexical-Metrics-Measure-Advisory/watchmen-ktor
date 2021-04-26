@@ -1,10 +1,14 @@
 package com.imma.persist.mysql
 
-import com.imma.persist.defs.*
+import com.imma.persist.defs.AbstractMappedEntityDef
+import com.imma.persist.defs.EntityFieldDef
+import com.imma.persist.defs.EntityFieldType
+import com.imma.persist.defs.parseMappedEntity
+import com.imma.persist.rdbms.RDBMSMappedEntityFieldDef
 import java.beans.PropertyDescriptor
 
 class MySQLMappedEntityFieldDef(name: String, type: EntityFieldType, descriptor: PropertyDescriptor) :
-	MappedEntityFieldDef(name, type, descriptor) {
+	RDBMSMappedEntityFieldDef(name, type, descriptor) {
 }
 
 class MySQLMappedEntityDef(name: String, entityClass: Class<*>, fields: List<EntityFieldDef>) :

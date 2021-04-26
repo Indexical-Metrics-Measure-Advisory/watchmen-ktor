@@ -21,7 +21,7 @@ open class MappedEntityFieldDef(name: String, type: EntityFieldType, private val
 
 interface MappedEntityDef: EntityDef
 
-abstract class AbstractMappedEntityDef(name: String, private val entityClass: Class<*>, fields: List<EntityFieldDef>) :
+abstract class AbstractMappedEntityDef(name: String, protected val entityClass: Class<*>, fields: List<EntityFieldDef>) :
 	AbstractEntityDef(name, fields), MappedEntityDef {
 	override fun toPersistObject(entity: Any): PersistObject {
 		val map = fields.map { field ->

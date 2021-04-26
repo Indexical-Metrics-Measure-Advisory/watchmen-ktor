@@ -3,6 +3,10 @@ package com.imma.persist.mysql
 import com.imma.persist.rdbms.RDBMSFunctions
 import com.imma.persist.rdbms.SQLPart
 
+/**
+ * The JSON functions were added in MySQL 5.7.8.
+ * See https://dev.mysql.com/doc/refman/5.7/en/json-functions.html
+ */
 class MySQLFunctions : RDBMSFunctions() {
 	override fun year(one: SQLPart): SQLPart {
 		return SQLPart("YEAR(${one.statement})", one.values)
@@ -49,6 +53,9 @@ class MySQLFunctions : RDBMSFunctions() {
 		return SQLPart("IF(${one.statement} IS NULL OR '', FALSE, TRUE)", one.values)
 	}
 
+	/**
+	 * IMPORTANT only string value can be proceed correctly
+	 */
 	override fun hasOne(one: SQLPart, another: SQLPart): SQLPart {
 		val values = mutableListOf<Any?>()
 		repeat(2) { values.addAll(one.values) }
@@ -59,6 +66,9 @@ class MySQLFunctions : RDBMSFunctions() {
 		)
 	}
 
+	/**
+	 * IMPORTANT only string value can be proceed correctly
+	 */
 	override fun pull(fieldName: String, value: Any?): SQLPart {
 		return SQLPart(
 			"$fieldName = IF($fieldName IS NULL OR '', $fieldName, JSON_REMOVE($fieldName, JSON_UNQUOTE(JSON_SEARCH($fieldName, 'one', ?))))",
@@ -66,6 +76,9 @@ class MySQLFunctions : RDBMSFunctions() {
 		)
 	}
 
+	/**
+	 * IMPORTANT only string value can be proceed correctly
+	 */
 	override fun push(fieldName: String, value: Any?): SQLPart {
 		return SQLPart(
 			"$fieldName = IF($fieldName IS NULL OR '', CAST(CONCAT('[', ?, ']') AS JSON), JSON_ARRAY_APPEND($fieldName, '$', ?))",
