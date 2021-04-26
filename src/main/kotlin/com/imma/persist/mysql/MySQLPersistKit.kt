@@ -1,13 +1,9 @@
 package com.imma.persist.mysql
 
 import com.imma.model.core.Topic
-import com.imma.model.page.DataPage
-import com.imma.model.page.Pageable
 import com.imma.persist.PersistKit
 import com.imma.persist.PersistKitProvider
 import com.imma.persist.PersistKits
-import com.imma.persist.core.Select
-import com.imma.persist.core.Where
 import com.imma.persist.rdbms.RDBMSMapperMaterial
 import com.imma.persist.rdbms.RDBMSPersistKit
 import com.imma.plugin.PluginInitializer

@@ -9,7 +9,8 @@ class SQLPart(val statement: String, val values: List<Any?>)
 abstract class RDBMSMapperMaterial(
 	entity: Any?,
 	entityClass: Class<*>? = null,
-	entityName: String? = null
+	entityName: String? = null,
+	private val functions: RDBMSFunctions
 ) : MapperMaterial(entity, entityClass, entityName) {
 	fun toPersistObject(generateId: () -> Any): PersistObject {
 		return this.getDef().toPersistObject(entity!!, generateId)
@@ -39,12 +40,12 @@ abstract class RDBMSMapperMaterial(
 	 * projection for aggregate
 	 */
 	fun toProjection(select: Select): String {
-		return select.columns.map { column ->
+		return select.columns.joinToString(", ") { column ->
 			when (column.element) {
 				is FactorElement -> fromFactorElement(column.element, ElementShouldBe.any, false)
 				else -> throw RuntimeException("Only plain factor column is supported in projection, but is [$column] now.")
 			}
-		}.joinToString(", ")
+		}
 	}
 
 	fun toUpdates(updates: Updates): SQLPart {
@@ -134,47 +135,86 @@ abstract class RDBMSMapperMaterial(
 //		}
 	}
 
-	override fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): Any {
-		TODO()
-//		val operator = element.operator ?: throw RuntimeException("Operator of [$element] cannot be null.")
-//		val elements = element.elements.also {
-//			if (it.size == 0) throw RuntimeException("Elements of [$element] cannot be null.")
-//		}
-//		this.checkElements(element)
-//
-//		return when (operator) {
-//			ElementComputeOperator.add -> MF.add(elements.map { fromElement(it, ElementShouldBe.numeric) })
-//			ElementComputeOperator.subtract -> MF.subtract(elements.map { fromElement(it, ElementShouldBe.numeric) })
-//			ElementComputeOperator.multiply -> MF.multiply(elements.map { fromElement(it, ElementShouldBe.numeric) })
-//			ElementComputeOperator.divide -> MF.divide(elements.map { fromElement(it, ElementShouldBe.numeric) })
-//			ElementComputeOperator.modulus -> MF.mod(
-//				fromElement(elements[0], ElementShouldBe.numeric),
-//				fromElement(elements[1], ElementShouldBe.numeric)
-//			)
-//			ElementComputeOperator.`year-of` -> MF.year(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`half-year-of` -> MF.halfYear(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`quarter-of` -> MF.quarter(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`month-of` -> MF.month(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`week-of-year` -> MF.weekOfYear(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`week-of-month` -> MF.weekOfMonth(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`day-of-month` -> MF.dayOfMonth(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`day-of-week` -> MF.dayOfWeek(fromElement(elements[0], ElementShouldBe.date))
-//			ElementComputeOperator.`case-then` -> toCaseThenMatcher(elements, shouldBe)
-//		}
+	override fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): SQLPart {
+		val operator = element.operator ?: throw RuntimeException("Operator of [$element] cannot be null.")
+		val elements = element.elements.also {
+			if (it.size == 0) throw RuntimeException("Elements of [$element] cannot be null.")
+		}
+		this.checkElements(element)
+
+		return when (operator) {
+			ElementComputeOperator.add -> functions.add(elements.map { fromElement(it, ElementShouldBe.numeric) })
+			ElementComputeOperator.subtract -> functions.subtract(elements.map {
+				fromElement(
+					it,
+					ElementShouldBe.numeric
+				)
+			})
+			ElementComputeOperator.multiply -> functions.multiply(elements.map {
+				fromElement(
+					it,
+					ElementShouldBe.numeric
+				)
+			})
+			ElementComputeOperator.divide -> functions.divide(elements.map { fromElement(it, ElementShouldBe.numeric) })
+			ElementComputeOperator.modulus -> functions.mod(
+				fromElement(elements[0], ElementShouldBe.numeric),
+				fromElement(elements[1], ElementShouldBe.numeric)
+			)
+			ElementComputeOperator.`year-of` -> functions.year(fromElement(elements[0], ElementShouldBe.date))
+			ElementComputeOperator.`half-year-of` -> functions.halfYear(fromElement(elements[0], ElementShouldBe.date))
+			ElementComputeOperator.`quarter-of` -> functions.quarter(fromElement(elements[0], ElementShouldBe.date))
+			ElementComputeOperator.`month-of` -> functions.month(fromElement(elements[0], ElementShouldBe.date))
+			ElementComputeOperator.`week-of-year` -> functions.weekOfYear(
+				fromElement(
+					elements[0],
+					ElementShouldBe.date
+				)
+			)
+			ElementComputeOperator.`week-of-month` -> functions.weekOfMonth(
+				fromElement(
+					elements[0],
+					ElementShouldBe.date
+				)
+			)
+			ElementComputeOperator.`day-of-month` -> functions.dayOfMonth(
+				fromElement(
+					elements[0],
+					ElementShouldBe.date
+				)
+			)
+			ElementComputeOperator.`day-of-week` -> functions.dayOfWeek(fromElement(elements[0], ElementShouldBe.date))
+			ElementComputeOperator.`case-then` -> toCaseThenMatcher(elements, shouldBe)
+		}
 	}
 
-	private fun toCaseThenMatcher(
-		elements: MutableList<Element>,
-		shouldBe: ElementShouldBe
-	): Map<String, Map<String, Any?>> {
-		TODO()
-//		val caseElements = elements.filter { it.joint != null }
-//		val firstThen = MF.case(MF.eq(fromJoint(elements[0].joint!!), true)).then(fromElement(elements[0], shouldBe))
-//		val cases = caseElements.filterIndexed { index, _ -> index != 0 }.fold(firstThen) { previousThen, element ->
-//			previousThen.case(MF.eq(fromJoint(element.joint!!), true)).then(fromElement(element, shouldBe))
-//		}
-//		// append default() to $switch when anyway element exists, otherwise finish it by done()
-//		return elements.find { it.joint == null }?.let { cases.default(fromElement(it, shouldBe)) } ?: cases.done()
+	override fun fromElement(element: Element, shouldBe: ElementShouldBe): SQLPart {
+		return when (element) {
+			is FactorElement -> SQLPart(fromFactorElement(element, shouldBe), listOf())
+			is ConstantElement -> SQLPart("?", listOf(fromConstantElement(element, shouldBe)))
+			is ComputedElement -> fromComputedElement(element, shouldBe)
+			else -> throw RuntimeException("Unsupported [$element] in balanced expression.")
+		}
+	}
+
+	protected open fun toCaseThenMatcher(elements: MutableList<Element>, shouldBe: ElementShouldBe): SQLPart {
+		val values = mutableListOf<Any?>()
+		val cases = elements.filter { it.joint != null }.map { case ->
+			val condition = fromJoint(case.joint!!)
+			val value = fromElement(case, shouldBe)
+			values.addAll(condition.values)
+			values.addAll(value.values)
+			"CASE ${condition.statement} THEN ${value.statement}"
+		}.joinToString(" ")
+
+		val defaultCase = elements.find { it.joint == null }
+		return if (defaultCase == null) {
+			SQLPart("CASE $cases END", values)
+		} else {
+			val default = fromElement(defaultCase, shouldBe)
+			values.addAll(default.values)
+			SQLPart("CASE $cases ELSE ${default.statement} END", values)
+		}
 	}
 
 	override fun toFieldNameInExpression(fieldName: String): String {

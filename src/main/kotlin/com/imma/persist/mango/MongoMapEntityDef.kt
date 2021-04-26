@@ -6,12 +6,14 @@ import org.bson.Document
 import org.bson.types.ObjectId
 
 class MongoMapEntityDef(name: String) : AbstractMapEntityDef(name), MongoEntityDef {
-	override fun toPersistObject(entity: Any): PersistObject {
-		val po = super.toPersistObject(entity)
-		val idKey = this.toFieldName(this.getId().key)
-		val value = po[idKey]
-		po[idKey] = if (value is ObjectId) value.toString() else value
-		return po
+	override fun fromPersistObject(po: PersistObject): Any {
+		@Suppress("UNCHECKED_CAST")
+		val entity = super.fromPersistObject(po) as MutableMap<String, Any?>
+		val id = entity[this.getId().key]
+		if (id is ObjectId) {
+			entity[this.getId().key] = id.toString()
+		}
+		return entity
 	}
 
 	override fun toDocument(entity: Any): Document {

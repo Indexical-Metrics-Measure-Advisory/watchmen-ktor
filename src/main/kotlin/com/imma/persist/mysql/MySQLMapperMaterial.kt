@@ -7,7 +7,7 @@ class MySQLMapperMaterial(
 	entity: Any?,
 	entityClass: Class<*>? = null,
 	entityName: String? = null
-) : RDBMSMapperMaterial(entity, entityClass, entityName) {
+) : RDBMSMapperMaterial(entity, entityClass, entityName, MySQLFunctions()) {
 	private val def: MySQLEntityDef = MySQLEntityMapper.getDef(this)
 
 	override fun getDef(): EntityDef {

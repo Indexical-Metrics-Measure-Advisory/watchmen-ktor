@@ -82,7 +82,7 @@ abstract class MapperMaterial(
 
 	protected abstract fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): Any
 
-	protected fun fromElement(element: Element, shouldBe: ElementShouldBe = ElementShouldBe.any): Any? {
+	protected open fun fromElement(element: Element, shouldBe: ElementShouldBe = ElementShouldBe.any): Any? {
 		return when (element) {
 			is FactorElement -> fromFactorElement(element, shouldBe)
 			is ConstantElement -> fromConstantElement(element, shouldBe)
