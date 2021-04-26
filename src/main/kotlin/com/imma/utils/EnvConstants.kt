@@ -26,6 +26,13 @@ object EnvConstants {
 	const val MYSQL_USER: String = "ktor.mysql.username"
 	const val MYSQL_PASSWORD: String = "ktor.mysql.password"
 
+	const val ORACLE_ENABLED: String = "ktor.oracle.enabled"
+	const val ORACLE_HOST: String = "ktor.oracle.host"
+	const val ORACLE_PORT: String = "ktor.oracle.port"
+	const val ORACLE_NAME: String = "ktor.oracle.name"
+	const val ORACLE_USER: String = "ktor.oracle.username"
+	const val ORACLE_PASSWORD: String = "ktor.oracle.password"
+
 	const val SNOWFLAKE_WORKER: String = "ktor.snowflake.worker"
 	const val SNOWFLAKE_DATA_CENTER: String = "ktor.snowflake.dataCenter"
 

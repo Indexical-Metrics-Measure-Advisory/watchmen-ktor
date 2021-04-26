@@ -1,10 +1,12 @@
 val ktor_version: String by project
 val kotlin_version: String by project
+val jna_version: String by project
 val logback_version: String by project
 val jackson_version: String by project
 val spring_version: String by project
 val mongo_driver_version: String by project
 val mysql_driver_version: String by project
+val oracle_driver_version: String by project
 val mail_version: String by project
 val trino_version: String by project
 
@@ -58,12 +60,13 @@ dependencies {
     implementation("io.trino:trino-jdbc:$trino_version")
     implementation("org.mongodb:mongodb-driver-sync:$mongo_driver_version")
     implementation("mysql:mysql-connector-java:$mysql_driver_version")
+    implementation("com.oracle.database.jdbc:ojdbc8:$oracle_driver_version")
     implementation("org.springframework:spring-context-support:$spring_version")
     implementation("com.sun.mail:jakarta.mail:$mail_version")
-    implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.4.30")
-    implementation("org.jetbrains.kotlin:kotlin-script-util:1.4.30")
-    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.4.30")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.4.30")
-    implementation("net.java.dev.jna:jna:5.7.0")
+    implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-script-util:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:$kotlin_version")
+    implementation("net.java.dev.jna:jna:$jna_version")
 //    testImplementation("org.springframework.dataio.ktor:ktor-server-tests:$ktor_version")
 }
