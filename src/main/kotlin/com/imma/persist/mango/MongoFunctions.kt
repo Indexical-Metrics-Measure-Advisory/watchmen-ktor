@@ -19,7 +19,7 @@ class MongoFunctions {
 			return mapOf("\$ne" to listOf(a, b))
 		}
 
-		fun regex(a: Any?, b: Any?): Map<String, List<Any?>> {
+		fun hasText(a: Any?, b: Any?): Map<String, List<Any?>> {
 			return mapOf("\$regex" to listOf(a, b))
 		}
 
@@ -297,4 +297,5 @@ class CondIf(private val expression: Any?) {
 	}
 }
 
+@Suppress("unused")
 typealias MF = MongoFunctions

@@ -40,4 +40,12 @@ class MySQLFunctions : RDBMSFunctions() {
 	override fun dayOfWeek(one: SQLPart): SQLPart {
 		return SQLPart("DAYOFWEEK(${one.statement})", one.values)
 	}
+
+	override fun isEmpty(one: SQLPart): SQLPart {
+		return SQLPart("IF(${one.statement} IS NULL OR '', TRUE, FALSE", one.values)
+	}
+
+	override fun isNotEmpty(one: SQLPart): SQLPart {
+		return SQLPart("IF(${one.statement} IS NULL OR '', FALSE, TRUE", one.values)
+	}
 }

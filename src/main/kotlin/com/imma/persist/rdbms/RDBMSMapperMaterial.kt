@@ -110,29 +110,34 @@ abstract class RDBMSMapperMaterial(
 	}
 
 	private fun fromExpression(exp: Expression): SQLPart {
-		TODO()
-//		val left = exp.left ?: throw RuntimeException("Left of [$exp] cannot be null.")
-//		val operator = exp.operator ?: throw RuntimeException("Operator of [$exp] cannot be null.")
-//
-//		val right = exp.right
-//		if (operator != ExpressionOperator.empty && operator != ExpressionOperator.`not-empty` && right == null) {
-//			throw RuntimeException("Right of [$exp] cannot be null when operator is neither empty nor not-empty.")
-//		}
-//
-//		return when (operator) {
-//			ExpressionOperator.empty -> MF.eq(fromElement(left), null)
-//			ExpressionOperator.`not-empty` -> MF.notEq(fromElement(left), null)
-//			ExpressionOperator.equals -> MF.eq(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.`not-equals` -> MF.notEq(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.less -> MF.lt(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.`less-equals` -> MF.lte(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.more -> MF.gt(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.`more-equals` -> MF.gte(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.`in` -> MF.exists(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.`not-in` -> MF.notExists(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.regex -> MF.regex(fromElement(left), fromElement(right!!))
-//			ExpressionOperator.contains -> MF.eq(fromElement(left), fromElement(right!!))
-//		}
+		val left = exp.left ?: throw RuntimeException("Left of [$exp] cannot be null.")
+		val operator = exp.operator ?: throw RuntimeException("Operator of [$exp] cannot be null.")
+
+		val right = exp.right
+		if (operator != ExpressionOperator.empty && operator != ExpressionOperator.`not-empty` && right == null) {
+			throw RuntimeException("Right of [$exp] cannot be null when operator is neither empty nor not-empty.")
+		}
+
+		return when (operator) {
+			ExpressionOperator.empty -> functions.isEmpty(fromElement(left))
+			ExpressionOperator.`not-empty` -> functions.isNotEmpty(fromElement(left))
+			ExpressionOperator.equals -> functions.eq(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`not-equals` -> functions.notEq(fromElement(left), fromElement(right!!))
+			ExpressionOperator.less -> functions.lt(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`less-equals` -> functions.lte(fromElement(left), fromElement(right!!))
+			ExpressionOperator.more -> functions.gt(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`more-equals` -> functions.gte(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`in` -> functions.exists(
+				fromElement(left),
+				fromElement(right!!, ElementShouldBe.collection)
+			)
+			ExpressionOperator.`not-in` -> functions.notExists(
+				fromElement(left),
+				fromElement(right!!, ElementShouldBe.collection)
+			)
+			ExpressionOperator.`has-text` -> functions.hasText(fromElement(left), fromElement(right!!))
+			ExpressionOperator.contains -> functions.eq(fromElement(left), fromElement(right!!))
+		}
 	}
 
 	override fun fromComputedElement(element: ComputedElement, shouldBe: ElementShouldBe): SQLPart {
@@ -191,7 +196,15 @@ abstract class RDBMSMapperMaterial(
 	override fun fromElement(element: Element, shouldBe: ElementShouldBe): SQLPart {
 		return when (element) {
 			is FactorElement -> SQLPart(fromFactorElement(element, shouldBe), listOf())
-			is ConstantElement -> SQLPart("?", listOf(fromConstantElement(element, shouldBe)))
+			is ConstantElement -> {
+				val values = fromConstantElement(element, shouldBe)
+				if (values is Collection<*>) {
+					// seems only occurs in (in/not in) expression
+					SQLPart(values.joinToString(", ") { "?" }, values.toList())
+				} else {
+					SQLPart("?", listOf(values))
+				}
+			}
 			is ComputedElement -> fromComputedElement(element, shouldBe)
 			else -> throw RuntimeException("Unsupported [$element] in balanced expression.")
 		}

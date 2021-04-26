@@ -34,7 +34,7 @@ class TopicService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 pageable,
                 Topic::class.java, CollectionNames.TOPIC
@@ -48,7 +48,7 @@ class TopicService(services: Services) : TupleService(services) {
         } else {
             persist().list(
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 TopicForHolder::class.java, CollectionNames.TOPIC
             )

@@ -91,7 +91,7 @@ class ReportService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 pageable,
                 Report::class.java, CollectionNames.REPORT

@@ -143,7 +143,7 @@ class MongoMapperMaterial(
 			ExpressionOperator.`more-equals` -> MF.gte(fromElement(left), fromElement(right!!))
 			ExpressionOperator.`in` -> MF.exists(fromElement(left), fromElement(right!!))
 			ExpressionOperator.`not-in` -> MF.notExists(fromElement(left), fromElement(right!!))
-			ExpressionOperator.regex -> MF.regex(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`has-text` -> MF.hasText(fromElement(left), fromElement(right!!))
 			ExpressionOperator.contains -> MF.eq(fromElement(left), fromElement(right!!))
 		}
 	}

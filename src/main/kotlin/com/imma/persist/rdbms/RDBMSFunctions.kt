@@ -45,4 +45,53 @@ abstract class RDBMSFunctions {
 	abstract fun dayOfMonth(one: SQLPart): SQLPart
 
 	abstract fun dayOfWeek(one: SQLPart): SQLPart
+
+	abstract fun isEmpty(one: SQLPart): SQLPart
+
+	abstract fun isNotEmpty(one: SQLPart): SQLPart
+
+	open fun eq(one: SQLPart, another: SQLPart): SQLPart {
+		return asContinuousOperation(listOf(one, another), " = ")
+	}
+
+	open fun notEq(one: SQLPart, another: SQLPart): SQLPart {
+		return asContinuousOperation(listOf(one, another), " != ")
+	}
+
+	open fun lt(one: SQLPart, another: SQLPart): SQLPart {
+		return asContinuousOperation(listOf(one, another), " < ")
+	}
+
+	open fun lte(one: SQLPart, another: SQLPart): SQLPart {
+		return asContinuousOperation(listOf(one, another), " <= ")
+	}
+
+	open fun gt(one: SQLPart, another: SQLPart): SQLPart {
+		return asContinuousOperation(listOf(one, another), " > ")
+	}
+
+	open fun gte(one: SQLPart, another: SQLPart): SQLPart {
+		return asContinuousOperation(listOf(one, another), " >= ")
+	}
+
+	open fun exists(one: SQLPart, another: SQLPart): SQLPart {
+		val values = mutableListOf<Any?>()
+		values.addAll(one.values)
+		values.addAll(another.values)
+		return SQLPart("${one.statement} IN (${another.statement})", values)
+	}
+
+	open fun notExists(one: SQLPart, another: SQLPart): SQLPart {
+		val values = mutableListOf<Any?>()
+		values.addAll(one.values)
+		values.addAll(another.values)
+		return SQLPart("${one.statement} NOT IN (${another.statement})", values)
+	}
+
+	open fun hasText(one: SQLPart, another: SQLPart): SQLPart {
+		val values = mutableListOf<Any?>()
+		values.addAll(one.values)
+		values.addAll(another.values)
+		return SQLPart("${one.statement} LIKE ('%' + ${another.statement} + '%')", values)
+	}
 }

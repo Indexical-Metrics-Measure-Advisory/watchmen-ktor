@@ -65,7 +65,7 @@ class UserService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 pageable,
                 User::class.java, CollectionNames.USER
@@ -89,7 +89,7 @@ class UserService(services: Services) : TupleService(services) {
                     factor("name")
                 },
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 UserForHolder::class.java, CollectionNames.USER
             )

@@ -56,8 +56,8 @@ class ExpressionBuilder(private val expression: Expression) {
         build(ExpressionOperator.`not-in`, ElementBuilder.SINGLETON.block())
     }
 
-    infix fun regex(block: ElementBuilder.() -> Element) {
-        build(ExpressionOperator.regex, ElementBuilder.SINGLETON.block())
+    infix fun hasText(block: ElementBuilder.() -> Element) {
+        build(ExpressionOperator.`has-text`, ElementBuilder.SINGLETON.block())
     }
 
     infix fun contains(block: ElementBuilder.() -> Element) {

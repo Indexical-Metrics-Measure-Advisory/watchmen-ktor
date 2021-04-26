@@ -43,7 +43,7 @@ class SpaceService(services: Services) : TupleService(services) {
         } else {
             persist().page(
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 pageable,
                 Space::class.java, CollectionNames.SPACE
@@ -67,7 +67,7 @@ class SpaceService(services: Services) : TupleService(services) {
                     factor("name")
                 },
                 where {
-                    factor("name") regex { value(name) }
+                    factor("name") hasText { value(name) }
                 },
                 SpaceForHolder::class.java, CollectionNames.SPACE
             )

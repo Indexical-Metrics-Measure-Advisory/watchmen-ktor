@@ -21,7 +21,7 @@ enum class ExpressionOperator {
     `more-equals`,
     `in`,
     `not-in`,
-    regex,
+    `has-text`,
     contains;
 }
 
