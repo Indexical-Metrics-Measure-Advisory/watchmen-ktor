@@ -22,7 +22,7 @@ enum class ExpressionOperator {
     `in`,
     `not-in`,
     `has-text`,
-    contains;
+    `has-one`;
 }
 
 class Expression : Condition {

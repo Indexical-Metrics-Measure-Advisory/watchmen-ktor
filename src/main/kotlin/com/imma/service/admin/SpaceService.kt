@@ -14,107 +14,107 @@ import com.imma.service.TupleService
 import kotlin.contracts.ExperimentalContracts
 
 class SpaceService(services: Services) : TupleService(services) {
-    @ExperimentalContracts
-    fun saveSpace(space: Space) {
-        val fake = determineFakeOrNullId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
+	@ExperimentalContracts
+	fun saveSpace(space: Space) {
+		val fake = determineFakeOrNullId({ space.spaceId }, true, { space.spaceId = nextSnowflakeId().toString() })
 
-        if (fake) {
-            createTuple(space, Space::class.java, CollectionNames.SPACE)
-        } else {
-            updateTuple(space, Space::class.java, CollectionNames.SPACE)
-        }
+		if (fake) {
+			createTuple(space, Space::class.java, CollectionNames.SPACE)
+		} else {
+			updateTuple(space, Space::class.java, CollectionNames.SPACE)
+		}
 
-        val userGroupIds = space.groupIds
-        services.userGroup {
-            unassignSpace(space.spaceId!!)
-            if (!userGroupIds.isNullOrEmpty()) {
-                assignSpace(userGroupIds, space.spaceId!!)
-            }
-        }
-    }
+		val userGroupIds = space.groupIds
+		services.userGroup {
+			unassignSpace(space.spaceId!!)
+			if (!userGroupIds.isNullOrEmpty()) {
+				assignSpace(userGroupIds, space.spaceId!!)
+			}
+		}
+	}
 
-    fun findSpaceById(spaceId: String): Space? {
-        return persist().findById(spaceId, Space::class.java, CollectionNames.SPACE)
-    }
+	fun findSpaceById(spaceId: String): Space? {
+		return persist().findById(spaceId, Space::class.java, CollectionNames.SPACE)
+	}
 
-    fun findSpacesByName(name: String?, pageable: Pageable): DataPage<Space> {
-        return if (name.isNullOrEmpty()) {
-            persist().page(pageable, Space::class.java, CollectionNames.SPACE)
-        } else {
-            persist().page(
-                where {
-                    factor("name") hasText { value(name) }
-                },
-                pageable,
-                Space::class.java, CollectionNames.SPACE
-            )
-        }
-    }
+	fun findSpacesByName(name: String?, pageable: Pageable): DataPage<Space> {
+		return if (name.isNullOrEmpty()) {
+			persist().page(pageable, Space::class.java, CollectionNames.SPACE)
+		} else {
+			persist().page(
+				where {
+					factor("name") hasText { value(name) }
+				},
+				pageable,
+				Space::class.java, CollectionNames.SPACE
+			)
+		}
+	}
 
-    fun findSpacesByNameForHolder(name: String?): List<SpaceForHolder> {
-        return if (name.isNullOrEmpty()) {
-            persist().listAll(
-                select {
-                    factor("spaceId")
-                    factor("name")
-                },
-                SpaceForHolder::class.java, CollectionNames.SPACE
-            )
-        } else {
-            persist().list(
-                select {
-                    factor("spaceId")
-                    factor("name")
-                },
-                where {
-                    factor("name") hasText { value(name) }
-                },
-                SpaceForHolder::class.java, CollectionNames.SPACE
-            )
-        }
-    }
+	fun findSpacesByNameForHolder(name: String?): List<SpaceForHolder> {
+		return if (name.isNullOrEmpty()) {
+			persist().listAll(
+				select {
+					factor("spaceId")
+					factor("name")
+				},
+				SpaceForHolder::class.java, CollectionNames.SPACE
+			)
+		} else {
+			persist().list(
+				select {
+					factor("spaceId")
+					factor("name")
+				},
+				where {
+					factor("name") hasText { value(name) }
+				},
+				SpaceForHolder::class.java, CollectionNames.SPACE
+			)
+		}
+	}
 
-    fun findSpacesByIdsForHolder(spaceIds: List<String>): List<SpaceForHolder> {
-        return persist().list(
-            select {
-                factor("spaceId")
-                factor("name")
-            },
-            where {
-                factor("spaceId") existsIn { value(spaceIds) }
-            },
-            SpaceForHolder::class.java, CollectionNames.SPACE
-        )
-    }
+	fun findSpacesByIdsForHolder(spaceIds: List<String>): List<SpaceForHolder> {
+		return persist().list(
+			select {
+				factor("spaceId")
+				factor("name")
+			},
+			where {
+				factor("spaceId") existsIn { value(spaceIds) }
+			},
+			SpaceForHolder::class.java, CollectionNames.SPACE
+		)
+	}
 
-    fun findAvailableSpaces(userId: String): List<AvailableSpace> {
-        val user = services.user { findUserById(userId)!! }
-        val userGroupIds = user.groupIds.orEmpty()
-        if (userGroupIds.isEmpty()) {
-            return mutableListOf()
-        }
+	fun findAvailableSpaces(userId: String): List<AvailableSpace> {
+		val user = services.user { findUserById(userId)!! }
+		val userGroupIds = user.groupIds.orEmpty()
+		if (userGroupIds.isEmpty()) {
+			return mutableListOf()
+		}
 
-        val spaceIds = services.userGroup {
-            findUserGroupsByIds(userGroupIds).map {
-                it.spaceIds.orEmpty()
-            }.flatten()
-        }
-        if (spaceIds.isEmpty()) {
-            return mutableListOf()
-        }
+		val spaceIds = services.userGroup {
+			findUserGroupsByIds(userGroupIds).map {
+				it.spaceIds.orEmpty()
+			}.flatten()
+		}
+		if (spaceIds.isEmpty()) {
+			return mutableListOf()
+		}
 
-        return persist().list(
-            select {
-                factor("spaceId")
-                factor("name")
-                factor("topicIds")
-                factor("description")
-            },
-            where {
-                factor("spaceId") existsIn { value(spaceIds) }
-            },
-            AvailableSpace::class.java, CollectionNames.SPACE
-        )
-    }
+		return persist().list(
+			select {
+				factor("spaceId")
+				factor("name")
+				factor("topicIds")
+				factor("description")
+			},
+			where {
+				factor("spaceId") existsIn { value(spaceIds) }
+			},
+			AvailableSpace::class.java, CollectionNames.SPACE
+		)
+	}
 }
 

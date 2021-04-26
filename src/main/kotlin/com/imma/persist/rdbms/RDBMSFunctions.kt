@@ -94,4 +94,10 @@ abstract class RDBMSFunctions {
 		values.addAll(another.values)
 		return SQLPart("${one.statement} LIKE ('%' + ${another.statement} + '%')", values)
 	}
+
+	abstract fun hasOne(one: SQLPart, another: SQLPart): SQLPart
+
+	abstract fun pull(fieldName: String, value: Any?): SQLPart
+
+	abstract fun push(fieldName: String, value: Any?): SQLPart
 }

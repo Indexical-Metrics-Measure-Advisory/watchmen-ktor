@@ -60,15 +60,15 @@ abstract class RDBMSMapperMaterial(
 			val fieldName = toFieldName(factorName)
 
 			when (it.type) {
-				FactorUpdateType.SET -> "fieldName" to it.value
+				FactorUpdateType.SET -> SQLPart("$fieldName = ?", listOf(it.value))
 				// TODO pull value from array
-				FactorUpdateType.PULL -> fieldName to it.value
+				FactorUpdateType.PULL -> functions.pull(fieldName, it.value)
 				// TODO push value into array
-				FactorUpdateType.PUSH -> fieldName to it.value
+				FactorUpdateType.PUSH -> functions.push(fieldName, it.value)
 			}
-		}.joinToString(", ") { (key, value) ->
-			values.add(value)
-			"$key = ?"
+		}.joinToString(", ") { part ->
+			values.add(part.values)
+			part.statement
 		}
 		return SQLPart(statement, values)
 	}
@@ -109,6 +109,7 @@ abstract class RDBMSMapperMaterial(
 		return SQLPart(statement, values)
 	}
 
+	@Suppress("DuplicatedCode")
 	private fun fromExpression(exp: Expression): SQLPart {
 		val left = exp.left ?: throw RuntimeException("Left of [$exp] cannot be null.")
 		val operator = exp.operator ?: throw RuntimeException("Operator of [$exp] cannot be null.")
@@ -136,7 +137,7 @@ abstract class RDBMSMapperMaterial(
 				fromElement(right!!, ElementShouldBe.collection)
 			)
 			ExpressionOperator.`has-text` -> functions.hasText(fromElement(left), fromElement(right!!))
-			ExpressionOperator.contains -> functions.eq(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`has-one` -> functions.hasOne(fromElement(left), fromElement(right!!))
 		}
 	}
 
@@ -212,13 +213,13 @@ abstract class RDBMSMapperMaterial(
 
 	protected open fun toCaseThenMatcher(elements: MutableList<Element>, shouldBe: ElementShouldBe): SQLPart {
 		val values = mutableListOf<Any?>()
-		val cases = elements.filter { it.joint != null }.map { case ->
+		val cases = elements.filter { it.joint != null }.joinToString(" ") { case ->
 			val condition = fromJoint(case.joint!!)
 			val value = fromElement(case, shouldBe)
 			values.addAll(condition.values)
 			values.addAll(value.values)
 			"CASE ${condition.statement} THEN ${value.statement}"
-		}.joinToString(" ")
+		}
 
 		val defaultCase = elements.find { it.joint == null }
 		return if (defaultCase == null) {

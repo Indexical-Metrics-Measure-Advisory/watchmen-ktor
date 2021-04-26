@@ -60,7 +60,7 @@ class ExpressionBuilder(private val expression: Expression) {
         build(ExpressionOperator.`has-text`, ElementBuilder.SINGLETON.block())
     }
 
-    infix fun contains(block: ElementBuilder.() -> Element) {
-        build(ExpressionOperator.contains, ElementBuilder.SINGLETON.block())
+    infix fun hasOne(block: ElementBuilder.() -> Element) {
+        build(ExpressionOperator.`has-one`, ElementBuilder.SINGLETON.block())
     }
 }

@@ -96,6 +96,7 @@ class MongoMapperMaterial(
 		return Document("\$limit", limitCount)
 	}
 
+	@Suppress("DuplicatedCode")
 	private fun fromJoint(joint: Joint): Map<String, Any?> {
 		val parts = joint.parts
 		if (parts.isNullOrEmpty()) {
@@ -123,6 +124,7 @@ class MongoMapperMaterial(
 		return mapOf(operator to sub)
 	}
 
+	@Suppress("DuplicatedCode")
 	private fun fromExpression(exp: Expression): Map<String, Any?> {
 		val left = exp.left ?: throw RuntimeException("Left of [$exp] cannot be null.")
 		val operator = exp.operator ?: throw RuntimeException("Operator of [$exp] cannot be null.")
@@ -144,7 +146,7 @@ class MongoMapperMaterial(
 			ExpressionOperator.`in` -> MF.exists(fromElement(left), fromElement(right!!))
 			ExpressionOperator.`not-in` -> MF.notExists(fromElement(left), fromElement(right!!))
 			ExpressionOperator.`has-text` -> MF.hasText(fromElement(left), fromElement(right!!))
-			ExpressionOperator.contains -> MF.eq(fromElement(left), fromElement(right!!))
+			ExpressionOperator.`has-one` -> MF.eq(fromElement(left), fromElement(right!!))
 		}
 	}
 

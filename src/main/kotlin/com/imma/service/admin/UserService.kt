@@ -112,7 +112,7 @@ class UserService(services: Services) : TupleService(services) {
     fun unassignUserGroup(userGroupId: String) {
         persist().update(
             where {
-                factor("groupIds") contains { value(userGroupId) }
+                factor("groupIds") hasOne { value(userGroupId) }
             },
             update {
                 pull(userGroupId) from "groupIds"

@@ -42,10 +42,34 @@ class MySQLFunctions : RDBMSFunctions() {
 	}
 
 	override fun isEmpty(one: SQLPart): SQLPart {
-		return SQLPart("IF(${one.statement} IS NULL OR '', TRUE, FALSE", one.values)
+		return SQLPart("IF(${one.statement} IS NULL OR '', TRUE, FALSE)", one.values)
 	}
 
 	override fun isNotEmpty(one: SQLPart): SQLPart {
-		return SQLPart("IF(${one.statement} IS NULL OR '', FALSE, TRUE", one.values)
+		return SQLPart("IF(${one.statement} IS NULL OR '', FALSE, TRUE)", one.values)
+	}
+
+	override fun hasOne(one: SQLPart, another: SQLPart): SQLPart {
+		val values = mutableListOf<Any?>()
+		repeat(2) { values.addAll(one.values) }
+		values.addAll(another.values)
+		return SQLPart(
+			"IF(${one.statement} IS NULL OR '', FALSE, IF(JSON_CONTAINS(${one.statement}, CAST(${another.statement} AS JSON)) = 0, FALSE, TRUE))",
+			values
+		)
+	}
+
+	override fun pull(fieldName: String, value: Any?): SQLPart {
+		return SQLPart(
+			"$fieldName = IF($fieldName IS NULL OR '', $fieldName, JSON_REMOVE($fieldName, JSON_UNQUOTE(JSON_SEARCH($fieldName, 'one', ?))))",
+			listOf(value, value)
+		)
+	}
+
+	override fun push(fieldName: String, value: Any?): SQLPart {
+		return SQLPart(
+			"$fieldName = IF($fieldName IS NULL OR '', CAST(CONCAT('[', ?, ']') AS JSON), JSON_ARRAY_APPEND($fieldName, '$', ?))",
+			listOf(value, value)
+		)
 	}
 }
