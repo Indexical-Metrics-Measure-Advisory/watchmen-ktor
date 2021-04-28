@@ -57,6 +57,8 @@ class OracleFunctions : RDBMSFunctions() {
 
     /**
      * IMPORTANT only string value can be proceed correctly
+     *
+     * @param another for given one, value is
      */
     override fun hasOne(one: SQLPart, another: SQLPart): SQLPart {
         val values = mutableListOf<Any?>()
@@ -71,21 +73,18 @@ class OracleFunctions : RDBMSFunctions() {
      * IMPORTANT only string value can be proceed correctly
      */
     override fun pull(fieldName: String, value: Any?): SQLPart {
-        TODO()
-//		return SQLPart(
-//			"$fieldName = IF($fieldName IS NULL OR '', $fieldName, JSON_REMOVE($fieldName, JSON_UNQUOTE(JSON_SEARCH($fieldName, 'one', ?))))",
-//			listOf(value, value)
-//		)
+        val replacement = (value?.toString() ?: "").let { "(\"$it\")(,\\s)?" }
+        return SQLPart("REGEXP_REPLACE($fieldName, '$replacement')", listOf())
     }
 
     /**
      * IMPORTANT only string value can be proceed correctly
      */
     override fun push(fieldName: String, value: Any?): SQLPart {
-        TODO()
-//		return SQLPart(
-//			"$fieldName = IF($fieldName IS NULL OR '', CAST(CONCAT('[', ?, ']') AS JSON), JSON_ARRAY_APPEND($fieldName, '$', ?))",
-//			listOf(value, value)
-//		)
+        val newValue = (value?.toString() ?: "")
+        return SQLPart(
+            "$fieldName = CASE WHEN $fieldName IS NULL OR $fieldName = '' THEN '[\"$newValue\"]' ELSE REPLACE($fieldName, ']', ',\"$newValue\"]') END",
+            listOf(value, value)
+        )
     }
 }
