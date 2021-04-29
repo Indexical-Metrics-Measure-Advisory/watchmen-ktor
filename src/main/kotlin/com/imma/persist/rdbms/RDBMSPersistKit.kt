@@ -46,13 +46,17 @@ abstract class RDBMSPersistKit : AbstractPersistKit() {
 
             statement.executeQuery().use { rst ->
                 val meta = rst.metaData
-                val columnNames = (1..meta.columnCount).map { meta.getColumnName(it) }
+                val columnNames = filterUselessColumnNames((1..meta.columnCount).map { meta.getColumnName(it) })
                 while (rst.next()) {
-                    rows.add(columnNames.map { it to rst.getObject(it) }.toMap().toMutableMap())
+                    rows.add(columnNames.associateWith { rst.getObject(it) }.toMutableMap())
                 }
             }
         }
         return rows
+    }
+
+    protected open fun filterUselessColumnNames(columnNames: List<String>): List<String> {
+        return columnNames
     }
 
     @Suppress("MemberVisibilityCanBePrivate")

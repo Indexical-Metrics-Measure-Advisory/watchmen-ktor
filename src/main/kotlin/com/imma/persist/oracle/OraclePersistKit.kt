@@ -60,13 +60,20 @@ class OraclePersistKit : RDBMSPersistKit() {
         return this.createConnection("jdbc:oracle:thin:@$host:$port:$name", user, password)
     }
 
+    /**
+     * filter column _ROWNUM if exists
+     */
+    override fun filterUselessColumnNames(columnNames: List<String>): List<String> {
+        return columnNames.filter { it != "_ROWNUM" }
+    }
+
     override fun toPageSQL(sql: String, skipCount: Int, pageSize: Int, pageNumber: Int): String {
         return "SELECT * FROM (${
             sql.replaceFirst(
                 "SELECT ",
-                "SELECT ROWNUM "
+                "SELECT ROWNUM _ROWNUM "
             )
-        }) WHERE ROWNUM > $skipCount AND ROWNUM <= ${pageNumber * pageSize}"
+        }) WHERE _ROWNUM > $skipCount AND _ROWNUM <= ${pageNumber * pageSize}"
     }
 
     override fun entityExists(entityClass: Class<*>, entityName: String): Boolean {
