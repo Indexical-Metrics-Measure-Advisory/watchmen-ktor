@@ -21,18 +21,21 @@ class OracleFunctions : RDBMSFunctions() {
     }
 
     override fun weekOfYear(one: SQLPart): SQLPart {
-        TODO()
-//		return SQLPart("WEEK(${one.statement})", one.values)
+        val values = mutableListOf<Any?>()
+        repeat(2) { values.addAll(one.values) }
+        return SQLPart(
+            "FLOOR((TO_NUMBER(TO_CHAR(${one.statement}, 'DDD')) - MOD(8 - TO_CHAR(TRUNC(${one.statement}, 'Y'), 'D'), 7) - 1) / 7) + 1",
+            values
+        )
     }
 
     override fun weekOfMonth(one: SQLPart): SQLPart {
-        TODO()
-//		val values = mutableListOf<Any?>()
-//		repeat(5) { values.addAll(one.values) }
-//		return SQLPart(
-//			"IF(DAYOFWEEK(${one.statement}) <> 1, WEEK(${one.statement}) - WEEK(DATE_FORMAT(${one.statement}, '%Y-%m-01')), WEEK(${one.statement}) - WEEK(DATE_FORMAT(${one.statement}, '%Y-%m-01')) + 1)",
-//			values
-//		)
+        val values = mutableListOf<Any?>()
+        repeat(2) { values.addAll(one.values) }
+        return SQLPart(
+            "FLOOR((TO_NUMBER(TO_CHAR(${one.statement}, 'DD')) - MOD(8 - TO_CHAR(TRUNC(${one.statement}, 'MM'), 'D'), 7) - 1) / 7) + 1",
+            values
+        )
     }
 
     override fun dayOfMonth(one: SQLPart): SQLPart {
