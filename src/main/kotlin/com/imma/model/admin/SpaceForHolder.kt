@@ -10,9 +10,9 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.SPACE)
 class SpaceForHolder {
-    @Id
-    var spaceId: String? = null
+	@Id
+	var spaceId: String? = null
 
-    @Field("name")
-    var name: String? = null
+	@Field("name")
+	var name: String? = null
 }

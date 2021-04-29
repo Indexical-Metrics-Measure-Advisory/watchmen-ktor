@@ -20,137 +20,137 @@ import kotlin.contracts.ExperimentalContracts
  */
 @ExperimentalContracts
 fun Route.reportSaveByMeRoute() {
-    post(RouteConstants.REPORT_SAVE_BY_ME) {
-        val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val report = call.receive<Report>()
-        // get from query parameter first, or from body
-        val subjectId =
-            call.request.queryParameters["subject_id"].takeIf { it.isNullOrBlank() }?.apply { report.subjectId }
+	post(RouteConstants.REPORT_SAVE_BY_ME) {
+		val principal = call.authentication.principal<UserIdPrincipal>()!!
+		val report = call.receive<Report>()
+		// get from query parameter first, or from body
+		val subjectId =
+			call.request.queryParameters["subject_id"].takeIf { it.isNullOrBlank() }?.apply { report.subjectId }
 
-        val userId = report.userId
-        when {
-            // cannot save report which belongs to other user (at least by request data)
-            !userId.isNullOrBlank() && userId != principal.name -> call.respond(
-                HttpStatusCode.Forbidden,
-                "Cannot use report belongs to others."
-            )
-            // neither connect id nor report id given in request
-            subjectId.isNullOrBlank() && report.reportId.isFakeOrNull() -> call.respond(
-                HttpStatusCode.BadRequest,
-                "Cannot create report with no subject given."
-            )
-            subjectId.isFake() -> call.respond(
-                HttpStatusCode.BadRequest,
-                "Cannot use report with fake subject appointed."
-            )
-            // cannot save report which belongs to other user (check with exists data)
-            // connected space belongs to other user
-            !subjectBelongsToCurrentUser(subjectId, principal) -> call.respond(
-                HttpStatusCode.Forbidden,
-                "Cannot use report on subject which belongs to others."
-            )
-            // cannot save report which belongs to other user (check with exists data)
-            !reportBelongsToCurrentUser(report.reportId, principal) -> call.respond(
-                HttpStatusCode.Forbidden,
-                "Cannot use report belongs to others."
-            )
-            else -> {
-                // assign to current authenticated user
-                report.userId = principal.name
+		val userId = report.userId
+		when {
+			// cannot save report which belongs to other user (at least by request data)
+			!userId.isNullOrBlank() && userId != principal.name -> call.respond(
+				HttpStatusCode.Forbidden,
+				"Cannot use report belongs to others."
+			)
+			// neither connect id nor report id given in request
+			subjectId.isNullOrBlank() && report.reportId.isFakeOrNull() -> call.respond(
+				HttpStatusCode.BadRequest,
+				"Cannot create report with no subject given."
+			)
+			subjectId.isFake() -> call.respond(
+				HttpStatusCode.BadRequest,
+				"Cannot use report with fake subject appointed."
+			)
+			// cannot save report which belongs to other user (check with exists data)
+			// connected space belongs to other user
+			!subjectBelongsToCurrentUser(subjectId, principal) -> call.respond(
+				HttpStatusCode.Forbidden,
+				"Cannot use report on subject which belongs to others."
+			)
+			// cannot save report which belongs to other user (check with exists data)
+			!reportBelongsToCurrentUser(report.reportId, principal) -> call.respond(
+				HttpStatusCode.Forbidden,
+				"Cannot use report belongs to others."
+			)
+			else -> {
+				// assign to current authenticated user
+				report.userId = principal.name
 
-                when {
-                    // subjectId not exists, use reportId to retrieve it
-                    // in this case, report must be valid, it is checked in above logic already
-                    subjectId.isNullOrBlank() -> {
-                        // must exists, it is checked in above logic already
-                        val existsReport =
-                            Services().use { it.report { findReportById(report.reportId!!)!! } }
-                        report.connectId = existsReport.connectId
-                        report.subjectId = existsReport.subjectId
-                    }
-                    // if subject id in query parameter exists, assign to report
-                    else -> {
-                        val existsSubject = Services().use { it.subject { findSubjectById(subjectId)!! } }
-                        report.connectId = existsSubject.connectId
-                        report.subjectId = subjectId
-                    }
-                }
-                Services().use { it.report { saveReport(report) } }
-                // remove ids when respond to client
-                report.connectId = null
-                report.subjectId = null
-                report.userId = null
-                call.respond(report)
-            }
-        }
-    }
+				when {
+					// subjectId not exists, use reportId to retrieve it
+					// in this case, report must be valid, it is checked in above logic already
+					subjectId.isNullOrBlank() -> {
+						// must exists, it is checked in above logic already
+						val existsReport =
+							Services().use { it.report { findReportById(report.reportId!!)!! } }
+						report.connectId = existsReport.connectId
+						report.subjectId = existsReport.subjectId
+					}
+					// if subject id in query parameter exists, assign to report
+					else -> {
+						val existsSubject = Services().use { it.subject { findSubjectById(subjectId)!! } }
+						report.connectId = existsSubject.connectId
+						report.subjectId = subjectId
+					}
+				}
+				Services().use { it.report { saveReport(report) } }
+				// remove ids when respond to client
+				report.connectId = null
+				report.subjectId = null
+				report.userId = null
+				call.respond(report)
+			}
+		}
+	}
 }
 
 @ExperimentalContracts
 fun Route.reportRenameByMeRoute() {
-    get(RouteConstants.REPORT_RENAME_BY_ME) {
-        val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val reportId = call.request.queryParameters["report_id"]
-        val name = call.request.queryParameters["name"]
+	get(RouteConstants.REPORT_RENAME_BY_ME) {
+		val principal = call.authentication.principal<UserIdPrincipal>()!!
+		val reportId = call.request.queryParameters["report_id"]
+		val name = call.request.queryParameters["name"]
 
-        when {
-            reportId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Report id is required.")
-            // cannot save report which belongs to other user (check with exists data)
-            !reportBelongsToCurrentUser(reportId, principal) -> call.respond(
-                HttpStatusCode.Forbidden,
-                "Cannot use report belongs to others."
-            )
-            else -> {
-                Services().use { it.report { renameReport(reportId, name) } }
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-    }
+		when {
+			reportId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Report id is required.")
+			// cannot save report which belongs to other user (check with exists data)
+			!reportBelongsToCurrentUser(reportId, principal) -> call.respond(
+				HttpStatusCode.Forbidden,
+				"Cannot use report belongs to others."
+			)
+			else -> {
+				Services().use { it.report { renameReport(reportId, name) } }
+				call.respond(HttpStatusCode.OK)
+			}
+		}
+	}
 }
 
 @ExperimentalContracts
 fun Route.reportDeleteByMeRoute() {
-    get(RouteConstants.REPORT_DELETE_BY_ME) {
-        val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val reportId = call.request.queryParameters["report_id"]
+	get(RouteConstants.REPORT_DELETE_BY_ME) {
+		val principal = call.authentication.principal<UserIdPrincipal>()!!
+		val reportId = call.request.queryParameters["report_id"]
 
-        when {
-            reportId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Report id is required.")
-            // cannot save report which belongs to other user (check with exists data)
-            !reportBelongsToCurrentUser(reportId, principal) -> call.respond(
-                HttpStatusCode.Forbidden,
-                "Cannot use report belongs to others."
-            )
-            else -> {
-                Services().use { it.report { deleteReport(reportId) } }
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-    }
+		when {
+			reportId.isNullOrBlank() -> call.respond(HttpStatusCode.BadRequest, "Report id is required.")
+			// cannot save report which belongs to other user (check with exists data)
+			!reportBelongsToCurrentUser(reportId, principal) -> call.respond(
+				HttpStatusCode.Forbidden,
+				"Cannot use report belongs to others."
+			)
+			else -> {
+				Services().use { it.report { deleteReport(reportId) } }
+				call.respond(HttpStatusCode.OK)
+			}
+		}
+	}
 }
 
 /**
  * TODO it is not compatible with frontend response format, to be continued...
  */
 fun Route.listReportsByNameRoute() {
-    post(RouteConstants.REPORT_LIST_BY_NAME) {
-        val pageable = call.receive<Pageable>()
-        val name: String? = call.request.queryParameters["query_name"]
-        val page = Services().use { it.report { findReportsByName(name, pageable) } }
-        call.respond(page)
-    }
+	post(RouteConstants.REPORT_LIST_BY_NAME) {
+		val pageable = call.receive<Pageable>()
+		val name: String? = call.request.queryParameters["query_name"]
+		val page = Services().use { it.report { findReportsByName(name, pageable) } }
+		call.respond(page)
+	}
 }
 
 @ExperimentalContracts
 fun Application.reportRoutes() {
-    routing {
-        authenticate(Roles.AUTHENTICATED.ROLE) {
-            reportSaveByMeRoute()
-            reportRenameByMeRoute()
-            reportDeleteByMeRoute()
-        }
-        authenticate(Roles.ADMIN.ROLE) {
-            listReportsByNameRoute()
-        }
-    }
+	routing {
+		authenticate(Roles.AUTHENTICATED.ROLE) {
+			reportSaveByMeRoute()
+			reportRenameByMeRoute()
+			reportDeleteByMeRoute()
+		}
+		authenticate(Roles.ADMIN.ROLE) {
+			listReportsByNameRoute()
+		}
+	}
 }

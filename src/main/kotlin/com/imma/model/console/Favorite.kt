@@ -7,10 +7,10 @@ import com.imma.persist.annotation.Id
 
 @Entity(CollectionNames.FAVORITE)
 class Favorite(
-    @Id
-    var userId: String? = null,
-    @Field("connected_space_ids")
-    var connectedSpaceIds: List<String>? = mutableListOf(),
-    @Field("dashboard_ids")
-    var dashboardIds: List<String>? = mutableListOf()
+	@Id
+	var userId: String? = null,
+	@Field("connected_space_ids")
+	var connectedSpaceIds: List<String>? = mutableListOf(),
+	@Field("dashboard_ids")
+	var dashboardIds: List<String>? = mutableListOf()
 )

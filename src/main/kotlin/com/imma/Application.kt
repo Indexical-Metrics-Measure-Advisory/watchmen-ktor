@@ -32,102 +32,102 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(@Suppress("UNUSED_PARAMETER") testing: Boolean = false) {
-    envs {
-        PluginLoader.loadPlugins()
-    }
+	envs {
+		PluginLoader.loadPlugins()
+	}
 
-    install(CORS) {
-    }
-    install(CallLogging) {
-        level = Level.INFO
-        filter { call -> call.request.path().startsWith("/") }
-    }
+	install(CORS) {
+	}
+	install(CallLogging) {
+		level = Level.INFO
+		filter { call -> call.request.path().startsWith("/") }
+	}
 
-    install(ContentNegotiation) {
-        jackson {
-            enable(SerializationFeature.INDENT_OUTPUT)
-            enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-            enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
+	install(ContentNegotiation) {
+		jackson {
+			enable(SerializationFeature.INDENT_OUTPUT)
+			enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+			enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
 
-            enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
-            enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-            enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+			enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING)
+			enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+			enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
-            enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+			enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
 
-            setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-            dateFormat = SimpleDateFormat(environment.config.property(EnvConstants.CONTENT_DATE_FORMAT).getString())
-        }
-    }
+			dateFormat = SimpleDateFormat(environment.config.property(EnvConstants.CONTENT_DATE_FORMAT).getString())
+		}
+	}
 
-    val jwtVerifier = makeJwtVerifier()
-    fun roleBasedAuthorise(authorise: AuthorizationFunction<UserIdPrincipal>): (RoleBaseAuthenticationProvider.Configuration.() -> Unit) {
-        return {
-            verifier = jwtVerifier
-            validate { credentials ->
-                val mock = request.queryParameters["mock"]
-                if (isDev && mock.equals("true", ignoreCase = true)) {
-                    // in development mode, use token as principal
-                    // must with query parameter "mock=true", value is case insensitive
-                    UserIdPrincipal(credentials.token)
-                } else {
-                    val userId = verify(credentials.token)
-                    if (!userId.isNullOrBlank()) {
-                        if (AdminReserved.enabled && userId == AdminReserved.username) {
-                            // pass validation when admin enabled and username matched
-                            UserIdPrincipal(userId)
-                        } else if (Services().use { it.user { isActive(userId) } }) {
-                            UserIdPrincipal(userId)
-                        } else {
-                            null
-                        }
-                    } else {
-                        null
-                    }
-                }
-            }
-            authorise { principal ->
-                authorise(principal)
-            }
-        }
-    }
-    install(Authentication) {
-        role(name = "authenticated", roleBasedAuthorise { true })
-        role(name = "admin", roleBasedAuthorise { principal ->
-            val userId = principal.name
-            if (AdminReserved.enabled && userId == AdminReserved.username) {
-                // authorise anything when admin enabled and username matched
-                true
-            } else {
-                Services().use { it.user { isAdmin(userId) } }
-            }
-        })
-    }
+	val jwtVerifier = makeJwtVerifier()
+	fun roleBasedAuthorise(authorise: AuthorizationFunction<UserIdPrincipal>): (RoleBaseAuthenticationProvider.Configuration.() -> Unit) {
+		return {
+			verifier = jwtVerifier
+			validate { credentials ->
+				val mock = request.queryParameters["mock"]
+				if (isDev && mock.equals("true", ignoreCase = true)) {
+					// in development mode, use token as principal
+					// must with query parameter "mock=true", value is case insensitive
+					UserIdPrincipal(credentials.token)
+				} else {
+					val userId = verify(credentials.token)
+					if (!userId.isNullOrBlank()) {
+						if (AdminReserved.enabled && userId == AdminReserved.username) {
+							// pass validation when admin enabled and username matched
+							UserIdPrincipal(userId)
+						} else if (Services().use { it.user { isActive(userId) } }) {
+							UserIdPrincipal(userId)
+						} else {
+							null
+						}
+					} else {
+						null
+					}
+				}
+			}
+			authorise { principal ->
+				authorise(principal)
+			}
+		}
+	}
+	install(Authentication) {
+		role(name = "authenticated", roleBasedAuthorise { true })
+		role(name = "admin", roleBasedAuthorise { principal ->
+			val userId = principal.name
+			if (AdminReserved.enabled && userId == AdminReserved.username) {
+				// authorise anything when admin enabled and username matched
+				true
+			} else {
+				Services().use { it.user { isAdmin(userId) } }
+			}
+		})
+	}
 
-    routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
-    }
+	routing {
+		get("/") {
+			call.respondText("Hello World!")
+		}
+	}
 
-    routing {
-        loginRoutes()
-    }
+	routing {
+		loginRoutes()
+	}
 
-    routing {
-        userRoutes()
-        userGroupRoutes()
+	routing {
+		userRoutes()
+		userGroupRoutes()
 
-        spaceRoutes()
-        topicRoutes()
-        enumRoutes()
-        pipelineSpaceRoutes()
+		spaceRoutes()
+		topicRoutes()
+		enumRoutes()
+		pipelineSpaceRoutes()
 
-        connectedSpaceRoutes()
-        dashboardRoutes()
-        subjectRoutes()
-        favoriteRoutes()
-        lastSnapshotRoutes()
-    }
+		connectedSpaceRoutes()
+		dashboardRoutes()
+		subjectRoutes()
+		favoriteRoutes()
+		lastSnapshotRoutes()
+	}
 }

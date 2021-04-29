@@ -10,7 +10,7 @@ import com.imma.service.core.PipelineTriggerData
 import com.imma.service.core.PipelineVariables
 import com.imma.service.core.stage.StageContext
 
-class UnitContext(private val stageContext: StageContext, val unit: PipelineStageUnit)  {
+class UnitContext(private val stageContext: StageContext, val unit: PipelineStageUnit) {
 	val instanceId: String
 		get() = stageContext.instanceId
 	val pipeline: Pipeline

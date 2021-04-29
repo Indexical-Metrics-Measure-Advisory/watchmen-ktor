@@ -10,39 +10,39 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 fun Route.findFavoriteRoute() {
-    get(RouteConstants.FAVORITE) {
-        val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val favorite = Services().use { it.favorite { findFavoriteById(principal.name) } }
-        if (favorite != null) {
-            favorite.userId = null
-            call.respond(favorite)
-        } else {
-            call.respond(
-                mapOf(
-                    "connectedSpaceIds" to listOf<String>(),
-                    "dashboardIds" to listOf()
-                )
-            )
-        }
-    }
+	get(RouteConstants.FAVORITE) {
+		val principal = call.authentication.principal<UserIdPrincipal>()!!
+		val favorite = Services().use { it.favorite { findFavoriteById(principal.name) } }
+		if (favorite != null) {
+			favorite.userId = null
+			call.respond(favorite)
+		} else {
+			call.respond(
+				mapOf(
+					"connectedSpaceIds" to listOf<String>(),
+					"dashboardIds" to listOf()
+				)
+			)
+		}
+	}
 }
 
 fun Route.saveFavoriteRoute() {
-    post(RouteConstants.FAVORITE_SAVE) {
-        val principal = call.authentication.principal<UserIdPrincipal>()!!
-        val favorite = call.receive<Favorite>()
-        favorite.userId = principal.name
-        Services().use { it.favorite { saveFavorite(favorite) } }
-        favorite.userId = null
-        call.respond(favorite)
-    }
+	post(RouteConstants.FAVORITE_SAVE) {
+		val principal = call.authentication.principal<UserIdPrincipal>()!!
+		val favorite = call.receive<Favorite>()
+		favorite.userId = principal.name
+		Services().use { it.favorite { saveFavorite(favorite) } }
+		favorite.userId = null
+		call.respond(favorite)
+	}
 }
 
 fun Application.favoriteRoutes() {
-    routing {
-        authenticate(Roles.AUTHENTICATED.ROLE) {
-            findFavoriteRoute()
-            saveFavoriteRoute()
-        }
-    }
+	routing {
+		authenticate(Roles.AUTHENTICATED.ROLE) {
+			findFavoriteRoute()
+			saveFavoriteRoute()
+		}
+	}
 }

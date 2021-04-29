@@ -7,8 +7,8 @@ import java.util.*
 
 @Entity
 data class EnumItem(
-    @Id
-    var enumItemId: String? = null,
+	@Id
+	var enumItemId: String? = null,
 	@Field("code")
 	var code: String? = null,
 	@Field("label")

@@ -7,9 +7,9 @@ typealias PipelineTriggerData = Map<String, Any?>
 typealias PipelineVariables = MutableMap<String, Any?>
 
 fun createPipelineTopics(vararg topics: Pair<String, Topic>): PipelineTopics {
-    return mutableMapOf(*topics)
+	return mutableMapOf(*topics)
 }
 
 fun createPipelineVariables(): PipelineVariables {
-    return mutableMapOf()
+	return mutableMapOf()
 }

@@ -10,15 +10,15 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.SPACE)
 class AvailableSpace {
-    @Id
-    var spaceId: String? = null
+	@Id
+	var spaceId: String? = null
 
-    @Field("name")
-    var name: String? = null
+	@Field("name")
+	var name: String? = null
 
-    @Field("description")
-    var description: String? = null
+	@Field("description")
+	var description: String? = null
 
-    @Field("topic_ids")
-    var topicIds: List<String>? = mutableListOf()
+	@Field("topic_ids")
+	var topicIds: List<String>? = mutableListOf()
 }

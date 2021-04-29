@@ -13,63 +13,63 @@ import com.imma.service.TupleService
 import kotlin.contracts.ExperimentalContracts
 
 class TopicService(services: Services) : TupleService(services) {
-    @ExperimentalContracts
-    fun saveTopic(topic: Topic) {
-        val fake = determineFakeOrNullId({ topic.topicId }, true, { topic.topicId = nextSnowflakeId().toString() })
+	@ExperimentalContracts
+	fun saveTopic(topic: Topic) {
+		val fake = determineFakeOrNullId({ topic.topicId }, true, { topic.topicId = nextSnowflakeId().toString() })
 
-        if (fake) {
-            createTuple(topic, Topic::class.java, CollectionNames.TOPIC)
-        } else {
-            updateTuple(topic, Topic::class.java, CollectionNames.TOPIC)
-        }
-    }
+		if (fake) {
+			createTuple(topic, Topic::class.java, CollectionNames.TOPIC)
+		} else {
+			updateTuple(topic, Topic::class.java, CollectionNames.TOPIC)
+		}
+	}
 
-    fun findTopicById(topicId: String): Topic? {
-        return persist().findById(topicId, Topic::class.java, CollectionNames.TOPIC)
-    }
+	fun findTopicById(topicId: String): Topic? {
+		return persist().findById(topicId, Topic::class.java, CollectionNames.TOPIC)
+	}
 
-    fun findTopicsByName(name: String?, pageable: Pageable): DataPage<Topic> {
-        return if (name.isNullOrEmpty()) {
-            persist().page(pageable, Topic::class.java, CollectionNames.TOPIC)
-        } else {
-            persist().page(
-                where {
-                    factor("name") hasText { value(name) }
-                },
-                pageable,
-                Topic::class.java, CollectionNames.TOPIC
-            )
-        }
-    }
+	fun findTopicsByName(name: String?, pageable: Pageable): DataPage<Topic> {
+		return if (name.isNullOrEmpty()) {
+			persist().page(pageable, Topic::class.java, CollectionNames.TOPIC)
+		} else {
+			persist().page(
+				where {
+					factor("name") hasText { value(name) }
+				},
+				pageable,
+				Topic::class.java, CollectionNames.TOPIC
+			)
+		}
+	}
 
-    fun findTopicsByNameForHolder(name: String?): List<TopicForHolder> {
-        return if (name.isNullOrEmpty()) {
-            persist().listAll(TopicForHolder::class.java, CollectionNames.TOPIC)
-        } else {
-            persist().list(
-                where {
-                    factor("name") hasText { value(name) }
-                },
-                TopicForHolder::class.java, CollectionNames.TOPIC
-            )
-        }
-    }
+	fun findTopicsByNameForHolder(name: String?): List<TopicForHolder> {
+		return if (name.isNullOrEmpty()) {
+			persist().listAll(TopicForHolder::class.java, CollectionNames.TOPIC)
+		} else {
+			persist().list(
+				where {
+					factor("name") hasText { value(name) }
+				},
+				TopicForHolder::class.java, CollectionNames.TOPIC
+			)
+		}
+	}
 
-    fun findTopicsByIdsForHolder(topicIds: List<String>): List<TopicForHolder> {
-        return persist().list(
-            select {
-                factor("topicId")
-                factor("name")
-            },
-            where {
-                factor("topicId") existsIn { value(topicIds) }
-            },
-            TopicForHolder::class.java, CollectionNames.TOPIC
-        )
-    }
+	fun findTopicsByIdsForHolder(topicIds: List<String>): List<TopicForHolder> {
+		return persist().list(
+			select {
+				factor("topicId")
+				factor("name")
+			},
+			where {
+				factor("topicId") existsIn { value(topicIds) }
+			},
+			TopicForHolder::class.java, CollectionNames.TOPIC
+		)
+	}
 
-    fun findAllTopics(): List<Topic> {
-        return persist().listAll(Topic::class.java, CollectionNames.TOPIC)
-    }
+	fun findAllTopics(): List<Topic> {
+		return persist().listAll(Topic::class.java, CollectionNames.TOPIC)
+	}
 }
 

@@ -10,9 +10,9 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.ENUM)
 class EnumForHolder {
-    @Id
-    var enumId: String? = null
+	@Id
+	var enumId: String? = null
 
-    @Field("name")
-    var name: String? = null
+	@Field("name")
+	var name: String? = null
 }

@@ -10,9 +10,9 @@ import com.imma.persist.annotation.Id
  */
 @Entity(CollectionNames.TOPIC)
 class TopicForHolder {
-    @Id
-    var topicId: String? = null
+	@Id
+	var topicId: String? = null
 
-    @Field("name")
-    var name: String? = null
+	@Field("name")
+	var name: String? = null
 }

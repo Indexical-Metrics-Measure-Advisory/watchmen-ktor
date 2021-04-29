@@ -8,58 +8,58 @@ import java.util.*
 
 @Suppress("EnumEntryName")
 enum class ReportIndicatorArithmetic(val arithmetic: String) {
-    none("none"),
-    count("count"),
-    sum("sum"),
-    avg("avg"),
-    max("max"),
-    min("min");
+	none("none"),
+	count("count"),
+	sum("sum"),
+	avg("avg"),
+	max("max"),
+	min("min");
 }
 
 data class ReportIndicator(
-    var columnId: String,
-    var name: String,
-    var arithmetic: ReportIndicatorArithmetic = ReportIndicatorArithmetic.count
+	var columnId: String,
+	var name: String,
+	var arithmetic: ReportIndicatorArithmetic = ReportIndicatorArithmetic.count
 )
 
 data class ReportDimension(
-    var columnId: String,
-    var name: String,
+	var columnId: String,
+	var name: String,
 )
 
 data class ReportRect(
-    var x: Float = 0f,
-    var y: Float = 0f,
-    var width: Float = 0f,
-    var height: Float = 0f
+	var x: Float = 0f,
+	var y: Float = 0f,
+	var width: Float = 0f,
+	var height: Float = 0f
 )
 
 @Entity(CollectionNames.REPORT)
 data class Report(
-    @Id
-    var reportId: String? = null,
-    @Field("name")
-    var name: String? = null,
-    @Field("connect_id")
-    var connectId: String? = null,
-    @Field("subject_id")
-    var subjectId: String? = null,
-    @Field("user_id")
-    var userId: String? = null,
-    @Field("indicators")
-    var indicators: List<ReportIndicator> = mutableListOf(),
-    @Field("dimensions")
-    var dimensions: List<ReportDimension> = mutableListOf(),
-    @Field("description")
-    var description: String? = null,
-    @Field("rect")
-    var rect: ReportRect = ReportRect(),
-    @Field("chart")
-    var chart: Chart = Chart(),
-    @Field("last_visit_time")
-    var lastVisitTime: String? = null,
-    @CreatedAt
-    override var createTime: Date? = null,
-    @LastModifiedAt
-    override var lastModifyTime: Date? = null,
+	@Id
+	var reportId: String? = null,
+	@Field("name")
+	var name: String? = null,
+	@Field("connect_id")
+	var connectId: String? = null,
+	@Field("subject_id")
+	var subjectId: String? = null,
+	@Field("user_id")
+	var userId: String? = null,
+	@Field("indicators")
+	var indicators: List<ReportIndicator> = mutableListOf(),
+	@Field("dimensions")
+	var dimensions: List<ReportDimension> = mutableListOf(),
+	@Field("description")
+	var description: String? = null,
+	@Field("rect")
+	var rect: ReportRect = ReportRect(),
+	@Field("chart")
+	var chart: Chart = Chart(),
+	@Field("last_visit_time")
+	var lastVisitTime: String? = null,
+	@CreatedAt
+	override var createTime: Date? = null,
+	@LastModifiedAt
+	override var lastModifyTime: Date? = null,
 ) : Tuple()
