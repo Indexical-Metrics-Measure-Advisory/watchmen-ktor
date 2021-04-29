@@ -12,13 +12,13 @@ import com.imma.utils.Envs
 import java.sql.Connection
 
 class OraclePersistKitProvider(name: String) : PersistKitProvider(name) {
-	init {
-		Class.forName("com.mysql.cj.jdbc.Driver")
-	}
+    init {
+        Class.forName("com.mysql.cj.jdbc.Driver")
+    }
 
-	override fun createKit(): PersistKit {
-		return OraclePersistKit()
-	}
+    override fun createKit(): PersistKit {
+        return OraclePersistKit()
+    }
 }
 
 /**
@@ -26,45 +26,54 @@ class OraclePersistKitProvider(name: String) : PersistKitProvider(name) {
  */
 @Suppress("unused")
 class OracleInitializer : PluginInitializer {
-	override fun register() {
-		val oracleEnabled = Envs.boolean(EnvConstants.ORACLE_ENABLED, false)
-		if (oracleEnabled) {
-			PersistKits.register(OraclePersistKitProvider("oracle"))
-		}
-	}
+    override fun register() {
+        val oracleEnabled = Envs.boolean(EnvConstants.ORACLE_ENABLED, false)
+        if (oracleEnabled) {
+            PersistKits.register(OraclePersistKitProvider("oracle"))
+        }
+    }
 }
 
 /**
  * thread unsafe
  */
 class OraclePersistKit : RDBMSPersistKit() {
-	override fun registerDynamicTopic(topic: Topic) {
-		OracleEntityMapper.registerDynamicTopic(topic)
-	}
+    override fun registerDynamicTopic(topic: Topic) {
+        OracleEntityMapper.registerDynamicTopic(topic)
+    }
 
-	override fun buildMaterial(one: Any?, entityClass: Class<*>, entityName: String): RDBMSMapperMaterial {
-		return OracleMapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
-	}
+    override fun buildMaterial(one: Any?, entityClass: Class<*>, entityName: String): RDBMSMapperMaterial {
+        return OracleMapperMaterialBuilder.create(one).type(entityClass).name(entityName).build()
+    }
 
-	override fun buildMaterial(entityClass: Class<*>, entityName: String): RDBMSMapperMaterial {
-		return OracleMapperMaterialBuilder.create().type(entityClass).name(entityName).build()
-	}
+    override fun buildMaterial(entityClass: Class<*>, entityName: String): RDBMSMapperMaterial {
+        return OracleMapperMaterialBuilder.create().type(entityClass).name(entityName).build()
+    }
 
-	override fun createConnection(): Connection {
-		val host = Envs.string(EnvConstants.ORACLE_HOST)
-		val port = Envs.string(EnvConstants.ORACLE_PORT)
-		val name = Envs.string(EnvConstants.ORACLE_NAME)
-		val user = Envs.string(EnvConstants.ORACLE_USER)
-		val password = Envs.string(EnvConstants.ORACLE_PASSWORD)
+    override fun createConnection(): Connection {
+        val host = Envs.string(EnvConstants.ORACLE_HOST)
+        val port = Envs.string(EnvConstants.ORACLE_PORT)
+        val name = Envs.string(EnvConstants.ORACLE_NAME)
+        val user = Envs.string(EnvConstants.ORACLE_USER)
+        val password = Envs.string(EnvConstants.ORACLE_PASSWORD)
 
-		return this.createConnection("jdbc:oracle:thin:@$host:$port:$name", user, password)
-	}
+        return this.createConnection("jdbc:oracle:thin:@$host:$port:$name", user, password)
+    }
 
-	override fun entityExists(entityClass: Class<*>, entityName: String): Boolean {
-		TODO()
-	}
+    override fun toPageSQL(sql: String, skipCount: Int, pageSize: Int, pageNumber: Int): String {
+        return "SELECT * FROM (${
+            sql.replaceFirst(
+                "SELECT ",
+                "SELECT ROWNUM "
+            )
+        }) WHERE ROWNUM > $skipCount AND ROWNUM <= ${pageNumber * pageSize}"
+    }
 
-	override fun createEntity(entityClass: Class<*>, entityName: String) {
-		TODO()
-	}
+    override fun entityExists(entityClass: Class<*>, entityName: String): Boolean {
+        TODO()
+    }
+
+    override fun createEntity(entityClass: Class<*>, entityName: String) {
+        TODO()
+    }
 }
