@@ -20,6 +20,14 @@ class OracleFunctions : RDBMSFunctions() {
         return SQLPart("MONTH(${one.statement})", one.values)
     }
 
+    /**
+     * 1. calculate first day of year: X = TRUNC(:DATE, 'Y')
+     * 2. calculate day of week: Y = TO_CHAR({X}, 'D'). sunday: 1 - saturday: 7
+     * 3. calculate days of zero week: Z = MOD(8 - {Y}, 7)
+     * 4. calculate days left, after days zero week is cut: A = TO_NUMBER(TO_CHAR(:DATE, 'DDD')) - {Z}
+     * 5. calculate week, -1 based: B = FLOOR(({A} - 1) / 7)
+     * 6. calculate final week, zero based: C = {B} + 1
+     */
     override fun weekOfYear(one: SQLPart): SQLPart {
         val values = mutableListOf<Any?>()
         repeat(2) { values.addAll(one.values) }
@@ -29,6 +37,14 @@ class OracleFunctions : RDBMSFunctions() {
         )
     }
 
+    /**
+     * 1. calculate first day of month: X = TRUNC(:DATE, 'MM')
+     * 2. calculate day of week: Y = TO_CHAR({X}, 'D'). sunday: 1 - saturday: 7
+     * 3. calculate days of zero week: Z = MOD(8 - {Y}, 7)
+     * 4. calculate days left, after days zero week is cut: A = TO_NUMBER(TO_CHAR(:DATE, 'DD')) - {Z}
+     * 5. calculate week, -1 based: B = FLOOR(({A} - 1) / 7)
+     * 6. calculate final week, zero based: C = {B} + 1
+     */
     override fun weekOfMonth(one: SQLPart): SQLPart {
         val values = mutableListOf<Any?>()
         repeat(2) { values.addAll(one.values) }
