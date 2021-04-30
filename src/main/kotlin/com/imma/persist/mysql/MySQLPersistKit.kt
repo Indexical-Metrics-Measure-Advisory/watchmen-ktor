@@ -1,6 +1,7 @@
 package com.imma.persist.mysql
 
 import com.imma.model.core.Topic
+import com.imma.persist.DynamicTopicKits
 import com.imma.persist.PersistKit
 import com.imma.persist.PersistKitProvider
 import com.imma.persist.PersistKits
@@ -65,7 +66,12 @@ class MySQLPersistKit : RDBMSPersistKit() {
     }
 
     override fun entityExists(entityClass: Class<*>, entityName: String): Boolean {
-        TODO()
+        return executeQuery(
+            "SELECT COUNT(1) AS CNT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '${DynamicTopicKits.toCollectionName(entityName)}'",
+            listOf()
+        )[0].let {
+            getCountValue(it) > 0
+        }
     }
 
     override fun createEntity(entityClass: Class<*>, entityName: String) {

@@ -279,7 +279,7 @@ abstract class RDBMSPersistKit : AbstractPersistKit() {
     override fun <T> page(pageable: Pageable, entityClass: Class<*>, entityName: String): DataPage<T> {
         val material = this.buildMaterial(entityClass, entityName)
         val count = getCountValue(
-            executeQuery("SELECT COUNT(NULL) AS CNT FROM ${material.toCollectionName()}", listOf())[0]
+            executeQuery("SELECT COUNT(1) AS CNT FROM ${material.toCollectionName()}", listOf())[0]
         )
         val skipCount = computeSkipCount(pageable)
         return if (count <= skipCount) {
@@ -312,7 +312,7 @@ abstract class RDBMSPersistKit : AbstractPersistKit() {
         val filter = material.toFilter(where)
         val count = getCountValue(
             executeQuery(
-                "SELECT COUNT(NULL) AS CNT FROM ${material.toCollectionName()} WHERE ${filter.statement}",
+                "SELECT COUNT(1) AS CNT FROM ${material.toCollectionName()} WHERE ${filter.statement}",
                 filter.values
             )[0]
         )
@@ -343,7 +343,7 @@ abstract class RDBMSPersistKit : AbstractPersistKit() {
         val material = this.buildMaterial(entityClass, entityName)
         val filter = material.toFilter(where)
         return executeQuery(
-            "SELECT COUNT(NULL) AS CNT FROM ${material.toCollectionName()} WHERE $where",
+            "SELECT COUNT(1) AS CNT FROM ${material.toCollectionName()} WHERE $where",
             filter.values
         )[0].let {
             getCountValue(it) > 0
