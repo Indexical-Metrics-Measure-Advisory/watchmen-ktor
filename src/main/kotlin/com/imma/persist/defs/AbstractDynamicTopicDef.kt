@@ -53,7 +53,7 @@ abstract class AbstractDynamicTopicDef(private val topic: Topic) :
         } + listOf(createdAt, lastModifiedAt)
     ), DynamicTopicDef {
     private val fieldsMapByFieldName: Map<String, DynamicFactorDef> =
-        fields.map { it as DynamicFactorDef }.map { it.fieldName to it }.toMap()
+        fields.map { it as DynamicFactorDef }.associateBy { it.fieldName }
 
     override fun getTopic(): Topic {
         return topic

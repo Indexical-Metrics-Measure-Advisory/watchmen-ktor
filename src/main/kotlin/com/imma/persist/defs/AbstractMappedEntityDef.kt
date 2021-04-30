@@ -28,9 +28,9 @@ abstract class AbstractMappedEntityDef(
 ) :
 	AbstractEntityDef(name, fields), MappedEntityDef {
 	override fun toPersistObject(entity: Any): PersistObject {
-		val map = fields.map { field ->
+		val map = fields.associate { field ->
 			field.fieldName to field.read(entity)
-		}.toMap().toMutableMap()
+		}.toMutableMap()
 
 		this.removeEmptyId(map)
 		this.handleLastModifiedAt(map)
