@@ -61,19 +61,19 @@ class OraclePersistKit : RDBMSPersistKit() {
     }
 
     /**
-     * filter column _ROWNUM if exists
+     * filter column ROWNUM_ if exists
      */
     override fun filterUselessColumnNames(columnNames: List<String>): List<String> {
-        return columnNames.filter { it != "_ROWNUM" }
+        return columnNames.filter { it != "ROWNUM_" }
     }
 
     override fun toPageSQL(sql: String, skipCount: Int, pageSize: Int, pageNumber: Int): String {
         return "SELECT * FROM (${
             sql.replaceFirst(
                 "SELECT ",
-                "SELECT ROWNUM _ROWNUM "
+                "SELECT ROWNUM AS ROWNUM_ "
             )
-        }) WHERE _ROWNUM > $skipCount AND _ROWNUM <= ${pageNumber * pageSize}"
+        }) WHERE ROWNUM_ > $skipCount AND ROWNUM_ <= ${pageNumber * pageSize}"
     }
 
     override fun entityExists(entityClass: Class<*>, entityName: String): Boolean {
