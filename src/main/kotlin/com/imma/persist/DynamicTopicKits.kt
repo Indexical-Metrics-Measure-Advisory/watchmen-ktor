@@ -43,23 +43,26 @@ private fun String.toCamelCase(): String {
 class DynamicTopicKits {
 	companion object {
 		/**
-		 * replace blank, strikethrough to underline, convert to snake case
+		 * replace blank, strikethrough to underline, convert to snake + upper case
 		 */
 		fun toCollectionName(topicName: String): String {
 			return topicName.trim {
 				it == ' ' || it == '-'
-			}.replace(Regex("[\\s-]"), "_").toSnakeCase()
+			}.replace(Regex("[\\s-]"), "_").toSnakeCase().toUpperCase()
 		}
 
 		/**
-		 * replace blank, strikethrough to underline, convert to snake case
+		 * replace blank, strikethrough to underline, convert to snake + upper case
 		 */
 		fun toFieldName(factorName: String): String {
 			return factorName.trim {
 				it == ' ' || it == '-'
-			}.replace(Regex("[\\s-]"), "_").toSnakeCase()
+			}.replace(Regex("[\\s-]"), "_").toSnakeCase().toUpperCase()
 		}
 
+		/**
+		 * convert snake/upper case to camel case
+		 */
 		fun fromFieldName(fieldName: String): String {
 			return fieldName.toCamelCase()
 		}

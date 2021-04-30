@@ -2,6 +2,7 @@ package com.imma.persist.defs
 
 import com.imma.model.EntityColumns
 import com.imma.persist.DynamicTopicKits
+import kotlin.contracts.ExperimentalContracts
 
 class MapEntityFieldDef(name: String, type: EntityFieldType) : EntityFieldDef(name, type) {
 	override fun read(entity: Any): Any? {
@@ -45,13 +46,10 @@ abstract class AbstractMapEntityDef(name: String) : AbstractEntityDef(name, list
 
 		@Suppress("UNCHECKED_CAST")
 		val map = (entity as Map<String, Any?>).map { (key, value) ->
-			when (key) {
-				id.key -> id.fieldName
-				id.fieldName -> id.fieldName
-				createdAt?.key -> createdAt.fieldName
-				createdAt?.fieldName -> createdAt.fieldName
-				lastModifiedAt?.key -> lastModifiedAt.fieldName
-				lastModifiedAt?.fieldName -> lastModifiedAt.fieldName
+			when {
+				id.isMe(key)->id.fieldName
+				createdAt != null && createdAt.isMe(key) -> createdAt.fieldName
+				lastModifiedAt != null && lastModifiedAt.isMe(key) -> lastModifiedAt.fieldName
 				else -> toFieldName(key)
 			} to value
 		}.toMap().toMutableMap()
@@ -60,15 +58,13 @@ abstract class AbstractMapEntityDef(name: String) : AbstractEntityDef(name, list
 		return map
 	}
 
+	@ExperimentalContracts
 	override fun fromPersistObject(po: PersistObject): Any {
 		return po.map { (key, value) ->
-			when (key) {
-				id.fieldName -> id.key
-				id.key -> id.key
-				createdAt?.key -> createdAt.key
-				createdAt?.fieldName -> createdAt.key
-				lastModifiedAt?.key -> lastModifiedAt.key
-				lastModifiedAt?.fieldName -> lastModifiedAt.key
+			when {
+				id.isMe(key) -> id.key
+				createdAt != null && createdAt.isMe(key) -> createdAt.key
+				lastModifiedAt!=null && lastModifiedAt.isMe(key) -> lastModifiedAt.key
 				else -> DynamicTopicKits.fromFieldName(key)
 			} to value
 		}.toMap().toMutableMap()

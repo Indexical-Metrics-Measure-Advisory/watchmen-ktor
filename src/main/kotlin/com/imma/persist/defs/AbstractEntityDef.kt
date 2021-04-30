@@ -9,9 +9,17 @@ enum class EntityFieldType {
 }
 
 abstract class EntityFieldDef(val key: String, val type: EntityFieldType) {
+	/** field name is on upper and snake case */
 	val fieldName: String = DynamicTopicKits.toFieldName(key)
 	abstract fun read(entity: Any): Any?
 	abstract fun write(entity: Any, value: Any?)
+
+	/**
+	 * if given name equals key(case sensitive) or equals field name(ignore case)
+	 */
+	fun isMe(name: String): Boolean {
+		return name == key || name.equals(fieldName, true)
+	}
 }
 
 typealias PersistObject = MutableMap<String, Any?>
@@ -155,7 +163,7 @@ abstract class AbstractEntityDef(val key: String, val fields: List<EntityFieldDe
 		return when {
 			value == null -> throw RuntimeException("Cannot generate id filter when value of id is null.")
 			value is String && value.isBlank() -> throw RuntimeException("Cannot generate id filter when value of id is blank.")
-			else -> this.toFieldName(id.key) to value
+			else -> id.fieldName to value
 		}
 	}
 }

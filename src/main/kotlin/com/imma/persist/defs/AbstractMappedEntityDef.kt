@@ -1,5 +1,6 @@
 package com.imma.persist.defs
 
+import com.imma.persist.DynamicTopicKits
 import com.imma.persist.annotation.*
 import java.beans.PropertyDescriptor
 
@@ -50,9 +51,9 @@ abstract class AbstractMappedEntityDef(
 			val field = it as MappedEntityFieldDef
 			field.getPropertyName() == propertyOrFactorName
 					|| field.key == propertyOrFactorName
-					|| field.fieldName == propertyOrFactorName
+					|| field.fieldName.equals(propertyOrFactorName, true)
 		}
-		return field?.fieldName ?: propertyOrFactorName
+		return field?.fieldName ?: DynamicTopicKits.toFieldName(propertyOrFactorName)
 	}
 
 	override fun isMultipleTopicsSupported(): Boolean {

@@ -16,7 +16,7 @@ abstract class MapperMaterial(
 	}
 
 	fun getIdFieldName(): String {
-		return this.toFieldName(getDef().getId().key)
+		return getDef().getId().fieldName
 	}
 
 	@Suppress("MemberVisibilityCanBePrivate")
