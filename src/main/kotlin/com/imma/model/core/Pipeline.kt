@@ -2,6 +2,7 @@ package com.imma.model.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
+import com.imma.model.core.compute.ParameterDelegate
 import com.imma.model.core.compute.ParameterJointDelegate
 import com.imma.persist.annotation.*
 import java.util.*
@@ -27,6 +28,7 @@ data class PipelineStageUnitAction(
 data class PipelineStageUnit(
 	var unitId: String? = null,
 	var name: String? = null,
+	var loopWith: ParameterDelegate? = null,
 	override var conditional: Boolean = false,
 	override var on: ParameterJointDelegate = mutableMapOf(),
 	var `do`: List<PipelineStageUnitAction> = mutableListOf(),
