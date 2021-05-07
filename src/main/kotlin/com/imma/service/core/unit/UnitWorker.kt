@@ -9,7 +9,7 @@ import com.imma.service.core.parameter.ConditionWorker
 class UnitWorker(private val context: UnitContext) : EngineWorker() {
 	private val logger: UnitLogger by lazy { UnitLogger(context) }
 
-	private fun shouldRun(): Boolean {
+	private fun shouldRun(context: UnitContext): Boolean {
 		return context.run {
 			if (!unit.conditional || unit.on.isNullOrEmpty()) {
 				// no condition, run it
@@ -17,12 +17,31 @@ class UnitWorker(private val context: UnitContext) : EngineWorker() {
 			}
 
 			val joint = takeAsParameterJointOrThrow(unit.on)
-			ConditionWorker(pipeline, topics, currentOfTriggerData, mutableMapOf()).computeJoint(joint)
+			ConditionWorker(pipeline, topics, currentOfTriggerData, variables).computeJoint(joint)
 		}
 	}
 
 	fun run() {
-		if (this.shouldRun()) {
+		val loopVariableName = context.unit.loopVariableName
+		if (!loopVariableName.isNullOrBlank()) {
+			// run loop
+			when (val values = context.variables[loopVariableName]) {
+				is Collection<Any?> -> values.forEachIndexed { index, value ->
+					this.doRun(context.buildLoopContext(loopVariableName, index))
+				}
+				is Array<*> -> values.forEachIndexed { index, value ->
+					this.doRun(context.buildLoopContext(loopVariableName, index))
+				}
+				else -> this.doRun(context)
+			}
+		} else {
+			// no loop
+			this.doRun(context)
+		}
+	}
+
+	private fun doRun(context: UnitContext) {
+		if (this.shouldRun(context)) {
 			try {
 				this.markStart()
 				logger.start("Start to run unit.")

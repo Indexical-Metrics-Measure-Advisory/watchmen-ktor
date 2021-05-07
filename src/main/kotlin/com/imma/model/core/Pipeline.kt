@@ -2,7 +2,6 @@ package com.imma.model.core
 
 import com.imma.model.CollectionNames
 import com.imma.model.Tuple
-import com.imma.model.core.compute.ParameterDelegate
 import com.imma.model.core.compute.ParameterJointDelegate
 import com.imma.persist.annotation.*
 import java.util.*
@@ -12,7 +11,9 @@ enum class PipelineStageUnitActionType(val type: String) {
 	alarm("alarm"),
 	`copy-to-memory`("copy-to-memory"),
 	`read-row`("read-row"),
+	`read-rows`("read-rows"),
 	`read-factor`("read-factor"),
+	`read-factors`("read-factors"),
 	exists("exists"),
 	`merge-row`("merge-row"),
 	`insert-row`("insert-row"),
@@ -28,7 +29,7 @@ data class PipelineStageUnitAction(
 data class PipelineStageUnit(
 	var unitId: String? = null,
 	var name: String? = null,
-	var loopWith: ParameterDelegate? = null,
+	var loopVariableName: String? = null,
 	override var conditional: Boolean = false,
 	override var on: ParameterJointDelegate = mutableMapOf(),
 	var `do`: List<PipelineStageUnitAction> = mutableListOf(),
