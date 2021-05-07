@@ -33,15 +33,15 @@ open class UnitContext(private val stageContext: StageContext, val unit: Pipelin
 	val logger: EngineLogger
 		get() = stageContext.logger
 
-	fun buildLoopContext(delegatedVariableName: String, delegatedValueIndex: Int): UnitContext {
-		return UnitContextInLoop(stageContext, unit, delegatedVariableName, delegatedValueIndex)
+	fun buildLoopContext(delegateVariableName: String, delegateValue: Any?): UnitContext {
+		return UnitContextInLoop(stageContext, unit, delegateVariableName, delegateValue)
 	}
 }
 
 class UnitVariables(
 	private val variables: PipelineVariables,
-	private val delegatedVariableName: String,
-	private val delegatedValueIndex: Int
+	private val delegateVariableName: String,
+	private val delegateValue: Any?
 ) : PipelineVariables {
 	override val size: Int
 		get() = variables.size
@@ -51,16 +51,13 @@ class UnitVariables(
 	}
 
 	override fun containsValue(value: Any?): Boolean {
-		return variables.containsValue(value)
+		// assume check value which is delegated, is not gonna happen
+		return value == delegateValue || variables.containsValue(value)
 	}
 
 	override fun get(key: String): Any? {
-		return if (key == delegatedVariableName) {
-			when (val values = variables[key]) {
-				is Collection<Any?> -> values.toTypedArray()[delegatedValueIndex]
-				is Array<*> -> values[delegatedValueIndex]
-				else -> throw RuntimeException("Cannot get value from $values on index[$delegatedValueIndex].")
-			}
+		return if (key == delegateVariableName) {
+			delegateValue
 		} else {
 			variables[key]
 		}
@@ -73,8 +70,8 @@ class UnitVariables(
 	override val entries: MutableSet<MutableMap.MutableEntry<String, Any?>>
 		get() {
 			return variables.entries.associate { (key, value) ->
-				if (key == delegatedVariableName) {
-					key to get(delegatedVariableName)
+				if (key == delegateVariableName) {
+					key to get(delegateVariableName)
 				} else {
 					key to value
 				}
@@ -86,25 +83,13 @@ class UnitVariables(
 		get() = this.entries.map { it.value }.toMutableList()
 
 	override fun clear() {
-		variables.clear()
+		neverOccur()
 	}
 
-	@Suppress("UNCHECKED_CAST")
 	override fun put(key: String, value: Any?): Any? {
-		return if (key == delegatedVariableName) {
-			when (val values = variables[key]) {
-				is MutableList<*> -> {
-					val old = values[delegatedValueIndex]
-					(values as MutableList<Any?>)[delegatedValueIndex] = value
-					old
-				}
-				is Array<*> -> {
-					val old = values[delegatedValueIndex]
-					(values as Array<Any?>)[delegatedValueIndex] = value
-					old
-				}
-				else -> throw RuntimeException("Cannot put value to $values on index[$delegatedValueIndex].")
-			}
+		return if (key == delegateVariableName) {
+			// replace looped variable is not allowed
+			neverOccur()
 		} else {
 			variables.put(key, value)
 		}
@@ -122,12 +107,12 @@ class UnitVariables(
 class UnitContextInLoop(
 	private val stageContext: StageContext,
 	unit: PipelineStageUnit,
-	private val delegatedVariableName: String,
-	private val delegatedValueIndex: Int
+	private val delegateVariableName: String,
+	private val delegateValue: Any?
 ) :
 	UnitContext(stageContext, unit) {
 	private val variablesDelegate by lazy {
-		UnitVariables(stageContext.variables, delegatedVariableName, delegatedValueIndex)
+		UnitVariables(stageContext.variables, delegateVariableName, delegateValue)
 	}
 	override val variables: PipelineVariables
 		get() = variablesDelegate

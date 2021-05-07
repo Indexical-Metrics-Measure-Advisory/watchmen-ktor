@@ -26,11 +26,11 @@ class UnitWorker(private val context: UnitContext) : EngineWorker() {
 		if (!loopVariableName.isNullOrBlank()) {
 			// run loop
 			when (val values = context.variables[loopVariableName]) {
-				is Collection<Any?> -> values.forEachIndexed { index, value ->
-					this.doRun(context.buildLoopContext(loopVariableName, index))
+				is Iterable<Any?> -> values.forEach { value ->
+					this.doRun(context.buildLoopContext(loopVariableName, value))
 				}
-				is Array<*> -> values.forEachIndexed { index, value ->
-					this.doRun(context.buildLoopContext(loopVariableName, index))
+				is Array<*> -> values.forEach { value ->
+					this.doRun(context.buildLoopContext(loopVariableName, value))
 				}
 				else -> this.doRun(context)
 			}
