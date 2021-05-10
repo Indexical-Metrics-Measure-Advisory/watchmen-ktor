@@ -53,7 +53,7 @@ class ParameterBuilder(
 
         return if (isSourceTopic(topic.topicId!!)) {
             // from source topic, compute to value
-            val value = sourceData[factor.name!!]
+            val value = ParameterKits.getValueFromSourceData(factor, sourceData)
             val v = when (shouldBe) {
                 ParameterShouldBe.any -> value
                 ParameterShouldBe.collection -> ParameterKits.computeToCollection(value, parameter)

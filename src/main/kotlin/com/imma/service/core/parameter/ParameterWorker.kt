@@ -27,6 +27,9 @@ class ParameterWorker(
         return topicId == pipeline.topicId
     }
 
+    /**
+     * if factor is from raw data, name might has dot. which means multiple levels
+     */
     private fun computeTopicFactor(parameter: TopicFactorParameter, shouldBe: ParameterShouldBe): Any? {
         val (_, factor) = ParameterKits.readTopicFactorParameter(parameter, topics) { topicId ->
             if (!isSourceTopic(topicId)) {
@@ -34,7 +37,7 @@ class ParameterWorker(
             }
         }
 
-        val value = sourceData[factor.name!!]
+        val value = ParameterKits.getValueFromSourceData(factor, sourceData)
         return when (shouldBe) {
             ParameterShouldBe.any -> value
             ParameterShouldBe.collection -> ParameterKits.computeToCollection(value, parameter)

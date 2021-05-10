@@ -4,6 +4,7 @@ import com.imma.model.core.Factor
 import com.imma.model.core.Topic
 import com.imma.model.core.compute.*
 import com.imma.service.core.PipelineTopics
+import com.imma.service.core.PipelineTriggerData
 import com.imma.utils.nothing
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -99,6 +100,37 @@ class ParameterKits {
 
 			return FoundFactor(topic, factor)
 		}
+
+		fun getValueFromSourceData(factor: Factor, sourceData: PipelineTriggerData): Any? {
+			val name = factor.name!!
+			if (!name.contains('.')) {
+				return sourceData[factor.name!!]
+			} else {
+				val parts = name.split('.')
+				var source: Any? = sourceData
+				for (part in parts) {
+					when (source) {
+						is Iterable<Any?> -> source = source.map { item ->
+							when (item) {
+								is Map<*, *> -> item[part]
+								else -> throw RuntimeException("Cannot retrieve data from $source by [$part].")
+							}
+						}
+						is Array<*> -> source = source.map { item ->
+							when (item) {
+								is Map<*, *> -> item[part]
+								else -> throw RuntimeException("Cannot retrieve data from $source by [$part].")
+							}
+						}
+						is Map<*, *> -> source = source[part]
+						null -> nothing()
+						else -> throw RuntimeException("Cannot retrieve data from $source by [$part].")
+					}
+				}
+				return source
+			}
+		}
+
 
 		fun computeToDate(date: Any?, parameter: Parameter): LocalDate? {
 			return ValueKits.computeToDate(date) {
