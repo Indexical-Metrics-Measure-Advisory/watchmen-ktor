@@ -67,7 +67,7 @@ class ConstantParameterKits {
 		/**
 		 * compute constant value.
 		 *
-		 * @param statement use {} to call variables, eg. {x}, {x.y}, {nextSeq}, {x.y.length}.
+		 * @param statement use {} to call variables, eg. {x}, {x.y}, {&nextSeq}, {x.y.&count}.
 		 *  mixed also allowed, eg. a{x}, a{x}b{y.z}c.
 		 */
 		fun computeConstant(statement: String, getFirstValue: GetFirstValue, throws: () -> String): Any? {
