@@ -191,14 +191,14 @@ class ValueKits {
             }
         }
 
-        fun computeToCollection(value: Any?, throws: () -> String): List<Any?> {
+        fun computeToCollection(value: Any?): List<Any?> {
             return when (value) {
                 null -> listOf()
                 is Array<*> -> value.toList()
                 is List<*> -> value
                 is Collection<*> -> value.toList()
                 is String -> value.split(",")
-                else -> throw RuntimeException(throws())
+                else -> listOf(value)
             }
         }
     }

@@ -61,7 +61,7 @@ class ParameterWorker(
 
         val parameters = parameter.parameters
 
-        return when (parameter.type) {
+        val value = when (parameter.type) {
             ParameterComputeType.none -> throw RuntimeException("Operator of parameter[$parameter] cannot be none.")
             ParameterComputeType.add -> computeComputedToNumbers(parameters).sumOf { it }
             ParameterComputeType.subtract -> {
@@ -76,7 +76,7 @@ class ParameterWorker(
             ParameterComputeType.modulus -> {
                 val v0 = computeParameter(parameters[0], ParameterShouldBe.numeric) as BigDecimal
                 val v1 = computeParameter(parameters[1], ParameterShouldBe.numeric) as BigDecimal
-                v0 % v1
+                return v0 % v1
             }
             ParameterComputeType.`year-of` -> computeToDate(parameters[0])?.year
             ParameterComputeType.`half-year-of` -> {
@@ -125,6 +125,13 @@ class ParameterWorker(
                     null
                 }
             }
+        }
+
+        return when (shouldBe) {
+            ParameterShouldBe.any -> value
+            ParameterShouldBe.collection -> ParameterKits.computeToCollection(value, parameter)
+            ParameterShouldBe.numeric -> ParameterKits.computeToNumeric(value, parameter)
+            ParameterShouldBe.date -> ParameterKits.computeToDate(value, parameter)
         }
     }
 

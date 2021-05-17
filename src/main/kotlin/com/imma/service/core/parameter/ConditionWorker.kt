@@ -29,7 +29,7 @@ private class CompareFunctions(
 }
 
 private val eq: CompareFunctions = ({ value1: Any?, value2: Any? -> value1 == value2 }).run {
-	CompareFunctions(this, this, { _, _ -> false })
+	CompareFunctions(this, this) { _, _ -> false }
 }
 private val throwWhenIncomparable: WhenIncomparable = { value1, value2 ->
 	throw RuntimeException("More or less than operator is only compatible for comparable or null values, currently are [$value1] and [$value2].")

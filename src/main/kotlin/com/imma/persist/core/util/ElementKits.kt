@@ -13,9 +13,7 @@ class ElementKits {
 
 			return when (shouldBe) {
 				ElementShouldBe.any -> value
-				ElementShouldBe.collection -> ValueKits.computeToCollection(value) {
-					"Cannot cast given value[$value] to list, which is computed by element[$element]."
-				}
+				ElementShouldBe.collection -> ValueKits.computeToCollection(value)
 				ElementShouldBe.numeric -> ValueKits.computeToNumeric(value) {
 					"Cannot cast given value[$value] to number, which is computed by element[$element]."
 				}
