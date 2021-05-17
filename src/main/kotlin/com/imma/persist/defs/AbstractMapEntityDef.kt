@@ -58,7 +58,6 @@ abstract class AbstractMapEntityDef(name: String) : AbstractEntityDef(name, list
 		return map
 	}
 
-	@ExperimentalContracts
 	override fun fromPersistObject(po: PersistObject): Any {
 		return po.map { (key, value) ->
 			when {
