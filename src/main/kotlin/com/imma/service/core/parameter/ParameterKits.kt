@@ -170,13 +170,20 @@ class ParameterKits {
         fun computeConstant(parameter: ConstantParameter, shouldBe: ParameterShouldBe, getValue: GetFirstValue): Any? {
             val statement = parameter.value
 
-            return when {
+            val value = when {
                 statement == null -> null
                 statement.isEmpty() && shouldBe == ParameterShouldBe.any -> ""
                 statement.isEmpty() -> null
                 statement.isBlank() && shouldBe == ParameterShouldBe.any -> statement
                 statement.isBlank() -> null
                 else -> computeConstant(statement, parameter, shouldBe, getValue)
+            }
+
+            return when (shouldBe) {
+                ParameterShouldBe.any -> value
+                ParameterShouldBe.collection -> computeToCollection(value, parameter)
+                ParameterShouldBe.numeric -> computeToNumeric(value, parameter)
+                ParameterShouldBe.date -> computeToDate(value, parameter)
             }
         }
     }
