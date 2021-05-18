@@ -6,7 +6,7 @@ class CopyToMemoryAction(private val context: ActionContext, private val logger:
 	AbstractTopicAction(context) {
 	fun run() {
 		with(context) {
-			val variableName = action["variableName"]?.toString()
+			val variableName = action["variableName"]?.toString()?.trim()
 			if (variableName.isNullOrBlank()) {
 				throw RuntimeException("Variable name of copy to memory action cannot be null or empty.")
 			}
