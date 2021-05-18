@@ -99,13 +99,13 @@ class ParameterWorker(
             }
             ParameterComputeType.`month-of` -> computeToDate(parameters[0])?.month?.value
             ParameterComputeType.`week-of-year` -> {
-                // week starts from sunday, and first week must have 7 days
-                val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
+                // week starts from sunday
+                val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 1)
                 return computeToDate(parameters[0])?.get(weekFields.weekOfYear())
             }
             ParameterComputeType.`week-of-month` -> {
-                // week starts from sunday, and first week must have 7 days
-                val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
+                // week starts from sunday
+                val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 1)
                 return computeToDate(parameters[0])?.get(weekFields.weekOfMonth())
             }
             ParameterComputeType.`day-of-month` -> computeToDate(parameters[0])?.dayOfMonth
