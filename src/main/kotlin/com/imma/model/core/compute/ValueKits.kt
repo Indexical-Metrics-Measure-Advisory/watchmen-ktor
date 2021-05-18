@@ -78,8 +78,9 @@ class ValueKits {
                 is LocalDate -> date
                 is LocalDateTime -> date.toLocalDate()
                 is String -> {
-                    val length = date.length
+                    val length = date.trim().length
                     when {
+                        length == 0 -> null
                         // format is yyyyMMdd
                         length == 8 -> computeToDate(date, "yyyyMMdd")
                         // format is yyyy/MM/dd, yyyy-MM-dd
@@ -197,7 +198,7 @@ class ValueKits {
                 is Array<*> -> value.toList()
                 is List<*> -> value
                 is Collection<*> -> value.toList()
-                is String -> value.split(",")
+                is String -> value.split(",").map { it.trim() }
                 else -> listOf(value)
             }
         }
