@@ -343,7 +343,7 @@ abstract class RDBMSPersistKit : AbstractPersistKit() {
         val material = this.buildMaterial(entityClass, entityName)
         val filter = material.toFilter(where)
         return executeQuery(
-            "SELECT COUNT(1) AS CNT FROM ${material.toCollectionName()} WHERE $where",
+            "SELECT COUNT(1) AS CNT FROM ${material.toCollectionName()} WHERE ${filter.statement}",
             filter.values
         )[0].let {
             getCountValue(it) > 0
