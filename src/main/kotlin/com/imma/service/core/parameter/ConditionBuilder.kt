@@ -23,11 +23,12 @@ class ConditionBuilder(
     keptTopic: Topic,
     pipeline: Pipeline,
     topics: PipelineTopics,
-    sourceData: PipelineTriggerData,
+    currentTriggerData: PipelineTriggerData,
+    previousTriggerData: PipelineTriggerData?,
     variables: PipelineVariables = createPipelineVariables()
 ) {
     private val parameterBuilder: ParameterBuilder =
-        ParameterBuilder(keptTopic, pipeline, topics, sourceData, variables)
+        ParameterBuilder(keptTopic, pipeline, topics, currentTriggerData,previousTriggerData, variables)
 
     private fun createWhere(jointType: ParameterJointType): Where {
         return if (jointType == ParameterJointType.or) Or() else And()

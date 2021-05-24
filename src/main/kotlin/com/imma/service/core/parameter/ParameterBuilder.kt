@@ -1,5 +1,6 @@
 package com.imma.service.core.parameter
 
+import com.imma.model.ConstantPredefines
 import com.imma.model.core.Pipeline
 import com.imma.model.core.Topic
 import com.imma.model.core.compute.*
@@ -23,7 +24,8 @@ class ParameterBuilder(
     private val keptTopic: Topic,
     private val pipeline: Pipeline,
     private val topics: PipelineTopics,
-    private val sourceData: PipelineTriggerData,
+    private val currentTriggerData: PipelineTriggerData,
+    private val previousTriggerData: PipelineTriggerData?,
     private val variables: PipelineVariables = createPipelineVariables()
 ) {
     private fun isSourceTopic(topicId: String): Boolean {
@@ -40,7 +42,17 @@ class ParameterBuilder(
 
     private fun buildConstant(parameter: ConstantParameter, shouldBe: ParameterShouldBe): ConstantElement {
         return ElementBuilder.SINGLETON.value(ParameterKits.computeConstant(parameter, shouldBe) { propertyName ->
-            sourceData[propertyName] ?: variables[propertyName]
+            when {
+                propertyName == ConstantPredefines.FROM_PREVIOUS_TRIGGER_DATA -> {
+                    previousTriggerData
+                }
+                variables.containsKey(propertyName) -> {
+                    variables[propertyName]
+                }
+                else -> {
+                    currentTriggerData[propertyName]
+                }
+            }
         })
     }
 
@@ -53,7 +65,7 @@ class ParameterBuilder(
 
         return if (isSourceTopic(topic.topicId!!)) {
             // from source topic, compute to value
-            val value = ParameterKits.getValueFromSourceData(factor, sourceData)
+            val value = ParameterKits.getValueFromSourceData(factor, currentTriggerData)
             val v = when (shouldBe) {
                 ParameterShouldBe.any -> value
                 ParameterShouldBe.collection -> ParameterKits.computeToCollection(value, parameter)
@@ -142,7 +154,7 @@ class ParameterBuilder(
                 }
             }
             ParameterComputeType.`case-then` -> {
-                val conditionBuilder = ConditionBuilder(keptTopic, pipeline, topics, sourceData, variables)
+                val conditionBuilder = ConditionBuilder(keptTopic, pipeline, topics, currentTriggerData, variables)
                 ElementBuilder.SINGLETON.case {
                     // find conditional routes
                     parameters.filter { it.conditional == true && it.on != null }.forEach { param ->

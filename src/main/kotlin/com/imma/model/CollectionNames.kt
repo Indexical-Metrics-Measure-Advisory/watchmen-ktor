@@ -37,4 +37,5 @@ object ConstantPredefines {
 	const val NEXT_SEQ = "&nextSeq"
 	const val COUNT = "&count"
 	const val LENGTH = "&length"
+	const val FROM_PREVIOUS_TRIGGER_DATA = "&old"
 }

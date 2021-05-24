@@ -1,5 +1,6 @@
 package com.imma.service.core.parameter
 
+import com.imma.model.ConstantPredefines
 import com.imma.model.core.*
 import com.imma.model.core.compute.*
 import com.imma.service.core.PipelineTopics
@@ -20,7 +21,8 @@ import java.time.temporal.WeekFields
 class ParameterWorker(
     private val pipeline: Pipeline,
     private val topics: PipelineTopics,
-    private val sourceData: PipelineTriggerData,
+    private val currentTriggerData: PipelineTriggerData,
+    private val previousTriggerData: PipelineTriggerData?,
     private val variables: PipelineVariables
 ) {
     private fun isSourceTopic(topicId: String): Boolean {
@@ -37,7 +39,7 @@ class ParameterWorker(
             }
         }
 
-        val value = ParameterKits.getValueFromSourceData(factor, sourceData)
+        val value = ParameterKits.getValueFromSourceData(factor, currentTriggerData)
         return when (shouldBe) {
             ParameterShouldBe.any -> value
             ParameterShouldBe.collection -> ParameterKits.computeToCollection(value, parameter)
@@ -112,7 +114,9 @@ class ParameterWorker(
             ParameterComputeType.`day-of-week` -> computeToDate(parameters[0])?.dayOfWeek?.value
             ParameterComputeType.`case-then` -> {
                 val route = parameters.filter { it.conditional == true && it.on != null }.firstOrNull {
-                    ConditionWorker(pipeline, topics, sourceData, variables).computeJoint(it.on!!)
+                    ConditionWorker(pipeline, topics, currentTriggerData, previousTriggerData, variables).computeJoint(
+                        it.on!!
+                    )
                 }
                 if (route != null) {
                     return computeParameter(route, shouldBe)
@@ -144,7 +148,17 @@ class ParameterWorker(
                 param as ConstantParameter,
                 shouldBe
             ) { propertyName ->
-                sourceData[propertyName] ?: variables[propertyName]
+                when {
+                    propertyName == ConstantPredefines.FROM_PREVIOUS_TRIGGER_DATA -> {
+                        previousTriggerData
+                    }
+                    variables.containsKey(propertyName) -> {
+                        variables[propertyName]
+                    }
+                    else -> {
+                        currentTriggerData[propertyName]
+                    }
+                }
             }
             ParameterKind.computed -> computeComputed(param as ComputedParameter, shouldBe)
             else -> throw RuntimeException("Unsupported parameter[$param].")

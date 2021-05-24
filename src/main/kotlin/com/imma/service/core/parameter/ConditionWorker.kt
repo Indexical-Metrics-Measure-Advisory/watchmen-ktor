@@ -311,10 +311,19 @@ private class ParameterComputer(
 class ConditionWorker(
     private val pipeline: Pipeline,
     private val topics: PipelineTopics,
-    private val sourceData: PipelineTriggerData,
+    private val currentTriggerData: PipelineTriggerData,
+    private val previousTriggerData: PipelineTriggerData?,
     private val variables: PipelineVariables = createPipelineVariables()
 ) {
-    private val parameterWorker: ParameterWorker by lazy { ParameterWorker(pipeline, topics, sourceData, variables) }
+    private val parameterWorker: ParameterWorker by lazy {
+        ParameterWorker(
+            pipeline,
+            topics,
+            currentTriggerData,
+            previousTriggerData,
+            variables
+        )
+    }
 
     private fun computeExpression(expression: ParameterExpression): Boolean {
         // lazy compute

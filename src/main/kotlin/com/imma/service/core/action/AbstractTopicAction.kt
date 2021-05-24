@@ -134,28 +134,31 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 
     protected fun compute(parameter: Parameter): Any? {
         return with(context) {
-            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
+            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, previousOfTriggerData, variables)
             worker.computeParameter(parameter)
         }
     }
 
     protected fun compute(joint: ParameterJoint): Boolean {
         return with(context) {
-            val worker = ConditionWorker(pipeline, topics, currentOfTriggerData, variables)
+            val worker = ConditionWorker(pipeline, topics, currentOfTriggerData, previousOfTriggerData, variables)
             worker.computeJoint(joint)
         }
     }
 
     protected fun build(keptTopic: Topic, parameter: Parameter) {
         return with(context) {
-            val builder = ParameterBuilder(keptTopic, pipeline, topics, currentOfTriggerData, variables)
+            val builder =
+                ParameterBuilder(keptTopic, pipeline, topics, currentOfTriggerData, previousOfTriggerData, variables)
             builder.buildParameter(parameter)
         }
     }
 
     protected fun build(keptTopic: Topic, joint: ParameterJoint): Where {
         return with(context) {
-            ConditionBuilder(keptTopic, pipeline, topics, currentOfTriggerData, variables).build(joint)
+            ConditionBuilder(keptTopic, pipeline, topics, currentOfTriggerData, previousOfTriggerData, variables).build(
+                joint
+            )
         }
     }
 
@@ -171,21 +174,27 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 
     private fun toNumericUsePrevious(param: Parameter): Any? {
         return with(context) {
-            val worker = ParameterWorker(pipeline, topics, delegatePrevious(previousOfTriggerData), variables)
+            val worker = ParameterWorker(
+                pipeline,
+                topics,
+                delegatePrevious(previousOfTriggerData),
+                previousOfTriggerData,
+                variables
+            )
             worker.computeParameter(param, ParameterShouldBe.numeric)
         }
     }
 
     private fun toNumericUseCurrent(param: Parameter): Any? {
         return with(context) {
-            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
+            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, previousOfTriggerData, variables)
             worker.computeParameter(param, ParameterShouldBe.numeric)
         }
     }
 
     private fun toAnyUseCurrent(param: Parameter): Any? {
         return with(context) {
-            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, variables)
+            val worker = ParameterWorker(pipeline, topics, currentOfTriggerData, previousOfTriggerData, variables)
             worker.computeParameter(param)
         }
     }
