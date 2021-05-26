@@ -51,9 +51,9 @@ class MongoMapperMaterial(
 				is FactorElement -> fromFactorElement(column.element, ElementShouldBe.any, false)
 				else -> throw RuntimeException("Only plain factor column is supported in projection, but is [$column] now.")
 			}
-		}.map {
-			it to BsonInt32(1)
-		}.toMap().let {
+		}.associateWith {
+			BsonInt32(1)
+		}.let {
 			Document("\$project", it)
 		}
 	}
