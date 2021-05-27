@@ -1,6 +1,7 @@
 package com.imma.model.core.compute
 
 import com.imma.model.ConstantPredefines
+import com.imma.model.core.compute.ValueKits.Companion.computeToNumeric
 import com.imma.model.snowflake.SnowflakeHelper
 
 typealias GetFirstValue = (propertyName: String) -> Any?
@@ -51,6 +52,24 @@ class ConstantParameterKits {
                     part == ConstantPredefines.COUNT && value is Collection<*> -> value.size
                     part == ConstantPredefines.COUNT && value is Array<*> -> value.size
                     part == ConstantPredefines.COUNT && value is Map<*, *> -> value.size
+                    part == ConstantPredefines.SUM && value is Collection<*> -> value.reduce { acc, any ->
+                        val a = computeToNumeric(acc) { throw RuntimeException(throws()) }
+                        val b = computeToNumeric(any) { throw RuntimeException(throws()) }
+                        when {
+                            a == null -> b ?: 0
+                            b == null -> a
+                            else -> a + b
+                        }
+                    }
+                    part == ConstantPredefines.SUM && value is Array<*> -> value.reduce { acc, any ->
+                        val a = computeToNumeric(acc) { throw RuntimeException(throws()) }
+                        val b = computeToNumeric(any) { throw RuntimeException(throws()) }
+                        when {
+                            a == null -> b ?: 0
+                            b == null -> a
+                            else -> a + b
+                        }
+                    }
                     part == ConstantPredefines.LENGTH && value is String -> value.length
                     value is Map<*, *> -> value[part]
                     value is Collection<*> -> mutableListOf(value.map { getValueAsList(it, part, throws) }.flatten())
