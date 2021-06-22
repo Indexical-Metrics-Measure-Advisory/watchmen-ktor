@@ -16,7 +16,6 @@ import com.imma.persist.core.where
 import com.imma.service.core.PipelineTriggerData
 import com.imma.service.core.parameter.*
 import com.imma.utils.neverOccur
-import com.imma.utils.nothing
 import java.math.BigDecimal
 
 class PipelineTriggerDataDelegate : LinkedHashMap<String, Any?>(), PipelineTriggerData {
@@ -246,7 +245,7 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
                     null -> set(factorId) to toAnyUseCurrent(source)
                     WriteAggregateArithmetic.none -> set(factorId) to toAnyUseCurrent(source)
                     // count will not be changed when merge
-                    WriteAggregateArithmetic.count -> nothing()
+                    WriteAggregateArithmetic.count -> updateCountValue(topic, factorId, oldOne, source)
                     WriteAggregateArithmetic.sum -> updateSumValue(topic, factorId, oldOne, source)
                     WriteAggregateArithmetic.avg -> updateAvgValue(topic, factorId, oldOne, source)
                 }
@@ -291,6 +290,28 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
 
         // build update
         set(factorId) to newAvg
+    }
+
+    private fun Updates.updateCountValue(
+        topic: Topic,
+        factorId: String,
+        oldOne: Map<String, *>,
+        source: Parameter
+    ) {
+        val toFactor = topic.factors.find { it.factorId == factorId }!!
+
+        val oldSum = toNumericOrZero(oldOne[toFactor.name!!])
+        val newSum: BigDecimal
+        with(context) {
+            newSum = if (previousOfTriggerData == null) {
+                oldSum + BigDecimal.ONE
+            } else {
+                oldSum
+            }
+        }
+
+        // build update
+        set(factorId) to newSum
     }
 
     private fun Updates.updateSumValue(
