@@ -273,6 +273,7 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
         return newOne
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun Updates.updateAvgValue(
         topic: Topic,
         factorId: String,
@@ -282,7 +283,14 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
         val toFactor = topic.factors.find { it.factorId == factorId }!!
 
         val oldAvg = toNumericOrZero(oldOne[toFactor.name!!])
-        val itemCount = getCountOfAvg(oldOne, toFactor)
+        var itemCount = getCountOfAvg(oldOne, toFactor)
+        with(context) {
+            itemCount = if (previousOfTriggerData == null) {
+                itemCount + BigDecimal.ONE
+            } else {
+                itemCount
+            }
+        }
         val newValue = toNumericOrZero(toNumericUseCurrent(source))
         val oldValue = toNumericOrZero(toNumericUsePrevious(source))
         // new avg value = (old avg value * item count + (new value - old value)) / count
@@ -296,7 +304,7 @@ abstract class AbstractTopicAction(private val context: ActionContext) {
         topic: Topic,
         factorId: String,
         oldOne: Map<String, *>,
-        source: Parameter
+        @Suppress("UNUSED_PARAMETER") source: Parameter
     ) {
         val toFactor = topic.factors.find { it.factorId == factorId }!!
 
