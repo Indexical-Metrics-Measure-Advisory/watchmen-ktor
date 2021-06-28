@@ -28,7 +28,7 @@ object EntityColumns {
 	const val CREATED_AT = "_create_time"
 	const val LAST_MODIFIED_AT = "_last_modify_time"
 
-	const val AGGREGATE_ASSIST = "_aggregate_assist"
+	const val AGGREGATE_ASSIST = "aggregate_assist_"
 	const val EMPTY_AGGREGATE_ASSIST = "{}"
 	const val AVG_COUNT = "avg_count"
 }
